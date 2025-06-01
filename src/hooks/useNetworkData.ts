@@ -4,18 +4,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { NodeData } from '../types/networkTypes';
 import { Node, Edge } from 'reactflow';
 
-interface NetworkNode {
+interface DatabaseNode {
   id: string;
   external_id: string;
   source_system: string;
-  node_type: 'device' | 'service' | 'application' | 'cloud';
+  node_type: string;
   label: string;
-  status: 'healthy' | 'warning' | 'critical' | 'unknown';
+  status: string;
   metadata: any;
   last_seen: string;
+  created_at: string;
+  updated_at: string;
 }
 
-interface NetworkConnection {
+interface DatabaseConnection {
   id: string;
   source_node_id: string;
   target_node_id: string;
@@ -24,26 +26,36 @@ interface NetworkConnection {
   port?: number;
 }
 
-const transformNodeToReactFlow = (node: NetworkNode, index: number): Node<NodeData> => {
+const transformNodeToReactFlow = (node: DatabaseNode, index: number): Node<NodeData> => {
   // Position nodes in a grid layout
   const cols = 5;
   const x = (index % cols) * 200 + 100;
   const y = Math.floor(index / cols) * 150 + 100;
 
+  // Ensure node_type is one of the allowed values
+  const nodeType = ['device', 'service', 'application', 'cloud'].includes(node.node_type) 
+    ? node.node_type as 'device' | 'service' | 'application' | 'cloud'
+    : 'device';
+
+  // Ensure status is one of the allowed values
+  const status = ['healthy', 'warning', 'critical', 'unknown'].includes(node.status)
+    ? node.status as 'healthy' | 'warning' | 'critical' | 'unknown'
+    : 'unknown';
+
   return {
     id: node.id,
-    type: node.node_type,
+    type: nodeType,
     position: { x, y },
     data: {
       label: node.label,
-      type: node.node_type,
-      status: node.status === 'unknown' ? 'warning' : node.status,
+      type: nodeType,
+      status: status === 'unknown' ? 'warning' : status,
       metadata: node.metadata
     }
   };
 };
 
-const transformConnectionToReactFlow = (connection: NetworkConnection): Edge => ({
+const transformConnectionToReactFlow = (connection: DatabaseConnection): Edge => ({
   id: connection.id,
   source: connection.source_node_id,
   target: connection.target_node_id,

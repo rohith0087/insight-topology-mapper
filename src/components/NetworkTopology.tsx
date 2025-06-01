@@ -1,6 +1,7 @@
 
-import React, { useCallback, useMemo } from 'react';
-import ReactFlow, {
+import React, { useCallback, useMemo, useEffect } from 'react';
+import {
+  ReactFlow,
   Node,
   Edge,
   addEdge,
@@ -9,8 +10,6 @@ import ReactFlow, {
   MiniMap,
   useNodesState,
   useEdgesState,
-  OnNodesChange,
-  OnEdgesChange,
   Connection,
   ConnectionMode,
 } from 'reactflow';
@@ -46,7 +45,7 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
   const [edges, setEdges, onEdgesChange] = useEdgesState(networkData?.edges || []);
 
   // Update nodes and edges when data changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (networkData) {
       setNodes(networkData.nodes);
       setEdges(networkData.edges);
