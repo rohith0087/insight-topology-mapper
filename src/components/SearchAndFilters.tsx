@@ -62,7 +62,7 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
             placeholder="Search nodes, IPs, services..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-slate-900 border-slate-600 text-white placeholder-slate-400"
+            className="pl-10 bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
           />
           {searchTerm && (
             <button
@@ -102,7 +102,7 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
                 setStatusFilter('all');
                 setSearchTerm('');
               }}
-              className="text-xs text-slate-400 hover:text-white h-6 px-2"
+              className="text-xs text-slate-400 hover:text-white h-6 px-2 bg-transparent hover:bg-slate-700"
             >
               Clear All
             </Button>
@@ -112,18 +112,18 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
               if (!enabled) return null;
               const option = filterOptions.find(opt => opt.key === key);
               return (
-                <Badge key={key} variant="secondary" className="text-xs">
+                <Badge key={key} variant="secondary" className="text-xs bg-slate-700 text-slate-200 border-slate-600">
                   {option?.icon} {option?.label}
                 </Badge>
               );
             })}
             {statusFilter !== 'all' && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs bg-slate-700 text-slate-200 border-slate-600">
                 Status: {statusFilter}
               </Badge>
             )}
             {searchTerm && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs bg-slate-700 text-slate-200 border-slate-600">
                 Search: {searchTerm}
               </Badge>
             )}
@@ -154,7 +154,7 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
                   {option.label}
                 </Label>
               </div>
-              <Badge variant="outline" className="text-xs border-slate-600">
+              <Badge variant="outline" className="text-xs border-slate-600 bg-slate-900 text-slate-300">
                 {option.count}
               </Badge>
             </div>
@@ -173,13 +173,17 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
               className={`w-full flex items-center justify-between p-2 rounded-lg border transition-colors ${
                 statusFilter === option.value
                   ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400'
-                  : 'border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800'
+                  : 'border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:border-slate-500'
               }`}
             >
               <span className="text-sm">{option.label}</span>
               <Badge
                 variant={statusFilter === option.value ? "default" : "secondary"}
-                className="text-xs"
+                className={`text-xs ${
+                  statusFilter === option.value 
+                    ? 'bg-cyan-600 text-white' 
+                    : 'bg-slate-700 text-slate-300 border-slate-600'
+                }`}
               >
                 {option.count}
               </Badge>
@@ -195,7 +199,7 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
           <Button
             variant="outline"
             size="sm"
-            className="w-full justify-start border-slate-600 hover:bg-slate-700"
+            className="w-full justify-start border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
           >
             <span className="mr-2">🔍</span>
             Show All Critical
@@ -203,7 +207,7 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
           <Button
             variant="outline"
             size="sm"
-            className="w-full justify-start border-slate-600 hover:bg-slate-700"
+            className="w-full justify-start border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
           >
             <span className="mr-2">📊</span>
             Network Overview
@@ -211,7 +215,7 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
           <Button
             variant="outline"
             size="sm"
-            className="w-full justify-start border-slate-600 hover:bg-slate-700"
+            className="w-full justify-start border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
           >
             <span className="mr-2">⚡</span>
             Recent Changes
