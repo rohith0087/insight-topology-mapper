@@ -15,7 +15,7 @@ import ReactFlow, {
   ConnectionMode,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { generateMockTopologyData } from '../utils/mockData';
+import { useNetworkData } from '../hooks/useNetworkData';
 import CustomDeviceNode from './nodes/CustomDeviceNode';
 import CustomServiceNode from './nodes/CustomServiceNode';
 import CustomApplicationNode from './nodes/CustomApplicationNode';
@@ -40,10 +40,18 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
   setSelectedNode,
   filterSettings
 }) => {
-  const mockData = useMemo(() => generateMockTopologyData(), []);
+  const { data: networkData, isLoading, error } = useNetworkData();
   
-  const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>(mockData.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(mockData.edges);
+  const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>(networkData?.nodes || []);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(networkData?.edges || []);
+
+  // Update nodes and edges when data changes
+  React.useEffect(() => {
+    if (networkData) {
+      setNodes(networkData.nodes);
+      setEdges(networkData.edges);
+    }
+  }, [networkData, setNodes, setEdges]);
 
   const onConnect = useCallback(
     (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -72,6 +80,22 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
       }
     });
   }, [nodes, filterSettings]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+        <div className="text-white text-lg">Loading network topology...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+        <div className="text-red-400 text-lg">Error loading network data: {error.message}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full bg-slate-900">

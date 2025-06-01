@@ -9,7 +9,182 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      data_sources: {
+        Row: {
+          config: Json
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+          last_sync: string | null
+          name: string
+          sync_interval: number | null
+          sync_status: string | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          config?: Json
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          last_sync?: string | null
+          name: string
+          sync_interval?: number | null
+          sync_status?: string | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          config?: Json
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          last_sync?: string | null
+          name?: string
+          sync_interval?: number | null
+          sync_status?: string | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      etl_jobs: {
+        Row: {
+          completed_at: string | null
+          data_source_id: string | null
+          error_details: Json | null
+          errors_count: number | null
+          id: string
+          job_type: string
+          metadata: Json | null
+          records_processed: number | null
+          started_at: string | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          data_source_id?: string | null
+          error_details?: Json | null
+          errors_count?: number | null
+          id?: string
+          job_type: string
+          metadata?: Json | null
+          records_processed?: number | null
+          started_at?: string | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          data_source_id?: string | null
+          error_details?: Json | null
+          errors_count?: number | null
+          id?: string
+          job_type?: string
+          metadata?: Json | null
+          records_processed?: number | null
+          started_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "etl_jobs_data_source_id_fkey"
+            columns: ["data_source_id"]
+            isOneToOne: false
+            referencedRelation: "data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      network_connections: {
+        Row: {
+          connection_type: string
+          discovered_at: string | null
+          id: string
+          last_verified: string | null
+          metadata: Json | null
+          port: number | null
+          protocol: string | null
+          source_node_id: string | null
+          target_node_id: string | null
+        }
+        Insert: {
+          connection_type?: string
+          discovered_at?: string | null
+          id?: string
+          last_verified?: string | null
+          metadata?: Json | null
+          port?: number | null
+          protocol?: string | null
+          source_node_id?: string | null
+          target_node_id?: string | null
+        }
+        Update: {
+          connection_type?: string
+          discovered_at?: string | null
+          id?: string
+          last_verified?: string | null
+          metadata?: Json | null
+          port?: number | null
+          protocol?: string | null
+          source_node_id?: string | null
+          target_node_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "network_connections_source_node_id_fkey"
+            columns: ["source_node_id"]
+            isOneToOne: false
+            referencedRelation: "network_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "network_connections_target_node_id_fkey"
+            columns: ["target_node_id"]
+            isOneToOne: false
+            referencedRelation: "network_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      network_nodes: {
+        Row: {
+          created_at: string | null
+          external_id: string
+          id: string
+          label: string
+          last_seen: string | null
+          metadata: Json
+          node_type: string
+          source_system: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          external_id: string
+          id?: string
+          label: string
+          last_seen?: string | null
+          metadata?: Json
+          node_type: string
+          source_system: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          external_id?: string
+          id?: string
+          label?: string
+          last_seen?: string | null
+          metadata?: Json
+          node_type?: string
+          source_system?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
