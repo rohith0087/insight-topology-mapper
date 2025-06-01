@@ -1,12 +1,11 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Plus, TestTube, Save } from 'lucide-react';
+import { Plus, TestTube, Save, X } from 'lucide-react';
 import { useToast } from './ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -17,7 +16,19 @@ interface DataSourceConfig {
   enabled: boolean;
 }
 
-const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void }) => {
+interface DataSourceConfigDialogProps {
+  onSourceAdded?: () => void;
+  editingSource?: any;
+  onClose?: () => void;
+  children?: React.ReactNode;
+}
+
+const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({ 
+  onSourceAdded, 
+  editingSource, 
+  onClose,
+  children 
+}) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<DataSourceConfig>({
     name: '',
@@ -27,6 +38,7 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
   });
   const [testing, setTesting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [testResult, setTestResult] = useState<any>(null);
   const { toast } = useToast();
 
   const sourceTypes = [
@@ -38,13 +50,25 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
     { value: 'api', label: 'Custom API' }
   ];
 
+  useEffect(() => {
+    if (editingSource) {
+      setFormData({
+        name: editingSource.name,
+        type: editingSource.type,
+        config: editingSource.config,
+        enabled: editingSource.enabled
+      });
+      setOpen(true);
+    }
+  }, [editingSource]);
+
   const renderConfigFields = () => {
     switch (formData.type) {
       case 'nmap':
         return (
-          <div className="space-y-4">
+          <div className="grid gap-4">
             <div>
-              <Label htmlFor="target_ranges">Target IP Ranges (comma-separated)</Label>
+              <Label htmlFor="target_ranges" className="text-slate-300">Target IP Ranges *</Label>
               <Input
                 id="target_ranges"
                 placeholder="192.168.1.0/24, 10.0.0.0/8"
@@ -53,68 +77,76 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
                   ...formData,
                   config: { ...formData.config, target_ranges: e.target.value }
                 })}
+                className="bg-slate-900 border-slate-600 text-white"
               />
             </div>
-            <div>
-              <Label htmlFor="scan_type">Scan Type</Label>
-              <Select value={formData.config.scan_type || 'tcp_syn'} onValueChange={(value) => 
-                setFormData({ ...formData, config: { ...formData.config, scan_type: value } })
-              }>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="tcp_syn">TCP SYN Scan</SelectItem>
-                  <SelectItem value="tcp_connect">TCP Connect Scan</SelectItem>
-                  <SelectItem value="udp">UDP Scan</SelectItem>
-                  <SelectItem value="ping">Ping Scan</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="ports">Port Range (optional)</Label>
-              <Input
-                id="ports"
-                placeholder="1-1000, 22, 80, 443"
-                value={formData.config.ports || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  config: { ...formData.config, ports: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="scan_type" className="text-slate-300">Scan Type</Label>
+                <Select value={formData.config.scan_type || 'tcp_syn'} onValueChange={(value) => 
+                  setFormData({ ...formData, config: { ...formData.config, scan_type: value } })
+                }>
+                  <SelectTrigger className="bg-slate-900 border-slate-600">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tcp_syn">TCP SYN Scan</SelectItem>
+                    <SelectItem value="tcp_connect">TCP Connect Scan</SelectItem>
+                    <SelectItem value="udp">UDP Scan</SelectItem>
+                    <SelectItem value="ping">Ping Scan</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="ports" className="text-slate-300">Port Range</Label>
+                <Input
+                  id="ports"
+                  placeholder="1-1000, 22, 80, 443"
+                  value={formData.config.ports || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    config: { ...formData.config, ports: e.target.value }
+                  })}
+                  className="bg-slate-900 border-slate-600 text-white"
+                />
+              </div>
             </div>
           </div>
         );
 
       case 'aws':
         return (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="access_key">AWS Access Key ID</Label>
-              <Input
-                id="access_key"
-                type="password"
-                value={formData.config.access_key_id || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  config: { ...formData.config, access_key_id: e.target.value }
-                })}
-              />
+          <div className="grid gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="access_key" className="text-slate-300">Access Key ID *</Label>
+                <Input
+                  id="access_key"
+                  type="password"
+                  value={formData.config.access_key_id || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    config: { ...formData.config, access_key_id: e.target.value }
+                  })}
+                  className="bg-slate-900 border-slate-600 text-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="secret_key" className="text-slate-300">Secret Access Key *</Label>
+                <Input
+                  id="secret_key"
+                  type="password"
+                  value={formData.config.secret_access_key || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    config: { ...formData.config, secret_access_key: e.target.value }
+                  })}
+                  className="bg-slate-900 border-slate-600 text-white"
+                />
+              </div>
             </div>
             <div>
-              <Label htmlFor="secret_key">AWS Secret Access Key</Label>
-              <Input
-                id="secret_key"
-                type="password"
-                value={formData.config.secret_access_key || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  config: { ...formData.config, secret_access_key: e.target.value }
-                })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="regions">AWS Regions (comma-separated)</Label>
+              <Label htmlFor="regions" className="text-slate-300">AWS Regions</Label>
               <Input
                 id="regions"
                 placeholder="us-east-1, us-west-2, eu-west-1"
@@ -123,10 +155,11 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
                   ...formData,
                   config: { ...formData.config, regions: e.target.value }
                 })}
+                className="bg-slate-900 border-slate-600 text-white"
               />
             </div>
             <div>
-              <Label htmlFor="services">AWS Services to Monitor</Label>
+              <Label htmlFor="services" className="text-slate-300">Services to Monitor</Label>
               <Textarea
                 id="services"
                 placeholder="ec2, vpc, rds, lambda, s3"
@@ -135,6 +168,7 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
                   ...formData,
                   config: { ...formData.config, services: e.target.value }
                 })}
+                className="bg-slate-900 border-slate-600 text-white"
               />
             </div>
           </div>
@@ -142,9 +176,9 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
 
       case 'splunk':
         return (
-          <div className="space-y-4">
+          <div className="grid gap-4">
             <div>
-              <Label htmlFor="splunk_url">Splunk Server URL</Label>
+              <Label htmlFor="splunk_url" className="text-slate-300">Splunk Server URL *</Label>
               <Input
                 id="splunk_url"
                 placeholder="https://splunk.company.com:8089"
@@ -153,33 +187,38 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
                   ...formData,
                   config: { ...formData.config, endpoint: e.target.value }
                 })}
+                className="bg-slate-900 border-slate-600 text-white"
               />
             </div>
-            <div>
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                value={formData.config.username || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  config: { ...formData.config, username: e.target.value }
-                })}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="username" className="text-slate-300">Username *</Label>
+                <Input
+                  id="username"
+                  value={formData.config.username || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    config: { ...formData.config, username: e.target.value }
+                  })}
+                  className="bg-slate-900 border-slate-600 text-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="password" className="text-slate-300">Password *</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.config.password || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    config: { ...formData.config, password: e.target.value }
+                  })}
+                  className="bg-slate-900 border-slate-600 text-white"
+                />
+              </div>
             </div>
             <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.config.password || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  config: { ...formData.config, password: e.target.value }
-                })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="index">Search Index</Label>
+              <Label htmlFor="index" className="text-slate-300">Search Index</Label>
               <Input
                 id="index"
                 placeholder="network, security, main"
@@ -188,6 +227,7 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
                   ...formData,
                   config: { ...formData.config, index: e.target.value }
                 })}
+                className="bg-slate-900 border-slate-600 text-white"
               />
             </div>
           </div>
@@ -293,7 +333,7 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
       default:
         return (
           <div>
-            <Label htmlFor="custom_config">Configuration (JSON)</Label>
+            <Label htmlFor="custom_config" className="text-slate-300">Configuration (JSON)</Label>
             <Textarea
               id="custom_config"
               placeholder='{"endpoint": "https://api.example.com", "api_key": "your-key"}'
@@ -306,6 +346,7 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
                   // Invalid JSON, don't update
                 }
               }}
+              className="bg-slate-900 border-slate-600 text-white"
             />
           </div>
         );
@@ -314,6 +355,8 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
 
   const testConnection = async () => {
     setTesting(true);
+    setTestResult(null);
+    
     try {
       const response = await supabase.functions.invoke('test-connection', {
         body: { type: formData.type, config: formData.config }
@@ -321,14 +364,26 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
       
       if (response.error) throw response.error;
       
-      toast({
-        title: "Connection Test Successful",
-        description: "Successfully connected to the data source!",
-      });
+      setTestResult(response.data);
+      
+      if (response.data.success) {
+        toast({
+          title: "Connection Test Successful",
+          description: response.data.message,
+        });
+      } else {
+        toast({
+          title: "Connection Test Failed",
+          description: response.data.message,
+          variant: "destructive",
+        });
+      }
     } catch (error) {
+      const result = { success: false, message: error.message || "Connection test failed" };
+      setTestResult(result);
       toast({
-        title: "Connection Test Failed",
-        description: error.message || "Failed to connect to data source",
+        title: "Test Error",
+        description: result.message,
         variant: "destructive",
       });
     } finally {
@@ -348,24 +403,44 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
 
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('data_sources')
-        .insert([{
-          name: formData.name,
-          type: formData.type,
-          config: formData.config,
-          enabled: formData.enabled
-        }]);
+      if (editingSource) {
+        const { error } = await supabase
+          .from('data_sources')
+          .update({
+            name: formData.name,
+            type: formData.type,
+            config: formData.config,
+            enabled: formData.enabled
+          })
+          .eq('id', editingSource.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Data Source Added",
-        description: "Successfully added new data source!",
-      });
+        toast({
+          title: "Data Source Updated",
+          description: "Successfully updated data source!",
+        });
+      } else {
+        const { error } = await supabase
+          .from('data_sources')
+          .insert([{
+            name: formData.name,
+            type: formData.type,
+            config: formData.config,
+            enabled: formData.enabled
+          }]);
+
+        if (error) throw error;
+
+        toast({
+          title: "Data Source Added",
+          description: "Successfully added new data source!",
+        });
+      }
 
       setOpen(false);
       onSourceAdded?.();
+      onClose?.();
       
       // Reset form
       setFormData({
@@ -374,6 +449,7 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
         config: {},
         enabled: true
       });
+      setTestResult(null);
     } catch (error) {
       toast({
         title: "Save Failed",
@@ -385,36 +461,59 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
     }
   };
 
+  const handleClose = () => {
+    setOpen(false);
+    onClose?.();
+    setFormData({
+      name: '',
+      type: 'nmap',
+      config: {},
+      enabled: true
+    });
+    setTestResult(null);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogTrigger asChild>
-        <Button className="bg-cyan-600 hover:bg-cyan-700">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Data Source
-        </Button>
+        {children || (
+          <Button className="bg-cyan-600 hover:bg-cyan-700">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Data Source
+          </Button>
+        )}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-slate-800 border-slate-600">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-slate-800 border-slate-600">
         <DialogHeader>
-          <DialogTitle className="text-cyan-400">Configure Data Source</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-cyan-400 text-xl">
+              {editingSource ? 'Edit Data Source' : 'Add Data Source'}
+            </DialogTitle>
+            <Button variant="ghost" onClick={handleClose} className="text-slate-400 hover:text-white">
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
         </DialogHeader>
         
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">Data Source Name</Label>
+              <Label htmlFor="name" className="text-slate-300">Data Source Name *</Label>
               <Input
                 id="name"
                 placeholder="My Network Scanner"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="bg-slate-900 border-slate-600 text-white"
               />
             </div>
             <div>
-              <Label htmlFor="type">Source Type</Label>
-              <Select value={formData.type} onValueChange={(value) => 
-                setFormData({ ...formData, type: value, config: {} })
-              }>
-                <SelectTrigger>
+              <Label htmlFor="type" className="text-slate-300">Source Type</Label>
+              <Select 
+                value={formData.type} 
+                onValueChange={(value) => setFormData({ ...formData, type: value, config: {} })}
+              >
+                <SelectTrigger className="bg-slate-900 border-slate-600">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -430,32 +529,65 @@ const DataSourceConfigDialog = ({ onSourceAdded }: { onSourceAdded?: () => void 
 
           {renderConfigFields()}
 
-          <div className="flex justify-between pt-4">
+          {/* Test Results */}
+          {testResult && (
+            <div className={`p-4 rounded-lg border ${
+              testResult.success 
+                ? 'bg-green-900/20 border-green-600' 
+                : 'bg-red-900/20 border-red-600'
+            }`}>
+              <div className="flex items-center space-x-2 mb-2">
+                <div className={`w-3 h-3 rounded-full ${
+                  testResult.success ? 'bg-green-500' : 'bg-red-500'
+                }`}></div>
+                <span className={`font-medium ${
+                  testResult.success ? 'text-green-200' : 'text-red-200'
+                }`}>
+                  {testResult.message}
+                </span>
+              </div>
+              {testResult.details && (
+                <div className="bg-slate-900 rounded p-3 mt-2">
+                  <div className="text-xs text-slate-300 space-y-1">
+                    {Object.entries(testResult.details).map(([key, value]) => (
+                      <div key={key} className="flex justify-between">
+                        <span className="font-medium">{key}:</span>
+                        <span className="text-cyan-400">{String(value)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex justify-between pt-4 border-t border-slate-600">
             <Button 
               variant="outline" 
               onClick={testConnection}
-              disabled={testing}
+              disabled={testing || saving}
               className="border-slate-600 hover:bg-slate-700"
             >
-              <TestTube className="w-4 h-4 mr-2" />
+              <TestTube className={`w-4 h-4 mr-2 ${testing ? 'animate-pulse' : ''}`} />
               {testing ? 'Testing...' : 'Test Connection'}
             </Button>
             
-            <div className="space-x-2">
+            <div className="space-x-3">
               <Button 
                 variant="outline" 
-                onClick={() => setOpen(false)}
+                onClick={handleClose}
+                disabled={saving}
                 className="border-slate-600 hover:bg-slate-700"
               >
                 Cancel
               </Button>
               <Button 
                 onClick={saveDataSource}
-                disabled={saving}
+                disabled={saving || testing}
                 className="bg-green-600 hover:bg-green-700"
               >
                 <Save className="w-4 h-4 mr-2" />
-                {saving ? 'Saving...' : 'Save & Configure'}
+                {saving ? 'Saving...' : (editingSource ? 'Update' : 'Save')}
               </Button>
             </div>
           </div>

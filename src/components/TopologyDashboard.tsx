@@ -37,19 +37,18 @@ const TopologyDashboard = () => {
           <Tabs defaultValue="filters" className="flex-1 flex flex-col">
             <TabsList className="grid w-full grid-cols-2 bg-slate-700">
               <TabsTrigger value="filters" className="data-[state=active]:bg-slate-600">
-                Filters & Search
+                Search & Filters
               </TabsTrigger>
               <TabsTrigger value="sources" className="data-[state=active]:bg-slate-600">
                 Data Sources
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="filters" className="flex-1 overflow-hidden">
+            <TabsContent value="filters" className="flex-1 overflow-y-auto p-4">
               <SearchAndFilters 
                 filterSettings={filterSettings}
                 setFilterSettings={setFilterSettings}
               />
-              <DataSourcePanel />
             </TabsContent>
             
             <TabsContent value="sources" className="flex-1 overflow-y-auto p-4">
