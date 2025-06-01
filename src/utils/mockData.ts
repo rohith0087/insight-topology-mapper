@@ -30,6 +30,7 @@ export const generateMockTopologyData = () => {
           ip: '192.168.1.10',
           vendor: 'Cisco',
           model: 'Catalyst 3750',
+          location: 'Data Center A',
           ports: 48
         }
       }
@@ -46,6 +47,7 @@ export const generateMockTopologyData = () => {
           ip: '192.168.1.11',
           vendor: 'Cisco',
           model: 'Catalyst 3750',
+          location: 'Data Center B',
           ports: 48
         }
       }

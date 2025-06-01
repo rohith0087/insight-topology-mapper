@@ -9,8 +9,8 @@ import ReactFlow, {
   MiniMap,
   useNodesState,
   useEdgesState,
-  onNodesChange,
-  onEdgesChange,
+  OnNodesChange,
+  OnEdgesChange,
   Connection,
   ConnectionMode,
 } from 'reactflow';
