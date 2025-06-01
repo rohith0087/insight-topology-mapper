@@ -1,6 +1,9 @@
 
+import { Node, Edge } from 'reactflow';
+import { NodeData } from '../types/networkTypes';
+
 export const generateMockTopologyData = () => {
-  const nodes = [
+  const nodes: Node<NodeData>[] = [
     // Devices
     {
       id: 'fw-001',
@@ -165,7 +168,7 @@ export const generateMockTopologyData = () => {
     }
   ];
 
-  const edges = [
+  const edges: Edge[] = [
     // Device connections
     { id: 'fw-sw1', source: 'fw-001', target: 'sw-001', type: 'smoothstep', style: { stroke: '#06b6d4' } },
     { id: 'fw-sw2', source: 'fw-001', target: 'sw-002', type: 'smoothstep', style: { stroke: '#06b6d4' } },

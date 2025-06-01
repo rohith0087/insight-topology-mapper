@@ -20,6 +20,7 @@ import CustomDeviceNode from './nodes/CustomDeviceNode';
 import CustomServiceNode from './nodes/CustomServiceNode';
 import CustomApplicationNode from './nodes/CustomApplicationNode';
 import CustomCloudNode from './nodes/CustomCloudNode';
+import { NodeData } from '../types/networkTypes';
 
 const nodeTypes = {
   device: CustomDeviceNode,
@@ -41,7 +42,7 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
 }) => {
   const mockData = useMemo(() => generateMockTopologyData(), []);
   
-  const [nodes, setNodes, onNodesChange] = useNodesState(mockData.nodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>(mockData.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(mockData.edges);
 
   const onConnect = useCallback(
@@ -49,7 +50,7 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
     [setEdges]
   );
 
-  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node<NodeData>) => {
     setSelectedNode(node.data);
   }, [setSelectedNode]);
 
