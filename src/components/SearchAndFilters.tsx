@@ -1,13 +1,20 @@
 
 import React, { useState } from 'react';
-import { Search, Filter, X, CheckCircle, AlertTriangle, XCircle, Clock } from 'lucide-react';
-import { Button } from './ui/button';
+import { Search, Filter, X } from 'lucide-react';
 import { Input } from './ui/input';
+import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
 
 interface SearchAndFiltersProps {
-  filterSettings: any;
+  filterSettings: {
+    showDevices: boolean;
+    showServices: boolean;
+    showApplications: boolean;
+    showCloudResources: boolean;
+    showConnections: boolean;
+  };
   setFilterSettings: (settings: any) => void;
 }
 
@@ -15,196 +22,202 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
   filterSettings,
   setFilterSettings
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
-  const nodeTypes = [
-    { key: 'showDevices', label: 'Devices', color: 'bg-cyan-400', count: 12 },
-    { key: 'showServices', label: 'Services', color: 'bg-green-400', count: 8 },
-    { key: 'showApplications', label: 'Applications', color: 'bg-purple-400', count: 15 },
-    { key: 'showCloudResources', label: 'Cloud Resources', color: 'bg-amber-400', count: 6 },
-    { key: 'showConnections', label: 'Connections', color: 'bg-slate-400', count: 45 }
+  const filterOptions = [
+    { key: 'showDevices', label: 'Network Devices', icon: '🖥️', count: 24 },
+    { key: 'showServices', label: 'Services', icon: '⚙️', count: 18 },
+    { key: 'showApplications', label: 'Applications', icon: '📱', count: 12 },
+    { key: 'showCloudResources', label: 'Cloud Resources', icon: '☁️', count: 8 },
+    { key: 'showConnections', label: 'Connections', icon: '🔗', count: 156 }
   ];
 
-  const statusFilters = [
-    { key: 'healthy', label: 'Healthy', icon: CheckCircle, color: 'text-green-400', count: 25 },
-    { key: 'warning', label: 'Warning', icon: AlertTriangle, color: 'text-yellow-400', count: 8 },
-    { key: 'critical', label: 'Critical', icon: XCircle, color: 'text-red-400', count: 3 },
-    { key: 'unknown', label: 'Unknown', icon: Clock, color: 'text-slate-400', count: 5 }
+  const statusOptions = [
+    { value: 'all', label: 'All Status', count: 62 },
+    { value: 'healthy', label: 'Healthy', count: 48 },
+    { value: 'warning', label: 'Warning', count: 10 },
+    { value: 'critical', label: 'Critical', count: 4 }
   ];
 
-  const handleFilterChange = (key: string) => {
-    setFilterSettings(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
+  const clearSearch = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
   };
 
-  const handleStatusFilter = (status: string) => {
-    const isActive = activeFilters.includes(status);
-    if (isActive) {
-      setActiveFilters(prev => prev.filter(f => f !== status));
-    } else {
-      setActiveFilters(prev => [...prev, status]);
-    }
+  const getActiveFiltersCount = () => {
+    const activeTypeFilters = Object.values(filterSettings).filter(Boolean).length;
+    const hasStatusFilter = statusFilter !== 'all';
+    const hasSearch = searchTerm.length > 0;
+    return activeTypeFilters + (hasStatusFilter ? 1 : 0) + (hasSearch ? 1 : 0);
   };
-
-  const clearAllFilters = () => {
-    setFilterSettings({
-      showDevices: true,
-      showServices: true,
-      showApplications: true,
-      showCloudResources: true,
-      showConnections: true
-    });
-    setActiveFilters([]);
-    setSearchQuery('');
-  };
-
-  const hasActiveFilters = !nodeTypes.every(type => filterSettings[type.key]) || 
-    activeFilters.length > 0 || searchQuery.length > 0;
 
   return (
     <div className="space-y-6">
       {/* Search */}
-      <Card className="bg-slate-800 border-slate-600">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-cyan-400 text-lg flex items-center">
-            <Search className="w-5 h-5 mr-2" />
-            Search Topology
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-            <Input
-              type="text"
-              placeholder="Search nodes, IPs, hostnames..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900 border-slate-600 pl-10 pr-4 text-white placeholder-slate-400 focus:border-cyan-400"
-            />
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-          {searchQuery && (
-            <div className="mt-3">
-              <Badge variant="outline" className="border-cyan-500 text-cyan-400">
-                Searching: "{searchQuery}"
-              </Badge>
-            </div>
+      <div className="space-y-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Input
+            placeholder="Search nodes, IPs, services..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 bg-slate-900 border-slate-600 text-white placeholder-slate-400"
+          />
+          {searchTerm && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Node Type Filters */}
-      <Card className="bg-slate-800 border-slate-600">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-cyan-400 text-lg flex items-center">
-            <Filter className="w-5 h-5 mr-2" />
-            Node Types
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {nodeTypes.map((type) => (
-            <label key={type.key} className="flex items-center justify-between cursor-pointer p-2 rounded hover:bg-slate-700 transition-colors">
-              <div className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  checked={filterSettings[type.key]}
-                  onChange={() => handleFilterChange(type.key)}
-                  className="w-4 h-4 text-cyan-600 bg-slate-900 border-slate-600 rounded focus:ring-cyan-500"
-                />
-                <div className="flex items-center space-x-2">
-                  <div className={`w-3 h-3 ${type.color} rounded`}></div>
-                  <span className="text-slate-300 font-medium">{type.label}</span>
-                </div>
-              </div>
-              <Badge variant="secondary" className="bg-slate-700 text-slate-300">
-                {type.count}
-              </Badge>
-            </label>
-          ))}
-        </CardContent>
-      </Card>
-
-      {/* Status Filters */}
-      <Card className="bg-slate-800 border-slate-600">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-cyan-400 text-lg">Status Filters</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {statusFilters.map((status) => {
-            const Icon = status.icon;
-            const isActive = activeFilters.includes(status.key);
-            return (
-              <Button
-                key={status.key}
-                variant={isActive ? "default" : "ghost"}
-                size="sm"
-                onClick={() => handleStatusFilter(status.key)}
-                className={`w-full justify-between ${
-                  isActive 
-                    ? 'bg-cyan-600 hover:bg-cyan-700' 
-                    : 'hover:bg-slate-700 text-slate-300'
-                }`}
-              >
-                <div className="flex items-center space-x-2">
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : status.color}`} />
-                  <span>{status.label}</span>
-                </div>
-                <Badge variant="secondary" className="bg-slate-700 text-slate-300">
-                  {status.count}
-                </Badge>
-              </Button>
-            );
-          })}
-        </CardContent>
-      </Card>
+        </div>
+        
+        {searchTerm && (
+          <div className="text-sm text-slate-400">
+            Searching for: <span className="text-cyan-400">"{searchTerm}"</span>
+          </div>
+        )}
+      </div>
 
       {/* Active Filters Summary */}
-      {hasActiveFilters && (
-        <Card className="bg-slate-900 border-slate-500">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-slate-300">Active Filters</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearAllFilters}
-                className="text-slate-400 hover:text-white"
-              >
-                Clear All
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {searchQuery && (
-                <Badge variant="outline" className="border-cyan-500 text-cyan-400">
-                  Search: {searchQuery}
+      {getActiveFiltersCount() > 0 && (
+        <div className="bg-slate-900 rounded-lg p-3 border border-slate-600">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-slate-300">
+              Active Filters ({getActiveFiltersCount()})
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setFilterSettings({
+                  showDevices: true,
+                  showServices: true,
+                  showApplications: true,
+                  showCloudResources: true,
+                  showConnections: true
+                });
+                setStatusFilter('all');
+                setSearchTerm('');
+              }}
+              className="text-xs text-slate-400 hover:text-white h-6 px-2"
+            >
+              Clear All
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {Object.entries(filterSettings).map(([key, enabled]) => {
+              if (!enabled) return null;
+              const option = filterOptions.find(opt => opt.key === key);
+              return (
+                <Badge key={key} variant="secondary" className="text-xs">
+                  {option?.icon} {option?.label}
                 </Badge>
-              )}
-              {activeFilters.map(filter => (
-                <Badge key={filter} variant="outline" className="border-yellow-500 text-yellow-400">
-                  {filter}
-                </Badge>
-              ))}
-              {nodeTypes.filter(type => !filterSettings[type.key]).map(type => (
-                <Badge key={type.key} variant="outline" className="border-red-500 text-red-400">
-                  Hide {type.label}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              );
+            })}
+            {statusFilter !== 'all' && (
+              <Badge variant="secondary" className="text-xs">
+                Status: {statusFilter}
+              </Badge>
+            )}
+            {searchTerm && (
+              <Badge variant="secondary" className="text-xs">
+                Search: {searchTerm}
+              </Badge>
+            )}
+          </div>
+        </div>
       )}
+
+      {/* Node Type Filters */}
+      <div className="space-y-3">
+        <div className="flex items-center space-x-2">
+          <Filter className="w-4 h-4 text-cyan-400" />
+          <h4 className="font-medium text-slate-200">Node Types</h4>
+        </div>
+        
+        <div className="space-y-3">
+          {filterOptions.map((option) => (
+            <div key={option.key} className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Switch
+                  id={option.key}
+                  checked={filterSettings[option.key]}
+                  onCheckedChange={(checked) =>
+                    setFilterSettings({ ...filterSettings, [option.key]: checked })
+                  }
+                />
+                <Label htmlFor={option.key} className="text-sm text-slate-300 cursor-pointer">
+                  <span className="mr-2">{option.icon}</span>
+                  {option.label}
+                </Label>
+              </div>
+              <Badge variant="outline" className="text-xs border-slate-600">
+                {option.count}
+              </Badge>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Status Filter */}
+      <div className="space-y-3">
+        <h4 className="font-medium text-slate-200">Status Filter</h4>
+        <div className="space-y-2">
+          {statusOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setStatusFilter(option.value)}
+              className={`w-full flex items-center justify-between p-2 rounded-lg border transition-colors ${
+                statusFilter === option.value
+                  ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400'
+                  : 'border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              <span className="text-sm">{option.label}</span>
+              <Badge
+                variant={statusFilter === option.value ? "default" : "secondary"}
+                className="text-xs"
+              >
+                {option.count}
+              </Badge>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="pt-4 border-t border-slate-700">
+        <h4 className="font-medium text-slate-200 mb-3">Quick Actions</h4>
+        <div className="space-y-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start border-slate-600 hover:bg-slate-700"
+          >
+            <span className="mr-2">🔍</span>
+            Show All Critical
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start border-slate-600 hover:bg-slate-700"
+          >
+            <span className="mr-2">📊</span>
+            Network Overview
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start border-slate-600 hover:bg-slate-700"
+          >
+            <span className="mr-2">⚡</span>
+            Recent Changes
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
