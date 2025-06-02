@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Webhook, Plus, Trash2, TestTube, Settings } from 'lucide-react';
+import { Webhook, Plus, Trash2, TestTube, Settings, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface WebhookConfig {
@@ -39,18 +39,9 @@ const AVAILABLE_EVENTS = [
 
 const WebhookManager: React.FC<WebhookManagerProps> = ({ onClose }) => {
   const { toast } = useToast();
-  const [webhooks, setWebhooks] = useState<WebhookConfig[]>([
-    {
-      id: '1',
-      name: 'ServiceNow Tickets',
-      url: 'https://instance.service-now.com/api/webhook/tickets',
-      events: ['alert.critical', 'device.offline'],
-      headers: { 'Authorization': 'Bearer ***', 'Content-Type': 'application/json' },
-      enabled: true,
-      description: 'Auto-create tickets for critical issues'
-    }
-  ]);
+  const [webhooks, setWebhooks] = useState<WebhookConfig[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingWebhook, setEditingWebhook] = useState<WebhookConfig | null>(null);
 
   const [newWebhook, setNewWebhook] = useState<Partial<WebhookConfig>>({
@@ -92,6 +83,28 @@ const WebhookManager: React.FC<WebhookManagerProps> = ({ onClose }) => {
     });
   };
 
+  const handleEditWebhook = () => {
+    if (!editingWebhook || !editingWebhook.name || !editingWebhook.url) {
+      toast({
+        title: "Validation Error",
+        description: "Name and URL are required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setWebhooks(webhooks.map(w => 
+      w.id === editingWebhook.id ? editingWebhook : w
+    ));
+    setEditingWebhook(null);
+    setShowEditDialog(false);
+    
+    toast({
+      title: "Webhook Updated",
+      description: `${editingWebhook.name} has been updated successfully`
+    });
+  };
+
   const handleTestWebhook = async (webhook: WebhookConfig) => {
     try {
       const testPayload = {
@@ -109,8 +122,7 @@ const WebhookManager: React.FC<WebhookManagerProps> = ({ onClose }) => {
         description: `Sending test request to ${webhook.name}...`
       });
 
-      // In a real implementation, this would go through a backend service
-      await fetch(webhook.url, {
+      const response = await fetch(webhook.url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -118,6 +130,10 @@ const WebhookManager: React.FC<WebhookManagerProps> = ({ onClose }) => {
         },
         body: JSON.stringify(testPayload)
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
       toast({
         title: "Test Successful",
@@ -133,10 +149,11 @@ const WebhookManager: React.FC<WebhookManagerProps> = ({ onClose }) => {
   };
 
   const handleDeleteWebhook = (id: string) => {
+    const webhook = webhooks.find(w => w.id === id);
     setWebhooks(webhooks.filter(w => w.id !== id));
     toast({
       title: "Webhook Deleted",
-      description: "Webhook has been removed"
+      description: `${webhook?.name || 'Webhook'} has been removed`
     });
   };
 
@@ -144,6 +161,19 @@ const WebhookManager: React.FC<WebhookManagerProps> = ({ onClose }) => {
     setWebhooks(webhooks.map(w => 
       w.id === id ? { ...w, enabled: !w.enabled } : w
     ));
+  };
+
+  const openEditDialog = (webhook: WebhookConfig) => {
+    setEditingWebhook({ ...webhook });
+    setShowEditDialog(true);
+  };
+
+  const resetNewWebhook = () => {
+    setNewWebhook({ name: '', url: '', events: [], headers: {}, enabled: true, description: '' });
+  };
+
+  const resetEditWebhook = () => {
+    setEditingWebhook(null);
   };
 
   return (
@@ -192,6 +222,14 @@ const WebhookManager: React.FC<WebhookManagerProps> = ({ onClose }) => {
                         className="border-slate-600 hover:bg-slate-600"
                       >
                         <TestTube className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openEditDialog(webhook)}
+                        className="border-slate-600 hover:bg-slate-600"
+                      >
+                        <Edit className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="outline"
@@ -260,7 +298,10 @@ const WebhookManager: React.FC<WebhookManagerProps> = ({ onClose }) => {
 
         {/* Create Webhook Dialog */}
         {showCreateDialog && (
-          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <Dialog open={showCreateDialog} onOpenChange={(open) => {
+            setShowCreateDialog(open);
+            if (!open) resetNewWebhook();
+          }}>
             <DialogContent className="bg-slate-800 border-slate-600">
               <DialogHeader>
                 <DialogTitle className="text-xl text-cyan-400">Create New Webhook</DialogTitle>
@@ -328,7 +369,7 @@ const WebhookManager: React.FC<WebhookManagerProps> = ({ onClose }) => {
                         <Badge
                           key={event}
                           variant="outline"
-                          className="text-xs cursor-pointer"
+                          className="text-xs cursor-pointer hover:bg-red-600"
                           onClick={() => {
                             setNewWebhook({
                               ...newWebhook,
@@ -356,6 +397,114 @@ const WebhookManager: React.FC<WebhookManagerProps> = ({ onClose }) => {
                     className="bg-cyan-600 hover:bg-cyan-700"
                   >
                     Create Webhook
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Edit Webhook Dialog */}
+        {showEditDialog && editingWebhook && (
+          <Dialog open={showEditDialog} onOpenChange={(open) => {
+            setShowEditDialog(open);
+            if (!open) resetEditWebhook();
+          }}>
+            <DialogContent className="bg-slate-800 border-slate-600">
+              <DialogHeader>
+                <DialogTitle className="text-xl text-cyan-400">Edit Webhook</DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="edit-webhook-name">Name</Label>
+                  <Input
+                    id="edit-webhook-name"
+                    value={editingWebhook.name || ''}
+                    onChange={(e) => setEditingWebhook({ ...editingWebhook, name: e.target.value })}
+                    placeholder="e.g., ServiceNow Integration"
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-webhook-url">Webhook URL</Label>
+                  <Input
+                    id="edit-webhook-url"
+                    value={editingWebhook.url || ''}
+                    onChange={(e) => setEditingWebhook({ ...editingWebhook, url: e.target.value })}
+                    placeholder="https://your-service.com/webhook"
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-webhook-description">Description (Optional)</Label>
+                  <Textarea
+                    id="edit-webhook-description"
+                    value={editingWebhook.description || ''}
+                    onChange={(e) => setEditingWebhook({ ...editingWebhook, description: e.target.value })}
+                    placeholder="What does this webhook do?"
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
+
+                <div>
+                  <Label>Event Triggers</Label>
+                  <Select
+                    onValueChange={(value) => {
+                      const currentEvents = editingWebhook.events || [];
+                      if (!currentEvents.includes(value)) {
+                        setEditingWebhook({ ...editingWebhook, events: [...currentEvents, value] });
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="bg-slate-700 border-slate-600">
+                      <SelectValue placeholder="Select events to trigger this webhook" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-700 border-slate-600">
+                      {AVAILABLE_EVENTS.map((event) => (
+                        <SelectItem key={event.value} value={event.value}>
+                          {event.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  {editingWebhook.events && editingWebhook.events.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {editingWebhook.events.map((event) => (
+                        <Badge
+                          key={event}
+                          variant="outline"
+                          className="text-xs cursor-pointer hover:bg-red-600"
+                          onClick={() => {
+                            setEditingWebhook({
+                              ...editingWebhook,
+                              events: editingWebhook.events?.filter(e => e !== event) || []
+                            });
+                          }}
+                        >
+                          {AVAILABLE_EVENTS.find(e => e.value === event)?.label || event} ×
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowEditDialog(false)}
+                    className="border-slate-600"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleEditWebhook}
+                    className="bg-cyan-600 hover:bg-cyan-700"
+                  >
+                    Update Webhook
                   </Button>
                 </div>
               </div>
