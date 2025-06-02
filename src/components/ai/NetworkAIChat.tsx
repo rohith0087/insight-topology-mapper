@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -321,10 +322,10 @@ I apologize, but I encountered an error while analyzing your network. This might
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col p-0">
-        {/* Messages Area with Scrolling */}
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
+      <CardContent className="flex-1 flex flex-col p-0 min-h-0">
+        {/* Messages Area with Proper Scrolling */}
+        <ScrollArea className="flex-1 max-h-[calc(100vh-400px)]">
+          <div className="space-y-4 p-4">
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] flex items-start space-x-3 ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
@@ -382,7 +383,7 @@ I apologize, but I encountered an error while analyzing your network. This might
 
         {/* Quick Questions */}
         {messages.length <= 1 && (
-          <div className="p-4 border-t border-slate-700 bg-slate-800">
+          <div className="flex-shrink-0 p-4 border-t border-slate-700 bg-slate-800">
             <p className="text-sm text-slate-400 mb-3">Try these quick questions:</p>
             <div className="flex flex-wrap gap-2">
               {quickQuestions.map((question, index) => (
@@ -402,7 +403,7 @@ I apologize, but I encountered an error while analyzing your network. This might
         )}
 
         {/* Input Area */}
-        <div className="p-4 border-t border-slate-700 flex-shrink-0 bg-slate-800">
+        <div className="flex-shrink-0 p-4 border-t border-slate-700 bg-slate-800">
           <div className="flex space-x-2">
             <Textarea
               value={currentMessage}
