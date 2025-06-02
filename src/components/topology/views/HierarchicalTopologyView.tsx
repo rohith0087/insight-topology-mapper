@@ -81,7 +81,7 @@ const HierarchicalTopologyView: React.FC<HierarchicalTopologyViewProps> = ({
       fitView
       className="bg-slate-900"
     >
-      <Background color="#334155" gap={20} variant="lines" />
+      <Background color="#334155" gap={20} />
       <Controls className="bg-slate-800 border border-slate-600" />
       <MiniMap 
         nodeColor={(node) => {

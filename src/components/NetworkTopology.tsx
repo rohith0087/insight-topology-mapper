@@ -1,4 +1,3 @@
-
 import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import {
   ReactFlow,
@@ -24,6 +23,9 @@ import GridTopologyView from './topology/views/GridTopologyView';
 import RadialTopologyView from './topology/views/RadialTopologyView';
 import HierarchicalTopologyView from './topology/views/HierarchicalTopologyView';
 import ConnectionMatrixView from './topology/views/ConnectionMatrixView';
+import TreeTopologyView from './topology/views/TreeTopologyView';
+import ForceTopologyView from './topology/views/ForceTopologyView';
+import LayeredTopologyView from './topology/views/LayeredTopologyView';
 import { NodeData } from '../types/networkTypes';
 import { generateMockTopologyData } from '../utils/mockData';
 import { Alert, AlertDescription } from './ui/alert';
@@ -129,21 +131,14 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
         return <RadialTopologyView {...commonProps} />;
       case 'hierarchical':
         return <HierarchicalTopologyView {...commonProps} />;
+      case 'tree':
+        return <TreeTopologyView {...commonProps} />;
+      case 'force':
+        return <ForceTopologyView {...commonProps} />;
+      case 'layered':
+        return <LayeredTopologyView {...commonProps} />;
       case 'matrix':
         return <ConnectionMatrixView {...commonProps} />;
-      case 'tree':
-      case 'force':
-        // Placeholder for future implementations
-        return (
-          <div className="w-full h-full bg-slate-900 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-cyan-400 text-lg font-semibold mb-2">
-                {currentView === 'tree' ? 'Tree View' : 'Force Layout'}
-              </div>
-              <div className="text-slate-400">Coming soon...</div>
-            </div>
-          </div>
-        );
       default:
         return (
           <ReactFlow

@@ -9,10 +9,11 @@ import {
   CircleDot, 
   TreePine, 
   Zap,
-  BarChart3
+  BarChart3,
+  Box
 } from 'lucide-react';
 
-export type TopologyView = 'network' | 'grid' | 'hierarchical' | 'radial' | 'tree' | 'force' | 'matrix';
+export type TopologyView = 'network' | 'grid' | 'hierarchical' | 'radial' | 'tree' | 'force' | 'matrix' | 'layered';
 
 interface TopologyViewSelectorProps {
   currentView: TopologyView;
@@ -55,6 +56,12 @@ const viewOptions = [
     name: 'Force Layout',
     icon: Zap,
     description: 'Physics-based positioning'
+  },
+  {
+    id: 'layered' as TopologyView,
+    name: 'Layered View',
+    icon: Box,
+    description: 'Isometric layer view'
   },
   {
     id: 'matrix' as TopologyView,
