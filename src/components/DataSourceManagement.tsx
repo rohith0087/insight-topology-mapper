@@ -52,6 +52,10 @@ const DataSourceManagement: React.FC<DataSourceManagementProps> = ({ onClose }) 
     refetch();
   };
 
+  const handleSourceAdded = () => {
+    refetch();
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-slate-800 rounded-lg border border-slate-600 w-full max-w-6xl h-[80vh] flex flex-col">
@@ -73,7 +77,7 @@ const DataSourceManagement: React.FC<DataSourceManagementProps> = ({ onClose }) 
               <RefreshCw className={`w-4 h-4 mr-2 ${runETL.isPending ? 'animate-spin' : ''}`} />
               {runETL.isPending ? 'Running...' : 'Sync All'}
             </Button>
-            <DataSourceConfigDialog onSourceAdded={refetch}>
+            <DataSourceConfigDialog onSourceAdded={handleSourceAdded}>
               <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
                 <Plus className="w-4 h-4 mr-2" />
                 Add Data Source
@@ -107,7 +111,7 @@ const DataSourceManagement: React.FC<DataSourceManagementProps> = ({ onClose }) 
                 <p className="text-slate-400 mb-8 max-w-md mx-auto">
                   Connect your first network monitoring tool or security system to start building your topology map.
                 </p>
-                <DataSourceConfigDialog onSourceAdded={refetch}>
+                <DataSourceConfigDialog onSourceAdded={handleSourceAdded}>
                   <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
                     <Plus className="w-4 h-4 mr-2" />
                     Add Your First Data Source

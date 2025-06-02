@@ -136,19 +136,10 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
         });
       }
 
-      setOpen(false);
+      handleClose();
       onSourceAdded?.();
-      onClose?.();
-      
-      // Reset form
-      setFormData({
-        name: '',
-        type: 'nmap',
-        config: {},
-        enabled: true
-      });
-      setTestResult(null);
     } catch (error) {
+      console.error('Save error:', error);
       toast({
         title: "Save Failed",
         description: error.message || "Failed to save data source",
@@ -171,8 +162,16 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
     setTestResult(null);
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      handleClose();
+    } else {
+      setOpen(newOpen);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {children || (
           <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
@@ -187,9 +186,6 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
             <DialogTitle className="text-cyan-400 text-xl">
               {editingSource ? 'Edit Data Source' : 'Add Data Source'}
             </DialogTitle>
-            <Button variant="ghost" onClick={handleClose} className="text-slate-400 hover:text-white hover:bg-slate-700">
-              <X className="w-4 h-4" />
-            </Button>
           </div>
         </DialogHeader>
         
