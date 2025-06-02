@@ -88,7 +88,12 @@ export const useOnboarding = () => {
         throw error;
       }
 
-      return data;
+      // Transform the data to match our interface
+      return {
+        ...data,
+        completed_steps: Array.isArray(data.completed_steps) ? data.completed_steps : [],
+        onboarding_data: data.onboarding_data || {}
+      } as OnboardingProgress;
     },
   });
 

@@ -97,7 +97,7 @@ export const useNaturalLanguageSearch = () => {
       .insert({
         query_name: queryName,
         query_text: queryText,
-        filters: filters,
+        filters: filters as any,
         is_favorite: false
       });
 

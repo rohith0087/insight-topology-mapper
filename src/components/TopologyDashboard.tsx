@@ -157,24 +157,26 @@ const TopologyDashboard = () => {
   return (
     <div className="flex flex-col h-screen bg-slate-900 text-white overflow-hidden">
       {/* Header */}
-      <header className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex-shrink-0">
+      <header className="bg-slate-800 border-b border-slate-700 px-6 py-3 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Network className="w-8 h-8 text-cyan-400" />
             <div>
-              <h1 className="text-2xl font-bold text-cyan-400">LumenNet</h1>
-              <p className="text-slate-400 text-sm">AI-Powered Security Operations Center Visualization</p>
+              <h1 className="text-xl font-bold text-cyan-400">LumenNet</h1>
+              <p className="text-slate-400 text-xs">AI-Powered Security Operations Center</p>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
+          
+          {/* Action Buttons - Better spacing */}
+          <div className="flex items-center space-x-2">
             {/* Onboarding Button (show if not completed) */}
             {profile && (!progress?.is_completed) && (
               <Button
                 onClick={handleStartOnboarding}
-                variant="outline"
-                className="border-green-600 hover:bg-green-700 bg-green-950 text-green-300 hover:text-white"
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white border-0"
               >
-                <Play className="w-4 h-4 mr-2" />
+                <Play className="w-4 h-4 mr-1" />
                 Start Tour
               </Button>
             )}
@@ -183,9 +185,10 @@ const TopologyDashboard = () => {
             <Button
               onClick={() => setShowExecutiveDashboard(true)}
               variant="outline"
+              size="sm"
               className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
             >
-              <BarChart3 className="w-4 h-4 mr-2" />
+              <BarChart3 className="w-4 h-4 mr-1" />
               Executive
             </Button>
 
@@ -193,9 +196,10 @@ const TopologyDashboard = () => {
             <Button
               onClick={() => setShowAIChat(true)}
               variant="outline"
+              size="sm"
               className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
             >
-              <Brain className="w-4 h-4 mr-2" />
+              <Brain className="w-4 h-4 mr-1" />
               AI Assistant
             </Button>
             
@@ -203,10 +207,11 @@ const TopologyDashboard = () => {
               onClick={handleGenerateInsights}
               disabled={insightsLoading}
               variant="outline"
+              size="sm"
               className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
             >
-              <Lightbulb className="w-4 h-4 mr-2" />
-              {insightsLoading ? 'Generating...' : 'Generate Insights'}
+              <Lightbulb className="w-4 h-4 mr-1" />
+              {insightsLoading ? 'Generating...' : 'Insights'}
             </Button>
 
             {/* Role-based action buttons */}
@@ -214,9 +219,10 @@ const TopologyDashboard = () => {
               <Button
                 onClick={() => setShowDataSources(true)}
                 variant="outline"
+                size="sm"
                 className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
               >
-                <Database className="w-4 h-4 mr-2" />
+                <Database className="w-4 h-4 mr-1" />
                 Data Sources
               </Button>
             )}
@@ -225,10 +231,11 @@ const TopologyDashboard = () => {
               <Button
                 onClick={() => setShowUserManagement(true)}
                 variant="outline"
+                size="sm"
                 className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
               >
-                <Users className="w-4 h-4 mr-2" />
-                Manage Users
+                <Users className="w-4 h-4 mr-1" />
+                Users
               </Button>
             )}
             
