@@ -1,15 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Plus, Save, X } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useToast } from './ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { DataSourceConfig, DataSourceConfigDialogProps, TestResult } from '../types/dataSourceTypes';
 import DataSourceConfigForm from './dataSource/DataSourceConfigForm';
 import TestConnectionComponent from './dataSource/TestConnectionComponent';
+import DataSourceDialogHeader from './dataSource/DataSourceDialogHeader';
+import DataSourceFormFields from './dataSource/DataSourceFormFields';
+import DataSourceActionButtons from './dataSource/DataSourceActionButtons';
 
 const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({ 
   onSourceAdded, 
@@ -28,19 +29,6 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
   const [saving, setSaving] = useState(false);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const { toast } = useToast();
-
-  const sourceTypes = [
-    { value: 'nmap', label: 'Nmap Network Scanner' },
-    { value: 'aws', label: 'AWS Discovery' },
-    { value: 'azure', label: 'Azure Monitor' },
-    { value: 'splunk', label: 'Splunk SIEM' },
-    { value: 'snmp', label: 'SNMP Monitoring' },
-    { value: 'api', label: 'Custom API' },
-    { value: 'sentinelone', label: 'SentinelOne EDR' },
-    { value: 'qradar', label: 'IBM QRadar SIEM' },
-    { value: 'datadog', label: 'DataDog Monitoring' },
-    { value: 'microsoft-sentinel', label: 'Microsoft Sentinel' }
-  ];
 
   useEffect(() => {
     if (editingSource) {
@@ -184,45 +172,13 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
         )}
       </DialogTrigger>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-slate-800 border-slate-600 text-white">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-cyan-400 text-xl">
-              {editingSource ? 'Edit Data Source' : 'Add Data Source'}
-            </DialogTitle>
-          </div>
-        </DialogHeader>
+        <DataSourceDialogHeader isEditing={!!editingSource} />
         
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="name" className="text-slate-300">Data Source Name *</Label>
-              <Input
-                id="name"
-                placeholder="My Network Scanner"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
-              />
-            </div>
-            <div>
-              <Label htmlFor="type" className="text-slate-300">Source Type</Label>
-              <Select 
-                value={formData.type} 
-                onValueChange={(value) => setFormData({ ...formData, type: value, config: {} })}
-              >
-                <SelectTrigger className="bg-slate-900 border-slate-600 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-600">
-                  {sourceTypes.map(type => (
-                    <SelectItem key={type.value} value={type.value} className="text-white hover:bg-slate-700">
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <DataSourceFormFields 
+            formData={formData}
+            onFormDataChange={setFormData}
+          />
 
           <DataSourceConfigForm 
             type={formData.type}
@@ -236,28 +192,13 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
             onTest={testConnection}
           />
 
-          <div className="flex justify-between pt-4 border-t border-slate-600">
-            <div></div>
-            
-            <div className="space-x-3">
-              <Button 
-                variant="outline" 
-                onClick={handleClose}
-                disabled={saving}
-                className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={saveDataSource}
-                disabled={saving || testing}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                <Save className="w-4 h-4 mr-2" />
-                {saving ? 'Saving...' : (editingSource ? 'Update' : 'Save')}
-              </Button>
-            </div>
-          </div>
+          <DataSourceActionButtons
+            onCancel={handleClose}
+            onSave={saveDataSource}
+            saving={saving}
+            testing={testing}
+            isEditing={!!editingSource}
+          />
         </div>
       </DialogContent>
     </Dialog>
