@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,7 +35,8 @@ import {
   Mail,
   Calendar,
   Check,
-  X
+  X,
+  Info
 } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
 
@@ -54,6 +54,30 @@ const UserManagement: React.FC = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<UserRole>('viewer');
   const [generatedLink, setGeneratedLink] = useState('');
+
+  // Role descriptions
+  const roleDescriptions = {
+    viewer: {
+      title: "Viewer",
+      description: "Read-only access to network topology and monitoring data",
+      permissions: ["View network topology", "View monitoring data", "Export reports"]
+    },
+    analyst: {
+      title: "Analyst", 
+      description: "Advanced analysis capabilities with limited configuration access",
+      permissions: ["All Viewer permissions", "Create custom filters", "Advanced analytics", "Incident investigation"]
+    },
+    network_admin: {
+      title: "Network Admin",
+      description: "Full network management with data source configuration",
+      permissions: ["All Analyst permissions", "Configure data sources", "Manage network settings", "Modify topology"]
+    },
+    tenant_admin: {
+      title: "Tenant Admin",
+      description: "Complete administrative access including user management",
+      permissions: ["All Network Admin permissions", "Manage users and roles", "Organization settings", "Billing management"]
+    }
+  };
 
   useEffect(() => {
     if (canManageUsers) {
@@ -268,7 +292,7 @@ const UserManagement: React.FC = () => {
               Invite User
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-slate-800 border-slate-700">
+          <DialogContent className="bg-slate-800 border-slate-700 max-w-2xl">
             <DialogHeader>
               <DialogTitle className="text-cyan-400">Invite New User</DialogTitle>
               <DialogDescription className="text-slate-400">
@@ -276,7 +300,7 @@ const UserManagement: React.FC = () => {
               </DialogDescription>
             </DialogHeader>
             
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
                 <Label htmlFor="inviteEmail" className="text-slate-200">
                   Email (optional)
@@ -292,8 +316,8 @@ const UserManagement: React.FC = () => {
               </div>
               
               <div>
-                <Label htmlFor="inviteRole" className="text-slate-200">
-                  Role
+                <Label htmlFor="inviteRole" className="text-slate-200 mb-3 block">
+                  Select Role & Permissions
                 </Label>
                 <Select value={inviteRole} onValueChange={(value: UserRole) => setInviteRole(value)}>
                   <SelectTrigger className="bg-slate-900 border-slate-600 text-white">
@@ -308,6 +332,34 @@ const UserManagement: React.FC = () => {
                     )}
                   </SelectContent>
                 </Select>
+
+                {/* Role Description Card */}
+                <div className="mt-4 p-4 bg-slate-900 rounded-lg border border-slate-600">
+                  <div className="flex items-start space-x-3">
+                    <Info className="w-5 h-5 text-cyan-400 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-white mb-2">
+                        {roleDescriptions[inviteRole].title}
+                      </h4>
+                      <p className="text-slate-300 text-sm mb-3">
+                        {roleDescriptions[inviteRole].description}
+                      </p>
+                      <div>
+                        <p className="text-slate-400 text-xs uppercase tracking-wider font-medium mb-2">
+                          Permissions:
+                        </p>
+                        <ul className="space-y-1">
+                          {roleDescriptions[inviteRole].permissions.map((permission, index) => (
+                            <li key={index} className="flex items-center text-sm text-slate-300">
+                              <Check className="w-3 h-3 text-green-400 mr-2 flex-shrink-0" />
+                              {permission}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {generatedLink && (
