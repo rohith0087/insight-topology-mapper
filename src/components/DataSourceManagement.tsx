@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { RefreshCw, Plus, X } from 'lucide-react';
+import { RefreshCw, Plus, X, BookOpen } from 'lucide-react';
 import { useDataSources, useRunETL } from '../hooks/useDataSources';
 import { Button } from './ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,6 +7,7 @@ import { useToast } from './ui/use-toast';
 import { ScrollArea } from './ui/scroll-area';
 import DataSourceConfigDialog from './DataSourceConfigDialog';
 import DataSourceCard from './DataSourceCard';
+import DataSourceDocumentation from './dataSource/DataSourceDocumentation';
 
 interface DataSourceManagementProps {
   onClose: () => void;
@@ -18,6 +18,7 @@ const DataSourceManagement: React.FC<DataSourceManagementProps> = ({ onClose }) 
   const runETL = useRunETL();
   const { toast } = useToast();
   const [editingSource, setEditingSource] = useState<any>(null);
+  const [showDocumentation, setShowDocumentation] = useState(false);
 
   const deleteDataSource = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
@@ -56,6 +57,10 @@ const DataSourceManagement: React.FC<DataSourceManagementProps> = ({ onClose }) 
     refetch();
   };
 
+  if (showDocumentation) {
+    return <DataSourceDocumentation onClose={() => setShowDocumentation(false)} />;
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-slate-800 rounded-lg border border-slate-600 w-full max-w-6xl h-[80vh] flex flex-col">
@@ -68,6 +73,14 @@ const DataSourceManagement: React.FC<DataSourceManagementProps> = ({ onClose }) 
             </p>
           </div>
           <div className="flex items-center space-x-3">
+            <Button
+              onClick={() => setShowDocumentation(true)}
+              variant="outline"
+              className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              Documentation
+            </Button>
             <Button
               onClick={() => runETL.mutate()}
               disabled={runETL.isPending}
@@ -111,12 +124,22 @@ const DataSourceManagement: React.FC<DataSourceManagementProps> = ({ onClose }) 
                 <p className="text-slate-400 mb-8 max-w-md mx-auto">
                   Connect your first network monitoring tool or security system to start building your topology map.
                 </p>
-                <DataSourceConfigDialog onSourceAdded={handleSourceAdded}>
-                  <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Your First Data Source
+                <div className="flex justify-center space-x-4">
+                  <Button
+                    onClick={() => setShowDocumentation(true)}
+                    variant="outline"
+                    className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+                  >
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    View Documentation
                   </Button>
-                </DataSourceConfigDialog>
+                  <DataSourceConfigDialog onSourceAdded={handleSourceAdded}>
+                    <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Your First Data Source
+                    </Button>
+                  </DataSourceConfigDialog>
+                </div>
               </div>
             </div>
           ) : (
