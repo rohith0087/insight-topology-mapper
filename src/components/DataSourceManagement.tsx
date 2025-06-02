@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RefreshCw, Plus, X, BookOpen } from 'lucide-react';
+import { RefreshCw, Plus, X, BookOpen, GitBranch } from 'lucide-react';
 import { useDataSources, useRunETL } from '../hooks/useDataSources';
 import { Button } from './ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,6 +8,7 @@ import { ScrollArea } from './ui/scroll-area';
 import DataSourceConfigDialog from './DataSourceConfigDialog';
 import DataSourceCard from './DataSourceCard';
 import DataSourceDocumentation from './dataSource/DataSourceDocumentation';
+import DataReconciliationDashboard from './dataReconciliation/DataReconciliationDashboard';
 
 interface DataSourceManagementProps {
   onClose: () => void;
@@ -19,6 +20,7 @@ const DataSourceManagement: React.FC<DataSourceManagementProps> = ({ onClose }) 
   const { toast } = useToast();
   const [editingSource, setEditingSource] = useState<any>(null);
   const [showDocumentation, setShowDocumentation] = useState(false);
+  const [showReconciliation, setShowReconciliation] = useState(false);
 
   const deleteDataSource = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
@@ -61,6 +63,10 @@ const DataSourceManagement: React.FC<DataSourceManagementProps> = ({ onClose }) 
     return <DataSourceDocumentation onClose={() => setShowDocumentation(false)} />;
   }
 
+  if (showReconciliation) {
+    return <DataReconciliationDashboard onClose={() => setShowReconciliation(false)} />;
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-slate-800 rounded-lg border border-slate-600 w-full max-w-6xl h-[80vh] flex flex-col">
@@ -73,6 +79,14 @@ const DataSourceManagement: React.FC<DataSourceManagementProps> = ({ onClose }) 
             </p>
           </div>
           <div className="flex items-center space-x-3">
+            <Button
+              onClick={() => setShowReconciliation(true)}
+              variant="outline"
+              className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+            >
+              <GitBranch className="w-4 h-4 mr-2" />
+              Data Reconciliation
+            </Button>
             <Button
               onClick={() => setShowDocumentation(true)}
               variant="outline"

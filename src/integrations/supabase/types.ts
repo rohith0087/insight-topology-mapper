@@ -9,6 +9,212 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      data_conflicts: {
+        Row: {
+          conflict_type: string
+          connection_id: string | null
+          created_at: string
+          field_name: string
+          id: string
+          node_id: string | null
+          resolution_strategy: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          resolved_value: Json | null
+          source_values: Json
+          status: string
+          tenant_id: string | null
+        }
+        Insert: {
+          conflict_type: string
+          connection_id?: string | null
+          created_at?: string
+          field_name: string
+          id?: string
+          node_id?: string | null
+          resolution_strategy?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          resolved_value?: Json | null
+          source_values: Json
+          status?: string
+          tenant_id?: string | null
+        }
+        Update: {
+          conflict_type?: string
+          connection_id?: string | null
+          created_at?: string
+          field_name?: string
+          id?: string
+          node_id?: string | null
+          resolution_strategy?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          resolved_value?: Json | null
+          source_values?: Json
+          status?: string
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_conflicts_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "network_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_conflicts_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "network_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_lineage: {
+        Row: {
+          confidence_score: number | null
+          connection_id: string | null
+          created_at: string
+          data_source_id: string
+          field_name: string
+          field_value: Json
+          id: string
+          node_id: string | null
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          connection_id?: string | null
+          created_at?: string
+          data_source_id: string
+          field_name: string
+          field_value: Json
+          id?: string
+          node_id?: string | null
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          confidence_score?: number | null
+          connection_id?: string | null
+          created_at?: string
+          data_source_id?: string
+          field_name?: string
+          field_value?: Json
+          id?: string
+          node_id?: string | null
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_lineage_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "network_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_lineage_data_source_id_fkey"
+            columns: ["data_source_id"]
+            isOneToOne: false
+            referencedRelation: "data_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_lineage_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "network_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_quality_metrics: {
+        Row: {
+          calculated_at: string
+          data_source_id: string
+          id: string
+          metadata: Json | null
+          metric_name: string
+          metric_type: string
+          metric_value: number
+          tenant_id: string | null
+        }
+        Insert: {
+          calculated_at?: string
+          data_source_id: string
+          id?: string
+          metadata?: Json | null
+          metric_name: string
+          metric_type: string
+          metric_value: number
+          tenant_id?: string | null
+        }
+        Update: {
+          calculated_at?: string
+          data_source_id?: string
+          id?: string
+          metadata?: Json | null
+          metric_name?: string
+          metric_type?: string
+          metric_value?: number
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_quality_metrics_data_source_id_fkey"
+            columns: ["data_source_id"]
+            isOneToOne: false
+            referencedRelation: "data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_source_priorities: {
+        Row: {
+          confidence_multiplier: number | null
+          created_at: string
+          data_source_id: string
+          field_specific_priorities: Json | null
+          id: string
+          priority_level: number
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          confidence_multiplier?: number | null
+          created_at?: string
+          data_source_id: string
+          field_specific_priorities?: Json | null
+          id?: string
+          priority_level: number
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          confidence_multiplier?: number | null
+          created_at?: string
+          data_source_id?: string
+          field_specific_priorities?: Json | null
+          id?: string
+          priority_level?: number
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_source_priorities_data_source_id_fkey"
+            columns: ["data_source_id"]
+            isOneToOne: false
+            referencedRelation: "data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_sources: {
         Row: {
           config: Json
@@ -118,42 +324,61 @@ export type Database = {
       }
       network_connections: {
         Row: {
+          confidence_score: number | null
           connection_type: string
+          data_hash: string | null
           discovered_at: string | null
           id: string
+          last_reconciled: string | null
           last_verified: string | null
           metadata: Json | null
           port: number | null
+          primary_source_id: string | null
           protocol: string | null
           source_node_id: string | null
           target_node_id: string | null
           tenant_id: string | null
         }
         Insert: {
+          confidence_score?: number | null
           connection_type?: string
+          data_hash?: string | null
           discovered_at?: string | null
           id?: string
+          last_reconciled?: string | null
           last_verified?: string | null
           metadata?: Json | null
           port?: number | null
+          primary_source_id?: string | null
           protocol?: string | null
           source_node_id?: string | null
           target_node_id?: string | null
           tenant_id?: string | null
         }
         Update: {
+          confidence_score?: number | null
           connection_type?: string
+          data_hash?: string | null
           discovered_at?: string | null
           id?: string
+          last_reconciled?: string | null
           last_verified?: string | null
           metadata?: Json | null
           port?: number | null
+          primary_source_id?: string | null
           protocol?: string | null
           source_node_id?: string | null
           target_node_id?: string | null
           tenant_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "network_connections_primary_source_id_fkey"
+            columns: ["primary_source_id"]
+            isOneToOne: false
+            referencedRelation: "data_sources"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "network_connections_source_node_id_fkey"
             columns: ["source_node_id"]
@@ -179,45 +404,64 @@ export type Database = {
       }
       network_nodes: {
         Row: {
+          confidence_score: number | null
           created_at: string | null
+          data_hash: string | null
           external_id: string
           id: string
           label: string
+          last_reconciled: string | null
           last_seen: string | null
           metadata: Json
           node_type: string
+          primary_source_id: string | null
           source_system: string
           status: string
           tenant_id: string | null
           updated_at: string | null
         }
         Insert: {
+          confidence_score?: number | null
           created_at?: string | null
+          data_hash?: string | null
           external_id: string
           id?: string
           label: string
+          last_reconciled?: string | null
           last_seen?: string | null
           metadata?: Json
           node_type: string
+          primary_source_id?: string | null
           source_system: string
           status?: string
           tenant_id?: string | null
           updated_at?: string | null
         }
         Update: {
+          confidence_score?: number | null
           created_at?: string | null
+          data_hash?: string | null
           external_id?: string
           id?: string
           label?: string
+          last_reconciled?: string | null
           last_seen?: string | null
           metadata?: Json
           node_type?: string
+          primary_source_id?: string | null
           source_system?: string
           status?: string
           tenant_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "network_nodes_primary_source_id_fkey"
+            columns: ["primary_source_id"]
+            isOneToOne: false
+            referencedRelation: "data_sources"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "network_nodes_tenant_id_fkey"
             columns: ["tenant_id"]
