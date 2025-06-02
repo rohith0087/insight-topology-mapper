@@ -10,13 +10,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Plus, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
 
+type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
+type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+
 interface SupportTicket {
   id: string;
   tenant_id: string;
   title: string;
   description: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  priority: TicketPriority;
+  status: TicketStatus;
   created_at: string;
   updated_at: string;
   tenant?: {
@@ -46,7 +49,14 @@ const SupportTickets = () => {
       
       if (error) throw error;
       
-      setTickets(data || []);
+      // Transform the data to ensure proper typing
+      const typedTickets = (data || []).map(ticket => ({
+        ...ticket,
+        priority: ticket.priority as TicketPriority,
+        status: ticket.status as TicketStatus,
+      }));
+      
+      setTickets(typedTickets);
     } catch (error: any) {
       console.error('Error fetching tickets:', error);
       toast({
@@ -74,7 +84,7 @@ const SupportTickets = () => {
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority: TicketPriority) => {
     switch (priority) {
       case 'critical': return 'bg-red-600';
       case 'high': return 'bg-orange-600';
@@ -84,7 +94,7 @@ const SupportTickets = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: TicketStatus) => {
     switch (status) {
       case 'open': return 'bg-blue-600';
       case 'in_progress': return 'bg-purple-600';
@@ -94,7 +104,7 @@ const SupportTickets = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: TicketStatus) => {
     switch (status) {
       case 'open': return <Clock className="w-4 h-4" />;
       case 'in_progress': return <AlertTriangle className="w-4 h-4" />;

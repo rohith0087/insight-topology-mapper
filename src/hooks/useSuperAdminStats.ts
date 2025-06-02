@@ -29,7 +29,9 @@ export const useSuperAdminStats = () => {
         throw rpcError;
       }
 
-      setStats(data);
+      // Type assertion since we know the structure from our database function
+      const typedStats = data as SuperAdminStats;
+      setStats(typedStats);
     } catch (err: any) {
       console.error('Error fetching super admin stats:', err);
       setError(err.message || 'Failed to fetch statistics');
