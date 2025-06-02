@@ -4,10 +4,13 @@ import NetworkTopology from './NetworkTopology';
 import SearchAndFilters from './SearchAndFilters';
 import StatusBar from './StatusBar';
 import DataSourceManagement from './DataSourceManagement';
+import UserProfile from './UserProfile';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
-import { Database, Settings, Network } from 'lucide-react';
+import { Database, Settings, Network, Users } from 'lucide-react';
 
 const TopologyDashboard = () => {
+  const { profile } = useAuth();
   const [selectedNode, setSelectedNode] = useState(null);
   const [showDataSources, setShowDataSources] = useState(false);
   const [filterSettings, setFilterSettings] = useState({
@@ -31,15 +34,30 @@ const TopologyDashboard = () => {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <Button
-              onClick={() => setShowDataSources(true)}
-              variant="outline"
-              className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
-            >
-              <Database className="w-4 h-4 mr-2" />
-              Data Sources
-            </Button>
+            {/* Role-based action buttons */}
+            {profile?.role && ['super_admin', 'tenant_admin', 'network_admin'].includes(profile.role) && (
+              <Button
+                onClick={() => setShowDataSources(true)}
+                variant="outline"
+                className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+              >
+                <Database className="w-4 h-4 mr-2" />
+                Data Sources
+              </Button>
+            )}
+            
+            {profile?.role && ['super_admin', 'tenant_admin'].includes(profile.role) && (
+              <Button
+                variant="outline"
+                className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Users
+              </Button>
+            )}
+            
             <StatusBar />
+            <UserProfile />
           </div>
         </div>
       </header>
@@ -53,6 +71,11 @@ const TopologyDashboard = () => {
               <Settings className="w-5 h-5 text-cyan-400" />
               <h3 className="text-lg font-semibold text-cyan-400">Search & Filters</h3>
             </div>
+            {profile && (
+              <div className="mt-2 text-xs text-slate-500">
+                Role: {profile.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </div>
+            )}
           </div>
           
           <div className="flex-1 overflow-y-auto">

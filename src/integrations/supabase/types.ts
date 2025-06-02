@@ -19,6 +19,7 @@ export type Database = {
           name: string
           sync_interval: number | null
           sync_status: string | null
+          tenant_id: string | null
           type: string
           updated_at: string | null
         }
@@ -31,6 +32,7 @@ export type Database = {
           name: string
           sync_interval?: number | null
           sync_status?: string | null
+          tenant_id?: string | null
           type: string
           updated_at?: string | null
         }
@@ -43,10 +45,19 @@ export type Database = {
           name?: string
           sync_interval?: number | null
           sync_status?: string | null
+          tenant_id?: string | null
           type?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "data_sources_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       etl_jobs: {
         Row: {
@@ -60,6 +71,7 @@ export type Database = {
           records_processed: number | null
           started_at: string | null
           status: string
+          tenant_id: string | null
         }
         Insert: {
           completed_at?: string | null
@@ -72,6 +84,7 @@ export type Database = {
           records_processed?: number | null
           started_at?: string | null
           status?: string
+          tenant_id?: string | null
         }
         Update: {
           completed_at?: string | null
@@ -84,6 +97,7 @@ export type Database = {
           records_processed?: number | null
           started_at?: string | null
           status?: string
+          tenant_id?: string | null
         }
         Relationships: [
           {
@@ -91,6 +105,13 @@ export type Database = {
             columns: ["data_source_id"]
             isOneToOne: false
             referencedRelation: "data_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "etl_jobs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -106,6 +127,7 @@ export type Database = {
           protocol: string | null
           source_node_id: string | null
           target_node_id: string | null
+          tenant_id: string | null
         }
         Insert: {
           connection_type?: string
@@ -117,6 +139,7 @@ export type Database = {
           protocol?: string | null
           source_node_id?: string | null
           target_node_id?: string | null
+          tenant_id?: string | null
         }
         Update: {
           connection_type?: string
@@ -128,6 +151,7 @@ export type Database = {
           protocol?: string | null
           source_node_id?: string | null
           target_node_id?: string | null
+          tenant_id?: string | null
         }
         Relationships: [
           {
@@ -144,6 +168,13 @@ export type Database = {
             referencedRelation: "network_nodes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "network_connections_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       network_nodes: {
@@ -157,6 +188,7 @@ export type Database = {
           node_type: string
           source_system: string
           status: string
+          tenant_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -169,6 +201,7 @@ export type Database = {
           node_type: string
           source_system: string
           status?: string
+          tenant_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -181,6 +214,95 @@ export type Database = {
           node_type?: string
           source_system?: string
           status?: string
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "network_nodes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          first_name: string | null
+          id: string
+          is_active: boolean | null
+          last_login: string | null
+          last_name: string | null
+          metadata: Json | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          tenant_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          first_name?: string | null
+          id: string
+          is_active?: boolean | null
+          last_login?: string | null
+          last_name?: string | null
+          metadata?: Json | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          first_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_login?: string | null
+          last_name?: string | null
+          metadata?: Json | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          name: string
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name: string
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name?: string
+          slug?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -190,10 +312,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
+      get_user_tenant: {
+        Args: { user_id: string }
+        Returns: string
+      }
+      has_role: {
+        Args: {
+          user_id: string
+          required_role: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      user_role:
+        | "super_admin"
+        | "tenant_admin"
+        | "network_admin"
+        | "analyst"
+        | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -308,6 +449,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: [
+        "super_admin",
+        "tenant_admin",
+        "network_admin",
+        "analyst",
+        "viewer",
+      ],
+    },
   },
 } as const
