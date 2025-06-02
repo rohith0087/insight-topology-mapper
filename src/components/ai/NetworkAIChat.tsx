@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -70,7 +69,7 @@ const FormattedText: React.FC<{ content: string }> = ({ content }) => {
       else if (line.includes('**')) {
         const parts = line.split(/(\*\*.*?\*\*)/);
         formattedLine = (
-          <p key={index} className="mb-2 leading-relaxed">
+          <p key={index} className="mb-2 leading-relaxed text-slate-100">
             {parts.map((part, partIndex) => {
               if (part.startsWith('**') && part.endsWith('**')) {
                 return (
@@ -89,7 +88,7 @@ const FormattedText: React.FC<{ content: string }> = ({ content }) => {
         formattedLine = (
           <div key={index} className="flex items-start mb-2">
             <span className="text-cyan-400 mr-2 mt-1">•</span>
-            <span className="leading-relaxed">{line.replace('- ', '')}</span>
+            <span className="leading-relaxed text-slate-100">{line.replace('- ', '')}</span>
           </div>
         );
       }
@@ -100,11 +99,11 @@ const FormattedText: React.FC<{ content: string }> = ({ content }) => {
           formattedLine = (
             <div key={index} className="flex items-start mb-2">
               <span className="text-cyan-400 mr-2 mt-1 font-medium">{match[1]}.</span>
-              <span className="leading-relaxed">{match[2]}</span>
+              <span className="leading-relaxed text-slate-100">{match[2]}</span>
             </div>
           );
         } else {
-          formattedLine = <p key={index} className="mb-2 leading-relaxed">{line}</p>;
+          formattedLine = <p key={index} className="mb-2 leading-relaxed text-slate-100">{line}</p>;
         }
       }
       // Empty lines
@@ -113,7 +112,7 @@ const FormattedText: React.FC<{ content: string }> = ({ content }) => {
       }
       // Regular text
       else {
-        formattedLine = <p key={index} className="mb-2 leading-relaxed">{line}</p>;
+        formattedLine = <p key={index} className="mb-2 leading-relaxed text-slate-100">{line}</p>;
       }
 
       formattedLines.push(formattedLine);
@@ -279,7 +278,7 @@ I apologize, but I encountered an error while analyzing your network. This might
   };
 
   return (
-    <Card className="bg-slate-800 border-slate-600 h-full flex flex-col">
+    <Card className="bg-slate-800 border-slate-600 h-full flex flex-col text-white">
       <CardHeader className="flex-shrink-0 border-b border-slate-700">
         <div className="flex items-center justify-between">
           <CardTitle className="text-cyan-400 flex items-center space-x-2">
@@ -310,8 +309,8 @@ I apologize, but I encountered an error while analyzing your network. This might
                 size="sm"
                 className={`flex items-center space-x-1 text-xs ${
                   selectedAnalysisType === type.id 
-                    ? `${type.color} text-white` 
-                    : 'border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white'
+                    ? `${type.color} text-white border-transparent` 
+                    : 'border-slate-500 text-slate-200 bg-slate-700 hover:bg-slate-600 hover:text-white hover:border-slate-400'
                 }`}
               >
                 <Icon className="w-3 h-3" />
@@ -343,15 +342,15 @@ I apologize, but I encountered an error while analyzing your network. This might
                       {message.type === 'ai' ? (
                         <FormattedText content={message.content} />
                       ) : (
-                        <div className="whitespace-pre-wrap">{message.content}</div>
+                        <div className="whitespace-pre-wrap text-white">{message.content}</div>
                       )}
                     </div>
                     <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-600">
-                      <div className="text-xs opacity-70">
+                      <div className="text-xs opacity-70 text-slate-300">
                         {message.timestamp.toLocaleTimeString()}
                       </div>
                       {message.analysis_type && (
-                        <Badge variant="outline" className="text-xs border-slate-500 text-slate-300">
+                        <Badge variant="outline" className="text-xs border-slate-500 text-slate-300 bg-slate-600">
                           {analysisTypes.find(t => t.id === message.analysis_type)?.label || message.analysis_type}
                         </Badge>
                       )}
@@ -370,7 +369,7 @@ I apologize, but I encountered an error while analyzing your network. This might
                   <div className="bg-slate-700 rounded-lg p-4">
                     <div className="flex items-center space-x-2">
                       <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
-                      <span className="text-sm text-slate-300">Analyzing your network...</span>
+                      <span className="text-sm text-slate-100">Analyzing your network...</span>
                     </div>
                   </div>
                 </div>
@@ -384,7 +383,7 @@ I apologize, but I encountered an error while analyzing your network. This might
         {/* Quick Questions */}
         {messages.length <= 1 && (
           <div className="flex-shrink-0 p-4 border-t border-slate-700 bg-slate-800">
-            <p className="text-sm text-slate-400 mb-3">Try these quick questions:</p>
+            <p className="text-sm text-slate-300 mb-3">Try these quick questions:</p>
             <div className="flex flex-wrap gap-2">
               {quickQuestions.map((question, index) => (
                 <Button
@@ -392,7 +391,7 @@ I apologize, but I encountered an error while analyzing your network. This might
                   onClick={() => handleQuickQuestion(question)}
                   variant="outline"
                   size="sm"
-                  className="text-xs border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white bg-slate-800"
+                  className="text-xs border-slate-500 text-slate-200 hover:bg-slate-700 hover:text-white bg-slate-700 hover:border-slate-400"
                   disabled={isLoading}
                 >
                   {question}
