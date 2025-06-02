@@ -72,8 +72,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [settings.theme]);
 
+  // Don't render children until settings are loaded
   if (loading) {
-    return <div>{children}</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
+        <div>Loading...</div>
+      </div>
+    );
   }
 
   return (
