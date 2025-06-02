@@ -1,8 +1,9 @@
+
 import React, { useMemo } from 'react';
 import { Node, Edge, NodeProps } from 'reactflow';
 import { useNetworkData } from '@/hooks/useNetworkData';
 import { NodeData } from '@/types/networkTypes';
-import GridLayoutView from './topology/views/GridLayoutView';
+import GridTopologyView from './topology/views/GridTopologyView';
 import HierarchicalTopologyView from './topology/views/HierarchicalTopologyView';
 import RadialTopologyView from './topology/views/RadialTopologyView';
 import NetworkFlowView from './topology/views/NetworkFlowView';
@@ -98,7 +99,7 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
 
     switch (currentView) {
       case 'grid':
-        return <GridLayoutView {...commonProps} />;
+        return <GridTopologyView {...commonProps} />;
       case 'hierarchical':
         return <HierarchicalTopologyView {...commonProps} />;
       case 'radial':

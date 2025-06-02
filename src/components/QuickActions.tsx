@@ -55,7 +55,9 @@ const QuickActions: React.FC<QuickActionsProps> = ({
   const handleRecentChanges = () => {
     console.log('Recent Changes clicked');
     const recentNodes = nodes.filter(node => {
-      const lastSeen = new Date(node.data.metadata?.last_seen || Date.now());
+      // Check if metadata exists and has a last_seen property
+      const metadata = node.data.metadata as any;
+      const lastSeen = new Date(metadata?.last_seen || Date.now());
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
       return lastSeen > oneHourAgo;
     });
