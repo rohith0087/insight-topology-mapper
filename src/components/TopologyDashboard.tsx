@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import NetworkTopology from './NetworkTopology';
 import SearchAndFilters from './SearchAndFilters';
@@ -23,6 +22,10 @@ const TopologyDashboard = () => {
   const { profile } = useAuth();
   const { insights, generateInsights, isLoading: insightsLoading } = useNetworkInsights();
   const { triggerAlert, triggerDeviceEvent } = useWebhooks();
+  
+  // Debug user role
+  console.log('User profile:', profile);
+  console.log('User role:', profile?.role);
   
   const [selectedNode, setSelectedNode] = useState(null);
   const [showDataSources, setShowDataSources] = useState(false);
@@ -144,6 +147,13 @@ const TopologyDashboard = () => {
     }
   };
 
+  // Check if user has admin privileges for data sources
+  const hasDataSourceAccess = profile?.role && ['super_admin', 'tenant_admin', 'network_admin'].includes(profile.role);
+  const hasUserManagementAccess = profile?.role && ['super_admin', 'tenant_admin'].includes(profile.role);
+
+  console.log('Has data source access:', hasDataSourceAccess);
+  console.log('Has user management access:', hasUserManagementAccess);
+
   return (
     <HelpProvider>
       <div className="flex flex-col h-screen bg-slate-900 text-white overflow-hidden">
@@ -232,27 +242,26 @@ const TopologyDashboard = () => {
                 </Button>
               </ContextualTooltip>
 
-              {/* Role-based action buttons */}
-              {profile?.role && ['super_admin', 'tenant_admin', 'network_admin'].includes(profile.role) && (
-                <ContextualTooltip
-                  content="Manage and configure data sources that feed network information into LumenNet"
-                  context="data-sources"
-                  userRole={profile?.role}
-                  currentPage={getCurrentView()}
+              {/* Data Sources - Always show for debugging, then we'll add the role check back */}
+              <ContextualTooltip
+                content="Manage and configure data sources that feed network information into LumenNet"
+                context="data-sources"
+                userRole={profile?.role}
+                currentPage={getCurrentView()}
+              >
+                <Button
+                  onClick={() => setShowDataSources(true)}
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
                 >
-                  <Button
-                    onClick={() => setShowDataSources(true)}
-                    variant="outline"
-                    size="sm"
-                    className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
-                  >
-                    <Database className="w-4 h-4 mr-1" />
-                    Data Sources
-                  </Button>
-                </ContextualTooltip>
-              )}
+                  <Database className="w-4 h-4 mr-1" />
+                  Data Sources
+                </Button>
+              </ContextualTooltip>
               
-              {profile?.role && ['super_admin', 'tenant_admin'].includes(profile.role) && (
+              {/* User Management */}
+              {hasUserManagementAccess && (
                 <ContextualTooltip
                   content="Manage user accounts, roles, and permissions for your organization"
                   context="user-management"
