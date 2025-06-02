@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Button } from './ui/button';
@@ -77,7 +78,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                   ...formData,
                   config: { ...formData.config, target_ranges: e.target.value }
                 })}
-                className="bg-slate-900 border-slate-600 text-white"
+                className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -86,14 +87,14 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                 <Select value={formData.config.scan_type || 'tcp_syn'} onValueChange={(value) => 
                   setFormData({ ...formData, config: { ...formData.config, scan_type: value } })
                 }>
-                  <SelectTrigger className="bg-slate-900 border-slate-600">
+                  <SelectTrigger className="bg-slate-900 border-slate-600 text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tcp_syn">TCP SYN Scan</SelectItem>
-                    <SelectItem value="tcp_connect">TCP Connect Scan</SelectItem>
-                    <SelectItem value="udp">UDP Scan</SelectItem>
-                    <SelectItem value="ping">Ping Scan</SelectItem>
+                  <SelectContent className="bg-slate-900 border-slate-600">
+                    <SelectItem value="tcp_syn" className="text-white hover:bg-slate-700">TCP SYN Scan</SelectItem>
+                    <SelectItem value="tcp_connect" className="text-white hover:bg-slate-700">TCP Connect Scan</SelectItem>
+                    <SelectItem value="udp" className="text-white hover:bg-slate-700">UDP Scan</SelectItem>
+                    <SelectItem value="ping" className="text-white hover:bg-slate-700">Ping Scan</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -107,7 +108,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                     ...formData,
                     config: { ...formData.config, ports: e.target.value }
                   })}
-                  className="bg-slate-900 border-slate-600 text-white"
+                  className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
                 />
               </div>
             </div>
@@ -128,7 +129,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                     ...formData,
                     config: { ...formData.config, access_key_id: e.target.value }
                   })}
-                  className="bg-slate-900 border-slate-600 text-white"
+                  className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
                 />
               </div>
               <div>
@@ -141,7 +142,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                     ...formData,
                     config: { ...formData.config, secret_access_key: e.target.value }
                   })}
-                  className="bg-slate-900 border-slate-600 text-white"
+                  className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
                 />
               </div>
             </div>
@@ -155,7 +156,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                   ...formData,
                   config: { ...formData.config, regions: e.target.value }
                 })}
-                className="bg-slate-900 border-slate-600 text-white"
+                className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
             <div>
@@ -168,7 +169,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                   ...formData,
                   config: { ...formData.config, services: e.target.value }
                 })}
-                className="bg-slate-900 border-slate-600 text-white"
+                className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
           </div>
@@ -187,7 +188,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                   ...formData,
                   config: { ...formData.config, endpoint: e.target.value }
                 })}
-                className="bg-slate-900 border-slate-600 text-white"
+                className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -200,7 +201,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                     ...formData,
                     config: { ...formData.config, username: e.target.value }
                   })}
-                  className="bg-slate-900 border-slate-600 text-white"
+                  className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
                 />
               </div>
               <div>
@@ -213,7 +214,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                     ...formData,
                     config: { ...formData.config, password: e.target.value }
                   })}
-                  className="bg-slate-900 border-slate-600 text-white"
+                  className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
                 />
               </div>
             </div>
@@ -227,7 +228,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                   ...formData,
                   config: { ...formData.config, index: e.target.value }
                 })}
-                className="bg-slate-900 border-slate-600 text-white"
+                className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
           </div>
@@ -237,7 +238,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
         return (
           <div className="space-y-4">
             <div>
-              <Label htmlFor="subscription_id">Azure Subscription ID</Label>
+              <Label htmlFor="subscription_id" className="text-slate-300">Azure Subscription ID</Label>
               <Input
                 id="subscription_id"
                 value={formData.config.subscription_id || ''}
@@ -245,10 +246,11 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                   ...formData,
                   config: { ...formData.config, subscription_id: e.target.value }
                 })}
+                className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
             <div>
-              <Label htmlFor="tenant_id">Tenant ID</Label>
+              <Label htmlFor="tenant_id" className="text-slate-300">Tenant ID</Label>
               <Input
                 id="tenant_id"
                 value={formData.config.tenant_id || ''}
@@ -256,10 +258,11 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                   ...formData,
                   config: { ...formData.config, tenant_id: e.target.value }
                 })}
+                className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
             <div>
-              <Label htmlFor="client_id">Client ID</Label>
+              <Label htmlFor="client_id" className="text-slate-300">Client ID</Label>
               <Input
                 id="client_id"
                 value={formData.config.client_id || ''}
@@ -267,10 +270,11 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                   ...formData,
                   config: { ...formData.config, client_id: e.target.value }
                 })}
+                className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
             <div>
-              <Label htmlFor="client_secret">Client Secret</Label>
+              <Label htmlFor="client_secret" className="text-slate-300">Client Secret</Label>
               <Input
                 id="client_secret"
                 type="password"
@@ -279,6 +283,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                   ...formData,
                   config: { ...formData.config, client_secret: e.target.value }
                 })}
+                className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
           </div>
@@ -288,7 +293,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
         return (
           <div className="space-y-4">
             <div>
-              <Label htmlFor="hosts">SNMP Hosts (comma-separated)</Label>
+              <Label htmlFor="hosts" className="text-slate-300">SNMP Hosts (comma-separated)</Label>
               <Textarea
                 id="hosts"
                 placeholder="192.168.1.1, switch01.company.com, router02.company.com"
@@ -297,10 +302,11 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                   ...formData,
                   config: { ...formData.config, hosts: e.target.value }
                 })}
+                className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
             <div>
-              <Label htmlFor="community">SNMP Community String</Label>
+              <Label htmlFor="community" className="text-slate-300">SNMP Community String</Label>
               <Input
                 id="community"
                 type="password"
@@ -310,20 +316,21 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                   ...formData,
                   config: { ...formData.config, community: e.target.value }
                 })}
+                className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
             <div>
-              <Label htmlFor="version">SNMP Version</Label>
+              <Label htmlFor="version" className="text-slate-300">SNMP Version</Label>
               <Select value={formData.config.version || '2c'} onValueChange={(value) => 
                 setFormData({ ...formData, config: { ...formData.config, version: value } })
               }>
-                <SelectTrigger>
+                <SelectTrigger className="bg-slate-900 border-slate-600 text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">SNMPv1</SelectItem>
-                  <SelectItem value="2c">SNMPv2c</SelectItem>
-                  <SelectItem value="3">SNMPv3</SelectItem>
+                <SelectContent className="bg-slate-900 border-slate-600">
+                  <SelectItem value="1" className="text-white hover:bg-slate-700">SNMPv1</SelectItem>
+                  <SelectItem value="2c" className="text-white hover:bg-slate-700">SNMPv2c</SelectItem>
+                  <SelectItem value="3" className="text-white hover:bg-slate-700">SNMPv3</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -346,7 +353,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                   // Invalid JSON, don't update
                 }
               }}
-              className="bg-slate-900 border-slate-600 text-white"
+              className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
             />
           </div>
         );
@@ -477,19 +484,19 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogTrigger asChild>
         {children || (
-          <Button className="bg-cyan-600 hover:bg-cyan-700">
+          <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
             <Plus className="w-4 h-4 mr-2" />
             Add Data Source
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-slate-800 border-slate-600">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-slate-800 border-slate-600 text-white">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-cyan-400 text-xl">
               {editingSource ? 'Edit Data Source' : 'Add Data Source'}
             </DialogTitle>
-            <Button variant="ghost" onClick={handleClose} className="text-slate-400 hover:text-white">
+            <Button variant="ghost" onClick={handleClose} className="text-slate-400 hover:text-white hover:bg-slate-700">
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -504,7 +511,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                 placeholder="My Network Scanner"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-slate-900 border-slate-600 text-white"
+                className="bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
               />
             </div>
             <div>
@@ -513,12 +520,12 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                 value={formData.type} 
                 onValueChange={(value) => setFormData({ ...formData, type: value, config: {} })}
               >
-                <SelectTrigger className="bg-slate-900 border-slate-600">
+                <SelectTrigger className="bg-slate-900 border-slate-600 text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-slate-900 border-slate-600">
                   {sourceTypes.map(type => (
-                    <SelectItem key={type.value} value={type.value}>
+                    <SelectItem key={type.value} value={type.value} className="text-white hover:bg-slate-700">
                       {type.label}
                     </SelectItem>
                   ))}
@@ -566,7 +573,7 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
               variant="outline" 
               onClick={testConnection}
               disabled={testing || saving}
-              className="border-slate-600 hover:bg-slate-700"
+              className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
             >
               <TestTube className={`w-4 h-4 mr-2 ${testing ? 'animate-pulse' : ''}`} />
               {testing ? 'Testing...' : 'Test Connection'}
@@ -577,14 +584,14 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
                 variant="outline" 
                 onClick={handleClose}
                 disabled={saving}
-                className="border-slate-600 hover:bg-slate-700"
+                className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
               >
                 Cancel
               </Button>
               <Button 
                 onClick={saveDataSource}
                 disabled={saving || testing}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-green-600 hover:bg-green-700 text-white"
               >
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? 'Saving...' : (editingSource ? 'Update' : 'Save')}

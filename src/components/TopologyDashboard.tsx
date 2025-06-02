@@ -31,7 +31,7 @@ const TopologyDashboard = () => {
             <Button
               onClick={() => setShowDataSources(true)}
               variant="outline"
-              className="border-slate-600 hover:bg-slate-700"
+              className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
             >
               <Database className="w-4 h-4 mr-2" />
               Data Sources
