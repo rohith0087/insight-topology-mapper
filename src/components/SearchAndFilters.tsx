@@ -15,14 +15,28 @@ interface SearchAndFiltersProps {
     showConnections: boolean;
   };
   setFilterSettings: (settings: any) => void;
+  statusFilter?: string;
+  setStatusFilter?: (filter: string) => void;
+  searchTerm?: string;
+  setSearchTerm?: (term: string) => void;
 }
 
 const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
   filterSettings,
-  setFilterSettings
+  setFilterSettings,
+  statusFilter: externalStatusFilter,
+  setStatusFilter: externalSetStatusFilter,
+  searchTerm: externalSearchTerm,
+  setSearchTerm: externalSetSearchTerm
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [internalSearchTerm, setInternalSearchTerm] = useState('');
+  const [internalStatusFilter, setInternalStatusFilter] = useState('all');
+
+  // Use external state if provided, otherwise use internal state
+  const searchTerm = externalSearchTerm !== undefined ? externalSearchTerm : internalSearchTerm;
+  const setSearchTerm = externalSetSearchTerm || setInternalSearchTerm;
+  const statusFilter = externalStatusFilter !== undefined ? externalStatusFilter : internalStatusFilter;
+  const setStatusFilter = externalSetStatusFilter || setInternalStatusFilter;
 
   const clearSearch = () => {
     setSearchTerm('');
@@ -74,7 +88,12 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
         setStatusFilter={setStatusFilter}
       />
 
-      <QuickActions />
+      <QuickActions 
+        setStatusFilter={setStatusFilter}
+        onShowCritical={() => console.log('Critical nodes filter applied')}
+        onNetworkOverview={() => console.log('Network overview requested')}
+        onRecentChanges={() => console.log('Recent changes requested')}
+      />
     </div>
   );
 };
