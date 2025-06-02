@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Edit, Trash2, Power, PowerOff, TestTube, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Button } from './ui/button';
@@ -21,19 +20,26 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ source, onEdit, onDelet
   const { toast } = useToast();
 
   const getTypeIcon = (type: string) => {
+    const iconImages = {
+      aws: '/lovable-uploads/e1398d3d-578a-471e-bfde-4096d0238576.png',
+      azure: '/lovable-uploads/c8dd797a-375c-47db-991f-ea4bdbf311f1.png',
+      datadog: '/lovable-uploads/29d45e0c-b15e-4e77-89ae-28286dda410d.png'
+    };
+
+    if (iconImages[type]) {
+      return <img src={iconImages[type]} alt={type} className="w-8 h-8 object-contain" />;
+    }
+
     const icons = {
       nmap: '🌐',
-      aws: '🟠', // AWS orange
-      azure: '🔵', // Microsoft Azure blue
       splunk: '🟢', // Splunk green
       snmp: '📡',
       api: '🔌',
       sentinelone: '🛡️', // Security shield
       qradar: '🔒', // IBM security
-      datadog: '🐕', // Datadog logo
       'microsoft-sentinel': '🛡️' // Microsoft security
     };
-    return icons[type] || '⚙️';
+    return <span className="text-2xl">{icons[type] || '⚙️'}</span>;
   };
 
   const getStatusIcon = (status: string, enabled: boolean) => {
@@ -138,7 +144,7 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ source, onEdit, onDelet
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="text-2xl">{getTypeIcon(source.type)}</div>
+            <div className="flex items-center justify-center w-8 h-8">{getTypeIcon(source.type)}</div>
             <div>
               <CardTitle className="text-white text-lg">{source.name}</CardTitle>
               <p className="text-slate-400 text-sm uppercase tracking-wide">{source.type}</p>

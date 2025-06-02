@@ -8,19 +8,26 @@ const DataSourcePanel = () => {
   const runETL = useRunETL();
 
   const getTypeIcon = (type: string) => {
+    const iconImages = {
+      aws: '/lovable-uploads/e1398d3d-578a-471e-bfde-4096d0238576.png',
+      azure: '/lovable-uploads/c8dd797a-375c-47db-991f-ea4bdbf311f1.png',
+      datadog: '/lovable-uploads/29d45e0c-b15e-4e77-89ae-28286dda410d.png'
+    };
+
+    if (iconImages[type]) {
+      return <img src={iconImages[type]} alt={type} className="w-5 h-5 object-contain" />;
+    }
+
     const icons = {
       nmap: '🌐',
-      aws: '🟠', // AWS orange
-      azure: '🔵', // Microsoft Azure blue
       splunk: '🟢', // Splunk green
       snmp: '📡',
       api: '🔌',
       sentinelone: '🛡️', // Security shield
       qradar: '🔒', // IBM security
-      datadog: '🐕', // Datadog logo
       'microsoft-sentinel': '🛡️' // Microsoft security
     };
-    return icons[type] || '⚙️';
+    return <span className="text-lg">{icons[type] || '⚙️'}</span>;
   };
 
   const getStatusColor = (status: string) => {
@@ -83,7 +90,7 @@ const DataSourcePanel = () => {
           <div key={source.id} className="bg-slate-900 rounded-lg p-4 border border-slate-600">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <span className="text-lg">{getTypeIcon(source.type)}</span>
+                <div className="flex items-center justify-center w-5 h-5">{getTypeIcon(source.type)}</div>
                 <div>
                   <p className="text-white font-medium text-sm">{source.name}</p>
                   <p className="text-slate-400 text-xs">{source.type.toUpperCase()}</p>

@@ -9,7 +9,7 @@ import { ExternalLink, Key, Settings, BookOpen, AlertTriangle, CheckCircle } fro
 interface DataSourceDoc {
   id: string;
   name: string;
-  icon: string;
+  icon: string | React.ReactNode;
   category: string;
   description: string;
   credentialGuide: {
@@ -26,6 +26,29 @@ interface DataSourceDoc {
   limitations: string[];
   troubleshooting: { issue: string; solution: string }[];
 }
+
+const getTypeIcon = (type: string) => {
+  const iconImages = {
+    aws: <img src="/lovable-uploads/e1398d3d-578a-471e-bfde-4096d0238576.png" alt="AWS" className="w-6 h-6 object-contain" />,
+    azure: <img src="/lovable-uploads/c8dd797a-375c-47db-991f-ea4bdbf311f1.png" alt="Azure" className="w-6 h-6 object-contain" />,
+    datadog: <img src="/lovable-uploads/29d45e0c-b15e-4e77-89ae-28286dda410d.png" alt="DataDog" className="w-6 h-6 object-contain" />
+  };
+
+  if (iconImages[type]) {
+    return iconImages[type];
+  }
+
+  const icons = {
+    nmap: '🌐',
+    splunk: '🟢',
+    snmp: '📡',
+    api: '🔌',
+    sentinelone: '🛡️',
+    qradar: '🔒',
+    'microsoft-sentinel': '🛡️'
+  };
+  return icons[type] || '⚙️';
+};
 
 const dataSources: DataSourceDoc[] = [
   {
@@ -76,7 +99,7 @@ const dataSources: DataSourceDoc[] = [
   {
     id: 'aws',
     name: 'AWS Discovery',
-    icon: '🟠',
+    icon: getTypeIcon('aws'),
     category: 'Cloud Infrastructure',
     description: 'Discover and map AWS cloud infrastructure including EC2 instances, VPCs, load balancers, and other AWS resources.',
     credentialGuide: {
@@ -126,7 +149,7 @@ const dataSources: DataSourceDoc[] = [
   {
     id: 'azure',
     name: 'Azure Monitor',
-    icon: '🔵',
+    icon: getTypeIcon('azure'),
     category: 'Cloud Infrastructure',
     description: 'Discover and monitor Azure cloud resources including virtual machines, networks, and services.',
     credentialGuide: {
@@ -381,7 +404,7 @@ const dataSources: DataSourceDoc[] = [
   {
     id: 'datadog',
     name: 'DataDog Monitoring',
-    icon: '🐕',
+    icon: getTypeIcon('datadog'),
     category: 'Infrastructure Monitoring',
     description: 'Extract infrastructure topology and service dependencies from DataDog monitoring platform.',
     credentialGuide: {
@@ -606,7 +629,13 @@ const DataSourceDocumentation: React.FC<DataSourceDocumentationProps> = ({ onClo
                             }`}
                           >
                             <div className="flex items-center space-x-3">
-                              <span className="text-lg">{source.icon}</span>
+                              <div className="flex items-center justify-center w-6 h-6">
+                                {typeof source.icon === 'string' ? (
+                                  <span className="text-lg">{source.icon}</span>
+                                ) : (
+                                  source.icon
+                                )}
+                              </div>
                               <div>
                                 <div className="font-medium">{source.name}</div>
                                 <div className="text-xs opacity-75">{source.category}</div>
@@ -628,7 +657,13 @@ const DataSourceDocumentation: React.FC<DataSourceDocumentationProps> = ({ onClo
                 {/* Source Header */}
                 <div className="p-6 border-b border-slate-700 flex-shrink-0">
                   <div className="flex items-center space-x-4 mb-4">
-                    <span className="text-3xl">{currentSource.icon}</span>
+                    <div className="flex items-center justify-center w-8 h-8">
+                      {typeof currentSource.icon === 'string' ? (
+                        <span className="text-3xl">{currentSource.icon}</span>
+                      ) : (
+                        <div className="scale-125">{currentSource.icon}</div>
+                      )}
+                    </div>
                     <div>
                       <h3 className="text-xl font-semibold text-white">{currentSource.name}</h3>
                       <Badge variant="outline" className="border-cyan-500 text-cyan-400">
