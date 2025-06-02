@@ -258,7 +258,6 @@ const UserManagement: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-cyan-400">User Management</h2>
           <p className="text-slate-400">Manage users and invitations for your organization</p>
         </div>
         
@@ -300,12 +299,12 @@ const UserManagement: React.FC = () => {
                   <SelectTrigger className="bg-slate-900 border-slate-600 text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-600">
-                    <SelectItem value="viewer">Viewer</SelectItem>
-                    <SelectItem value="analyst">Analyst</SelectItem>
-                    <SelectItem value="network_admin">Network Admin</SelectItem>
+                  <SelectContent className="bg-slate-900 border-slate-600 text-white">
+                    <SelectItem value="viewer" className="text-white hover:bg-slate-700">Viewer</SelectItem>
+                    <SelectItem value="analyst" className="text-white hover:bg-slate-700">Analyst</SelectItem>
+                    <SelectItem value="network_admin" className="text-white hover:bg-slate-700">Network Admin</SelectItem>
                     {profile?.role === 'super_admin' && (
-                      <SelectItem value="tenant_admin">Tenant Admin</SelectItem>
+                      <SelectItem value="tenant_admin" className="text-white hover:bg-slate-700">Tenant Admin</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
@@ -403,11 +402,11 @@ const UserManagement: React.FC = () => {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-900 border-slate-600">
-                              <SelectItem value="viewer">Viewer</SelectItem>
-                              <SelectItem value="analyst">Analyst</SelectItem>
-                              <SelectItem value="network_admin">Network Admin</SelectItem>
+                              <SelectItem value="viewer" className="text-white hover:bg-slate-700">Viewer</SelectItem>
+                              <SelectItem value="analyst" className="text-white hover:bg-slate-700">Analyst</SelectItem>
+                              <SelectItem value="network_admin" className="text-white hover:bg-slate-700">Network Admin</SelectItem>
                               {profile?.role === 'super_admin' && (
-                                <SelectItem value="tenant_admin">Tenant Admin</SelectItem>
+                                <SelectItem value="tenant_admin" className="text-white hover:bg-slate-700">Tenant Admin</SelectItem>
                               )}
                             </SelectContent>
                           </Select>
@@ -481,7 +480,7 @@ const UserManagement: React.FC = () => {
                         onClick={() => copyToClipboard(
                           `${window.location.origin}/auth?invite=${invitation.invite_token}`
                         )}
-                        className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                        className="border-slate-600 text-slate-300 hover:bg-slate-700 bg-slate-800"
                       >
                         <Copy className="w-3 h-3" />
                       </Button>
