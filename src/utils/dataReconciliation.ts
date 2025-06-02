@@ -127,7 +127,6 @@ export class DataReconciliationEngine {
       if (existingValue !== undefined && existingValue !== newValue) {
         const conflictData: DataConflict = {
           id: crypto.randomUUID(),
-          [entityType === 'node' ? 'node_id' : 'connection_id']: entityId,
           field_name: fieldName,
           conflict_type: 'value_mismatch' as const,
           source_values: {
@@ -137,6 +136,13 @@ export class DataReconciliationEngine {
           status: 'pending' as const,
           created_at: new Date().toISOString()
         };
+
+        // Add the appropriate entity ID based on entity type
+        if (entityType === 'node') {
+          conflictData.node_id = entityId;
+        } else {
+          conflictData.connection_id = entityId;
+        }
         
         conflicts.push(conflictData);
       }
@@ -234,7 +240,6 @@ export class DataReconciliationEngine {
     for (const [fieldName, fieldValue] of Object.entries(data)) {
       const lineageRecord: DataLineage = {
         id: crypto.randomUUID(),
-        [entityType === 'node' ? 'node_id' : 'connection_id']: entityId,
         data_source_id: sourceId,
         field_name: fieldName,
         field_value: fieldValue,
@@ -242,6 +247,13 @@ export class DataReconciliationEngine {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
+
+      // Add the appropriate entity ID based on entity type
+      if (entityType === 'node') {
+        lineageRecord.node_id = entityId;
+      } else {
+        lineageRecord.connection_id = entityId;
+      }
       
       records.push(lineageRecord);
     }
