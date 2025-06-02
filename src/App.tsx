@@ -6,10 +6,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SupportAuthProvider } from "@/contexts/SupportAuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import SupportProtectedRoute from "@/components/support/SupportProtectedRoute";
 import AuthPage from "@/components/auth/AuthPage";
 import Index from "./pages/Index";
-import SuperAdminPortal from "./pages/SuperAdminPortal";
+import SupportLogin from "./pages/SupportLogin";
+import SupportPortal from "./pages/SupportPortal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -18,31 +21,34 @@ const App: React.FC = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <AuthProvider>
-        <TooltipProvider>
-          <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route 
-              path="/" 
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/super-admin" 
-              element={
-                <ProtectedRoute requiredRole="super_admin">
-                  <SuperAdminPortal />
-                </ProtectedRoute>
-              } 
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-          <Sonner />
-        </TooltipProvider>
+        <SupportAuthProvider>
+          <TooltipProvider>
+            <Routes>
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/support-login" element={<SupportLogin />} />
+              <Route 
+                path="/" 
+                element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/support-portal" 
+                element={
+                  <SupportProtectedRoute>
+                    <SupportPortal />
+                  </SupportProtectedRoute>
+                } 
+              />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </SupportAuthProvider>
       </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>

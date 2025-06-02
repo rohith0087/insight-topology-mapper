@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { User, Settings, LogOut, Shield, MessageSquare } from 'lucide-react';
+import { User, Settings, LogOut, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ProfileSettingsDialog from './profile/ProfileSettingsDialog';
 import PreferencesDialog from './profile/PreferencesDialog';
@@ -27,10 +27,6 @@ const UserProfile: React.FC = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
-  };
-
-  const handleSuperAdminPortal = () => {
-    navigate('/super-admin');
   };
 
   if (!profile) return null;
@@ -74,16 +70,6 @@ const UserProfile: React.FC = () => {
             <MessageSquare className="mr-2 h-4 w-4" />
             <span>Support Tickets</span>
           </DropdownMenuItem>
-          
-          {profile.role === 'super_admin' && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSuperAdminPortal}>
-                <Shield className="mr-2 h-4 w-4 text-red-400" />
-                <span className="text-red-400">Super Admin Portal</span>
-              </DropdownMenuItem>
-            </>
-          )}
           
           <DropdownMenuSeparator />
           
