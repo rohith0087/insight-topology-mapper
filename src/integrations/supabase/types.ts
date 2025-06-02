@@ -641,6 +641,97 @@ export type Database = {
           },
         ]
       }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          priority: string
+          resolved_at: string | null
+          status: string
+          tags: Json | null
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          resolved_at?: string | null
+          status?: string
+          tags?: Json | null
+          tenant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          resolved_at?: string | null
+          status?: string
+          tags?: Json | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_health_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          metric_type: string
+          metric_value: Json
+          recorded_at: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_type: string
+          metric_value?: Json
+          recorded_at?: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_type?: string
+          metric_value?: Json
+          recorded_at?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_health_metrics_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           company_name: string | null
@@ -821,6 +912,26 @@ export type Database = {
       get_tenant_by_domain: {
         Args: { email_domain: string }
         Returns: string
+      }
+      get_tenant_details_with_health: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          tenant_id: string
+          tenant_name: string
+          tenant_slug: string
+          company_name: string
+          domain: string
+          is_active: boolean
+          user_count: number
+          data_source_count: number
+          last_activity: string
+          health_score: number
+          open_tickets: number
+        }[]
+      }
+      get_tenant_statistics: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       get_user_role: {
         Args: { user_id: string }

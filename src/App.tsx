@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AuthPage from "@/components/auth/AuthPage";
 import Index from "./pages/Index";
+import SuperAdminPortal from "./pages/SuperAdminPortal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,14 @@ const App: React.FC = () => (
               element={
                 <ProtectedRoute>
                   <Index />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/super-admin" 
+              element={
+                <ProtectedRoute requiredRole="super_admin">
+                  <SuperAdminPortal />
                 </ProtectedRoute>
               } 
             />

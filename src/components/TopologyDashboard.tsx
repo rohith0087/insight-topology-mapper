@@ -16,7 +16,7 @@ import ContextualTooltip from '@/components/help/ContextualTooltip';
 import SmartHelpButton from '@/components/help/SmartHelpButton';
 import WebhookManager from '@/components/automation/WebhookManager';
 import { Button } from './ui/button';
-import { Database, Settings, Network, Users, Brain, Lightbulb, X, BarChart3, Webhook } from 'lucide-react';
+import { Database, Settings, Network, Users, Brain, Lightbulb, X, BarChart3, Webhook, Shield } from 'lucide-react';
 
 const TopologyDashboard = () => {
   const { profile } = useAuth();
