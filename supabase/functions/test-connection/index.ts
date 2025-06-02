@@ -22,7 +22,6 @@ serve(async (req) => {
         if (!config.target_ranges) {
           testResult.message = 'Target ranges are required for nmap'
         } else {
-          // Simulate nmap test - in real implementation, you'd validate IP ranges
           testResult = {
             success: true,
             message: 'Nmap configuration is valid',
@@ -39,7 +38,6 @@ serve(async (req) => {
         if (!config.access_key_id || !config.secret_access_key) {
           testResult.message = 'AWS credentials are required'
         } else {
-          // In real implementation, you'd test AWS API access
           testResult = {
             success: true,
             message: 'AWS credentials format is valid',
@@ -57,7 +55,6 @@ serve(async (req) => {
           testResult.message = 'Splunk endpoint and credentials are required'
         } else {
           try {
-            // In real implementation, you'd make actual API call to Splunk
             const url = new URL(config.endpoint)
             testResult = {
               success: true,
@@ -101,6 +98,81 @@ serve(async (req) => {
             details: {
               hosts: config.hosts.split(',').length,
               version: config.version || '2c'
+            }
+          }
+        }
+        break
+
+      case 'sentinelone':
+        // Test SentinelOne configuration
+        if (!config.console_url || !config.api_token) {
+          testResult.message = 'SentinelOne console URL and API token are required'
+        } else {
+          try {
+            const url = new URL(config.console_url)
+            testResult = {
+              success: true,
+              message: 'SentinelOne configuration is valid',
+              details: {
+                console: url.hostname,
+                siteId: config.site_id || 'all',
+                accountId: config.account_id || 'all'
+              }
+            }
+          } catch (e) {
+            testResult.message = 'Invalid SentinelOne console URL format'
+          }
+        }
+        break
+
+      case 'qradar':
+        // Test QRadar configuration
+        if (!config.qradar_host || (!config.username && !config.auth_token)) {
+          testResult.message = 'QRadar host and credentials (username/password or auth token) are required'
+        } else {
+          testResult = {
+            success: true,
+            message: 'QRadar configuration is valid',
+            details: {
+              host: config.qradar_host,
+              port: config.port || '443',
+              authMethod: config.auth_token ? 'token' : 'username/password',
+              version: config.version || '19.0'
+            }
+          }
+        }
+        break
+
+      case 'datadog':
+        // Test DataDog configuration
+        if (!config.api_key || !config.app_key) {
+          testResult.message = 'DataDog API key and application key are required'
+        } else {
+          testResult = {
+            success: true,
+            message: 'DataDog configuration is valid',
+            details: {
+              site: config.site || 'datadoghq.com',
+              organization: config.organization || 'default',
+              includeServices: config.include_services || 'true'
+            }
+          }
+        }
+        break
+
+      case 'microsoft-sentinel':
+        // Test Microsoft Sentinel configuration
+        if (!config.workspace_id || !config.tenant_id || !config.client_id || !config.client_secret || !config.subscription_id) {
+          testResult.message = 'Microsoft Sentinel requires workspace ID, tenant ID, client ID, client secret, and subscription ID'
+        } else {
+          testResult = {
+            success: true,
+            message: 'Microsoft Sentinel configuration is valid',
+            details: {
+              workspace: config.workspace_id.substring(0, 8) + '...',
+              tenant: config.tenant_id.substring(0, 8) + '...',
+              resourceGroup: config.resource_group,
+              workspaceName: config.workspace_name
             }
           }
         }

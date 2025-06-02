@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Button } from './ui/button';
@@ -36,7 +35,11 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
     { value: 'azure', label: 'Azure Monitor' },
     { value: 'splunk', label: 'Splunk SIEM' },
     { value: 'snmp', label: 'SNMP Monitoring' },
-    { value: 'api', label: 'Custom API' }
+    { value: 'api', label: 'Custom API' },
+    { value: 'sentinelone', label: 'SentinelOne EDR' },
+    { value: 'qradar', label: 'IBM QRadar SIEM' },
+    { value: 'datadog', label: 'DataDog Monitoring' },
+    { value: 'microsoft-sentinel', label: 'Microsoft Sentinel' }
   ];
 
   useEffect(() => {

@@ -51,6 +51,18 @@ serve(async (req) => {
           case 'api':
             functionName = 'custom-api-collector'
             break
+          case 'sentinelone':
+            functionName = 'sentinelone-collector'
+            break
+          case 'qradar':
+            functionName = 'qradar-collector'
+            break
+          case 'datadog':
+            functionName = 'datadog-collector'
+            break
+          case 'microsoft-sentinel':
+            functionName = 'microsoft-sentinel-collector'
+            break
           default:
             console.log(`No ETL function for source type: ${source.type}`)
             continue
