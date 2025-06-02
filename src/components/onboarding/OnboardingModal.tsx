@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -25,7 +24,12 @@ const OnboardingModal: React.FC = () => {
     isUpdating
   } = useOnboarding();
 
-  if (!isOnboardingVisible || !currentStep) return null;
+  console.log('OnboardingModal render - isOnboardingVisible:', isOnboardingVisible, 'currentStep:', currentStep);
+
+  if (!isOnboardingVisible || !currentStep) {
+    console.log('OnboardingModal not rendering - visible:', isOnboardingVisible, 'currentStep:', currentStep);
+    return null;
+  }
 
   const handleNext = () => {
     if (currentStep && progress) {
@@ -43,6 +47,11 @@ const OnboardingModal: React.FC = () => {
 
   const handleSkip = () => {
     skipOnboarding();
+  };
+
+  const handleCloseModal = () => {
+    console.log('Closing onboarding modal manually');
+    setIsOnboardingVisible(false);
   };
 
   const renderStepContent = () => {
@@ -73,7 +82,10 @@ const OnboardingModal: React.FC = () => {
   };
 
   return (
-    <Dialog open={isOnboardingVisible} onOpenChange={setIsOnboardingVisible}>
+    <Dialog open={isOnboardingVisible} onOpenChange={() => {
+      // Prevent automatic closing - we'll handle this manually
+      console.log('Dialog onOpenChange triggered - ignoring to prevent auto-close');
+    }}>
       <DialogContent className="bg-slate-800 border-slate-600 max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -83,7 +95,7 @@ const OnboardingModal: React.FC = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsOnboardingVisible(false)}
+              onClick={handleCloseModal}
               className="text-slate-400 hover:text-white"
             >
               <X className="w-4 h-4" />
