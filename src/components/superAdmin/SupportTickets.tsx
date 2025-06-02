@@ -1,77 +1,22 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useTickets, SupportTicket } from '@/hooks/useTickets';
 import { Search, Plus, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
-
-type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
-type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
-
-interface SupportTicket {
-  id: string;
-  tenant_id: string;
-  title: string;
-  description: string;
-  priority: TicketPriority;
-  status: TicketStatus;
-  created_at: string;
-  updated_at: string;
-  tenant?: {
-    name: string;
-    company_name: string;
-  };
-}
+import TicketDialog from './TicketDialog';
 
 const SupportTickets = () => {
-  const [tickets, setTickets] = useState<SupportTicket[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { tickets, loading } = useTickets();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
-  const { toast } = useToast();
-
-  const fetchTickets = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('support_tickets')
-        .select(`
-          *,
-          tenant:tenants(name, company_name)
-        `)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      // Transform the data to ensure proper typing
-      const typedTickets = (data || []).map(ticket => ({
-        ...ticket,
-        priority: ticket.priority as TicketPriority,
-        status: ticket.status as TicketStatus,
-      }));
-      
-      setTickets(typedTickets);
-    } catch (error: any) {
-      console.error('Error fetching tickets:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch support tickets",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTickets();
-  }, []);
+  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
+  const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
 
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -84,7 +29,7 @@ const SupportTickets = () => {
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  const getPriorityColor = (priority: TicketPriority) => {
+  const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical': return 'bg-red-600';
       case 'high': return 'bg-orange-600';
@@ -94,7 +39,7 @@ const SupportTickets = () => {
     }
   };
 
-  const getStatusColor = (status: TicketStatus) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'open': return 'bg-blue-600';
       case 'in_progress': return 'bg-purple-600';
@@ -104,7 +49,7 @@ const SupportTickets = () => {
     }
   };
 
-  const getStatusIcon = (status: TicketStatus) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'open': return <Clock className="w-4 h-4" />;
       case 'in_progress': return <AlertTriangle className="w-4 h-4" />;
@@ -112,6 +57,11 @@ const SupportTickets = () => {
       case 'closed': return <CheckCircle className="w-4 h-4" />;
       default: return <Clock className="w-4 h-4" />;
     }
+  };
+
+  const handleViewTicket = (ticket: SupportTicket) => {
+    setSelectedTicket(ticket);
+    setTicketDialogOpen(true);
   };
 
   if (loading) {
@@ -138,10 +88,6 @@ const SupportTickets = () => {
             Manage customer support requests and issues
           </p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="w-4 h-4 mr-2" />
-          Create Ticket
-        </Button>
       </div>
 
       <Card className="bg-slate-800 border-slate-700">
@@ -235,7 +181,12 @@ const SupportTickets = () => {
                     {new Date(ticket.updated_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-slate-300 hover:text-white"
+                      onClick={() => handleViewTicket(ticket)}
+                    >
                       View
                     </Button>
                   </TableCell>
@@ -245,6 +196,12 @@ const SupportTickets = () => {
           </Table>
         </CardContent>
       </Card>
+
+      <TicketDialog
+        ticket={selectedTicket}
+        open={ticketDialogOpen}
+        onOpenChange={setTicketDialogOpen}
+      />
     </div>
   );
 };

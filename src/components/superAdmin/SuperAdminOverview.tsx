@@ -4,7 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSuperAdminStats } from '@/hooks/useSuperAdminStats';
 import { Building2, Users, Database, AlertTriangle, TrendingUp, Server } from 'lucide-react';
 
-const SuperAdminOverview = () => {
+interface SuperAdminOverviewProps {
+  onNavigateToTab?: (tab: string) => void;
+}
+
+const SuperAdminOverview: React.FC<SuperAdminOverviewProps> = ({ onNavigateToTab }) => {
   const { stats, loading, error } = useSuperAdminStats();
 
   if (loading) {
@@ -85,6 +89,25 @@ const SuperAdminOverview = () => {
     },
   ];
 
+  const handleQuickAction = (action: string) => {
+    switch (action) {
+      case 'clients':
+        onNavigateToTab?.('tenants');
+        break;
+      case 'tickets':
+        onNavigateToTab?.('support');
+        break;
+      case 'users':
+        onNavigateToTab?.('tenants');
+        break;
+      case 'health':
+        onNavigateToTab?.('health');
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -123,21 +146,33 @@ const SuperAdminOverview = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg hover:bg-blue-500/20 transition-colors">
+            <button 
+              onClick={() => handleQuickAction('clients')}
+              className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg hover:bg-blue-500/20 transition-colors"
+            >
               <Building2 className="w-6 h-6 text-blue-400 mb-2" />
-              <p className="text-sm text-blue-400 font-medium">Add New Client</p>
+              <p className="text-sm text-blue-400 font-medium">Manage Clients</p>
             </button>
-            <button className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg hover:bg-orange-500/20 transition-colors">
+            <button 
+              onClick={() => handleQuickAction('tickets')}
+              className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg hover:bg-orange-500/20 transition-colors"
+            >
               <AlertTriangle className="w-6 h-6 text-orange-400 mb-2" />
-              <p className="text-sm text-orange-400 font-medium">Create Support Ticket</p>
+              <p className="text-sm text-orange-400 font-medium">Support Tickets</p>
             </button>
-            <button className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg hover:bg-purple-500/20 transition-colors">
+            <button 
+              onClick={() => handleQuickAction('users')}
+              className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg hover:bg-purple-500/20 transition-colors"
+            >
               <Users className="w-6 h-6 text-purple-400 mb-2" />
               <p className="text-sm text-purple-400 font-medium">Manage Users</p>
             </button>
-            <button className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg hover:bg-green-500/20 transition-colors">
+            <button 
+              onClick={() => handleQuickAction('health')}
+              className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg hover:bg-green-500/20 transition-colors"
+            >
               <Server className="w-6 h-6 text-green-400 mb-2" />
-              <p className="text-sm text-green-400 font-medium">System Diagnostics</p>
+              <p className="text-sm text-green-400 font-medium">System Health</p>
             </button>
           </div>
         </CardContent>

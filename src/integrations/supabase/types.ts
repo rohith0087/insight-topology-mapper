@@ -905,6 +905,24 @@ export type Database = {
         Args: { p_tenant_id: string }
         Returns: Json
       }
+      create_support_ticket: {
+        Args: { p_title: string; p_description: string; p_priority?: string }
+        Returns: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          priority: string
+          resolved_at: string | null
+          status: string
+          tags: Json | null
+          tenant_id: string
+          title: string
+          updated_at: string
+        }
+      }
       extract_domain: {
         Args: { email: string }
         Returns: string
@@ -969,6 +987,24 @@ export type Database = {
           tenant_id: string
           updated_at: string | null
           user_id: string
+        }
+      }
+      update_ticket_status: {
+        Args: { p_ticket_id: string; p_status: string; p_assigned_to?: string }
+        Returns: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          priority: string
+          resolved_at: string | null
+          status: string
+          tags: Json | null
+          tenant_id: string
+          title: string
+          updated_at: string
         }
       }
       upsert_user_setting: {

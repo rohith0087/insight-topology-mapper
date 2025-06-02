@@ -10,6 +10,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const SuperAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
+  const handleNavigateToTab = (tab: string) => {
+    setActiveTab(tab);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-slate-900 text-white">
       <SuperAdminHeader />
@@ -35,7 +39,7 @@ const SuperAdminDashboard = () => {
 
           <div className="flex-1 overflow-y-auto">
             <TabsContent value="overview" className="h-full m-0">
-              <SuperAdminOverview />
+              <SuperAdminOverview onNavigateToTab={handleNavigateToTab} />
             </TabsContent>
             
             <TabsContent value="tenants" className="h-full m-0">

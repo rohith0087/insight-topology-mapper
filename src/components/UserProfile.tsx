@@ -2,130 +2,118 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { User, LogOut, Settings } from 'lucide-react';
-import ProfileSettingsDialog from '@/components/profile/ProfileSettingsDialog';
-import PreferencesDialog from '@/components/profile/PreferencesDialog';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { User, Settings, LogOut, Shield, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import ProfileSettingsDialog from './profile/ProfileSettingsDialog';
+import PreferencesDialog from './profile/PreferencesDialog';
+import UserTickets from './user/UserTickets';
 
 const UserProfile: React.FC = () => {
-  const { user, profile, signOut } = useAuth();
-  const [showProfileSettings, setShowProfileSettings] = useState(false);
-  const [showPreferences, setShowPreferences] = useState(false);
-
-  if (!user || !profile) return null;
-
-  const getInitials = (firstName: string | null, lastName: string | null, email: string) => {
-    if (firstName && lastName) {
-      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-    }
-    return email.charAt(0).toUpperCase();
-  };
-
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case 'super_admin':
-        return 'bg-purple-600 text-white';
-      case 'tenant_admin':
-        return 'bg-blue-600 text-white';
-      case 'network_admin':
-        return 'bg-green-600 text-white';
-      case 'analyst':
-        return 'bg-yellow-600 text-white';
-      case 'viewer':
-        return 'bg-gray-600 text-white';
-      default:
-        return 'bg-gray-600 text-white';
-    }
-  };
-
-  const formatRole = (role: string) => {
-    return role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-  };
+  const { profile, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+  const [preferencesDialogOpen, setPreferencesDialogOpen] = useState(false);
+  const [ticketsDialogOpen, setTicketsDialogOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
+    navigate('/auth');
   };
+
+  const handleSuperAdminPortal = () => {
+    navigate('/super-admin');
+  };
+
+  if (!profile) return null;
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
-            <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-cyan-600 text-white">
-                {getInitials(profile.first_name, profile.last_name, profile.email)}
+          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback>
+                {profile.first_name?.[0]}{profile.last_name?.[0]}
               </AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-80 bg-slate-800 border-slate-700" align="end" forceMount>
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-2">
-              <div className="flex items-center space-x-2">
-                <p className="text-sm font-medium leading-none text-white">
-                  {profile.first_name && profile.last_name 
-                    ? `${profile.first_name} ${profile.last_name}`
-                    : 'User'
-                  }
-                </p>
-                <Badge className={getRoleBadgeColor(profile.role)}>
-                  {formatRole(profile.role)}
-                </Badge>
-              </div>
-              <p className="text-xs leading-none text-slate-400">
+        
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+          <div className="flex items-center justify-start gap-2 p-2">
+            <div className="flex flex-col space-y-1 leading-none">
+              <p className="font-medium">{profile.first_name} {profile.last_name}</p>
+              <p className="w-[200px] truncate text-sm text-slate-500">
                 {profile.email}
               </p>
-              {profile.last_login && (
-                <p className="text-xs leading-none text-slate-500">
-                  Last login: {new Date(profile.last_login).toLocaleDateString()}
-                </p>
-              )}
             </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-slate-700" />
-          <DropdownMenuItem 
-            className="text-slate-300 hover:bg-slate-700 hover:text-white cursor-pointer"
-            onClick={() => setShowProfileSettings(true)}
-          >
+          </div>
+          
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuItem onClick={() => setProfileDialogOpen(true)}>
             <User className="mr-2 h-4 w-4" />
-            <span>Profile Settings</span>
+            <span>Profile</span>
           </DropdownMenuItem>
-          <DropdownMenuItem 
-            className="text-slate-300 hover:bg-slate-700 hover:text-white cursor-pointer"
-            onClick={() => setShowPreferences(true)}
-          >
+          
+          <DropdownMenuItem onClick={() => setPreferencesDialogOpen(true)}>
             <Settings className="mr-2 h-4 w-4" />
             <span>Preferences</span>
           </DropdownMenuItem>
-          <DropdownMenuSeparator className="bg-slate-700" />
-          <DropdownMenuItem 
-            className="text-red-400 hover:bg-red-950 hover:text-red-300 cursor-pointer"
-            onClick={handleSignOut}
-          >
+
+          <DropdownMenuItem onClick={() => setTicketsDialogOpen(true)}>
+            <MessageSquare className="mr-2 h-4 w-4" />
+            <span>Support Tickets</span>
+          </DropdownMenuItem>
+          
+          {profile.role === 'super_admin' && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSuperAdminPortal}>
+                <Shield className="mr-2 h-4 w-4 text-red-400" />
+                <span className="text-red-400">Super Admin Portal</span>
+              </DropdownMenuItem>
+            </>
+          )}
+          
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuItem onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Sign out</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ProfileSettingsDialog
-        open={showProfileSettings}
-        onOpenChange={setShowProfileSettings}
+      <ProfileSettingsDialog 
+        open={profileDialogOpen} 
+        onOpenChange={setProfileDialogOpen}
+      />
+      
+      <PreferencesDialog 
+        open={preferencesDialogOpen} 
+        onOpenChange={setPreferencesDialogOpen}
       />
 
-      <PreferencesDialog
-        open={showPreferences}
-        onOpenChange={setShowPreferences}
-      />
+      <Dialog open={ticketsDialogOpen} onOpenChange={setTicketsDialogOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] bg-slate-900 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Support Tickets</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+            <UserTickets />
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
