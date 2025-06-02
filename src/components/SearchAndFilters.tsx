@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, Monitor, Settings, Smartphone, Cloud, Link } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -26,11 +26,36 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
   const [statusFilter, setStatusFilter] = useState('all');
 
   const filterOptions = [
-    { key: 'showDevices', label: 'Network Devices', icon: '🖥️', count: 24 },
-    { key: 'showServices', label: 'Services', icon: '⚙️', count: 18 },
-    { key: 'showApplications', label: 'Applications', icon: '📱', count: 12 },
-    { key: 'showCloudResources', label: 'Cloud Resources', icon: '☁️', count: 8 },
-    { key: 'showConnections', label: 'Connections', icon: '🔗', count: 156 }
+    { 
+      key: 'showDevices', 
+      label: 'Network Devices', 
+      icon: <Monitor className="w-4 h-4 text-cyan-400" />, 
+      count: 24 
+    },
+    { 
+      key: 'showServices', 
+      label: 'Services', 
+      icon: <Settings className="w-4 h-4 text-green-400" />, 
+      count: 18 
+    },
+    { 
+      key: 'showApplications', 
+      label: 'Applications', 
+      icon: <Smartphone className="w-4 h-4 text-purple-400" />, 
+      count: 12 
+    },
+    { 
+      key: 'showCloudResources', 
+      label: 'Cloud Resources', 
+      icon: <Cloud className="w-4 h-4 text-blue-400" />, 
+      count: 8 
+    },
+    { 
+      key: 'showConnections', 
+      label: 'Connections', 
+      icon: <Link className="w-4 h-4 text-slate-400" />, 
+      count: 156 
+    }
   ];
 
   const statusOptions = [
@@ -112,7 +137,7 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
               if (!enabled) return null;
               const option = filterOptions.find(opt => opt.key === key);
               return (
-                <Badge key={key} variant="secondary" className="text-xs bg-slate-700 text-slate-200 border-slate-600">
+                <Badge key={key} variant="secondary" className="text-xs bg-slate-700 text-slate-200 border-slate-600 flex items-center gap-1">
                   {option?.icon} {option?.label}
                 </Badge>
               );
@@ -149,8 +174,8 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
                     setFilterSettings({ ...filterSettings, [option.key]: checked })
                   }
                 />
-                <Label htmlFor={option.key} className="text-sm text-slate-300 cursor-pointer">
-                  <span className="mr-2">{option.icon}</span>
+                <Label htmlFor={option.key} className="text-sm text-slate-300 cursor-pointer flex items-center gap-2">
+                  {option.icon}
                   {option.label}
                 </Label>
               </div>
