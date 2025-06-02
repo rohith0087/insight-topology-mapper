@@ -17,6 +17,7 @@ import { HelpProvider } from '@/components/help/HelpSystem';
 import ContextualTooltip from '@/components/help/ContextualTooltip';
 import SmartHelpButton from '@/components/help/SmartHelpButton';
 import WebhookManager from '@/components/automation/WebhookManager';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Button } from './ui/button';
 import { Database, Settings, Network, Users, Brain, Lightbulb, X, BarChart3, Play, Webhook } from 'lucide-react';
 
@@ -145,11 +146,11 @@ const TopologyDashboard = () => {
         return (
           <div className="h-full overflow-y-auto p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-cyan-400">User Management</h2>
+              <h2 className="text-2xl font-bold app-accent">User Management</h2>
               <Button
                 onClick={() => setShowUserManagement(false)}
                 variant="outline"
-                className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+                className="border-app-border hover:app-hover app-text-secondary hover:app-text-primary"
               >
                 Back to Network
               </Button>
@@ -173,7 +174,7 @@ const TopologyDashboard = () => {
               <Button
                 onClick={() => setShowExecutiveDashboard(false)}
                 variant="outline"
-                className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+                className="border-app-border hover:app-hover app-text-secondary hover:app-text-primary"
               >
                 Back to Network
               </Button>
@@ -195,20 +196,23 @@ const TopologyDashboard = () => {
 
   return (
     <HelpProvider>
-      <div className="flex flex-col h-screen bg-slate-900 text-white overflow-hidden">
+      <div className="flex flex-col h-screen app-bg app-text-primary overflow-hidden">
         {/* Header */}
-        <header className="bg-slate-800 border-b border-slate-700 px-6 py-3 flex-shrink-0">
+        <header className="app-header-bg border-b app-border px-6 py-3 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Network className="w-8 h-8 text-cyan-400" />
+              <Network className="w-8 h-8 app-accent" />
               <div>
-                <h1 className="text-xl font-bold text-cyan-400">LumenNet</h1>
-                <p className="text-slate-400 text-xs">AI-Powered Security Operations Center</p>
+                <h1 className="text-xl font-bold app-accent">LumenNet</h1>
+                <p className="app-text-muted text-xs">AI-Powered Security Operations Center</p>
               </div>
             </div>
             
             {/* Action Buttons */}
             <div className="flex items-center space-x-2">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Onboarding Button (show if not completed) */}
               {profile && shouldShowStartTour() && (
                 <ContextualTooltip
@@ -239,7 +243,7 @@ const TopologyDashboard = () => {
                   onClick={() => setShowExecutiveDashboard(true)}
                   variant="outline"
                   size="sm"
-                  className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+                  className="border-app-border hover:app-hover app-text-secondary hover:app-text-primary"
                 >
                   <BarChart3 className="w-4 h-4 mr-1" />
                   Executive
@@ -257,7 +261,7 @@ const TopologyDashboard = () => {
                   onClick={() => setShowAIChat(true)}
                   variant="outline"
                   size="sm"
-                  className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+                  className="border-app-border hover:app-hover app-text-secondary hover:app-text-primary"
                 >
                   <Brain className="w-4 h-4 mr-1" />
                   AI Assistant
@@ -275,7 +279,7 @@ const TopologyDashboard = () => {
                   disabled={insightsLoading}
                   variant="outline"
                   size="sm"
-                  className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+                  className="border-app-border hover:app-hover app-text-secondary hover:app-text-primary"
                 >
                   <Lightbulb className="w-4 h-4 mr-1" />
                   {insightsLoading ? 'Generating...' : 'Insights'}
@@ -293,7 +297,7 @@ const TopologyDashboard = () => {
                   onClick={() => setShowWebhookManager(true)}
                   variant="outline"
                   size="sm"
-                  className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+                  className="border-app-border hover:app-hover app-text-secondary hover:app-text-primary"
                 >
                   <Webhook className="w-4 h-4 mr-1" />
                   Webhooks
@@ -312,7 +316,7 @@ const TopologyDashboard = () => {
                     onClick={() => setShowDataSources(true)}
                     variant="outline"
                     size="sm"
-                    className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+                    className="border-app-border hover:app-hover app-text-secondary hover:app-text-primary"
                   >
                     <Database className="w-4 h-4 mr-1" />
                     Data Sources
@@ -331,7 +335,7 @@ const TopologyDashboard = () => {
                     onClick={() => setShowUserManagement(true)}
                     variant="outline"
                     size="sm"
-                    className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+                    className="border-app-border hover:app-hover app-text-secondary hover:app-text-primary"
                   >
                     <Users className="w-4 h-4 mr-1" />
                     Users
@@ -349,12 +353,12 @@ const TopologyDashboard = () => {
         <div className="flex flex-1 overflow-hidden relative">
           {/* Left Sidebar - Fixed width with scroll */}
           {getCurrentView() === 'network-topology' && (
-            <aside className="w-80 bg-slate-800 border-r border-slate-700 flex flex-col flex-shrink-0">
-              <div className="p-4 border-b border-slate-700 flex-shrink-0">
+            <aside className="w-80 app-panel-bg border-r app-border flex flex-col flex-shrink-0">
+              <div className="p-4 border-b app-border flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Settings className="w-5 h-5 text-cyan-400" />
-                    <h3 className="text-lg font-semibold text-cyan-400">Search & Filters</h3>
+                    <Settings className="w-5 h-5 app-accent" />
+                    <h3 className="text-lg font-semibold app-accent">Search & Filters</h3>
                   </div>
                   <SmartHelpButton
                     context="search-filters"
@@ -363,7 +367,7 @@ const TopologyDashboard = () => {
                   />
                 </div>
                 {profile && (
-                  <div className="mt-2 text-xs text-slate-500">
+                  <div className="mt-2 text-xs app-text-muted">
                     Role: {profile.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </div>
                 )}
@@ -389,20 +393,20 @@ const TopologyDashboard = () => {
           {getCurrentView() === 'network-topology' && (
             <div
               ref={rightPanelRef}
-              className={`absolute top-0 right-0 h-full w-96 bg-slate-800 border-l border-slate-700 flex flex-col transition-transform duration-300 ease-in-out z-10 ${
+              className={`absolute top-0 right-0 h-full w-96 app-panel-bg border-l app-border flex flex-col transition-transform duration-300 ease-in-out z-10 ${
                 showRightPanel ? 'transform translate-x-0' : 'transform translate-x-full'
               }`}
             >
               {selectedNode ? (
                 <>
-                  <div className="p-4 border-b border-slate-700 flex-shrink-0">
+                  <div className="p-4 border-b app-border flex-shrink-0">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-cyan-400">Node Details</h3>
+                      <h3 className="text-lg font-semibold app-accent">Node Details</h3>
                       <Button
                         onClick={handleCloseRightPanel}
                         variant="ghost"
                         size="sm"
-                        className="text-slate-400 hover:text-white hover:bg-slate-700"
+                        className="app-text-muted hover:app-text-primary hover:app-hover"
                       >
                         <X className="w-4 h-4" />
                       </Button>
@@ -412,15 +416,15 @@ const TopologyDashboard = () => {
                   <div className="flex-1 overflow-y-auto p-4">
                     <div className="space-y-4">
                       <div>
-                        <label className="text-sm text-slate-400 block mb-1">Type</label>
-                        <p className="text-white font-medium">{selectedNode.type}</p>
+                        <label className="text-sm app-text-muted block mb-1">Type</label>
+                        <p className="app-text-primary font-medium">{selectedNode.type}</p>
                       </div>
                       <div>
-                        <label className="text-sm text-slate-400 block mb-1">Label</label>
-                        <p className="text-white font-medium">{selectedNode.label}</p>
+                        <label className="text-sm app-text-muted block mb-1">Label</label>
+                        <p className="app-text-primary font-medium">{selectedNode.label}</p>
                       </div>
                       <div>
-                        <label className="text-sm text-slate-400 block mb-1">Status</label>
+                        <label className="text-sm app-text-muted block mb-1">Status</label>
                         <p className={`font-medium ${
                           selectedNode.status === 'healthy' ? 'text-green-400' :
                           selectedNode.status === 'warning' ? 'text-yellow-400' : 'text-red-400'
@@ -430,9 +434,9 @@ const TopologyDashboard = () => {
                       </div>
                       {selectedNode.metadata && (
                         <div>
-                          <label className="text-sm text-slate-400 block mb-1">Metadata</label>
-                          <div className="bg-slate-900 rounded p-3 mt-1">
-                            <pre className="text-xs text-slate-300 whitespace-pre-wrap overflow-x-auto">
+                          <label className="text-sm app-text-muted block mb-1">Metadata</label>
+                          <div className="app-bg rounded p-3 mt-1">
+                            <pre className="text-xs app-text-secondary whitespace-pre-wrap overflow-x-auto">
                               {JSON.stringify(selectedNode.metadata, null, 2)}
                             </pre>
                           </div>

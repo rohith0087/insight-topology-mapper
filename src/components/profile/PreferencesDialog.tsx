@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useUserSettings } from '@/hooks/useUserSettings';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ const PreferencesDialog: React.FC<PreferencesDialogProps> = ({
   onOpenChange,
 }) => {
   const { settings, loading, updateSettings } = useUserSettings();
+  const { effectiveTheme } = useTheme();
 
   const handleThemeChange = (theme: 'light' | 'dark' | 'system') => {
     updateSettings({ theme });
@@ -63,9 +65,9 @@ const PreferencesDialog: React.FC<PreferencesDialogProps> = ({
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[600px] bg-slate-800 border-slate-700">
+        <DialogContent className="sm:max-w-[600px] app-panel-bg border-app-border">
           <div className="flex items-center justify-center p-8">
-            <div className="text-slate-300">Loading preferences...</div>
+            <div className="app-text-secondary">Loading preferences...</div>
           </div>
         </DialogContent>
       </Dialog>
@@ -74,10 +76,10 @@ const PreferencesDialog: React.FC<PreferencesDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] bg-slate-800 border-slate-700 max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] app-panel-bg border-app-border max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-white">Preferences</DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogTitle className="app-text-primary">Preferences</DialogTitle>
+          <DialogDescription className="app-text-muted">
             Customize your application experience and settings.
           </DialogDescription>
         </DialogHeader>
@@ -85,27 +87,30 @@ const PreferencesDialog: React.FC<PreferencesDialogProps> = ({
         <div className="space-y-6 py-4">
           {/* Theme Settings */}
           <div className="space-y-3">
-            <h3 className="text-lg font-medium text-white">Appearance</h3>
+            <h3 className="text-lg font-medium app-text-primary">Appearance</h3>
             <div className="space-y-2">
-              <Label className="text-slate-300">Theme</Label>
+              <Label className="app-text-secondary">Theme</Label>
               <Select value={settings.theme} onValueChange={handleThemeChange}>
-                <SelectTrigger className="bg-slate-900 border-slate-600 text-white">
+                <SelectTrigger className="app-bg border-app-border app-text-primary">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-600">
+                <SelectContent className="app-panel-bg border-app-border">
                   <SelectItem value="light">Light</SelectItem>
                   <SelectItem value="dark">Dark</SelectItem>
                   <SelectItem value="system">System</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs app-text-muted">
+                Current: {effectiveTheme === 'light' ? 'Light Mode' : 'Dark Mode'}
+              </p>
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-300">Language</Label>
+              <Label className="app-text-secondary">Language</Label>
               <Select value={settings.language} onValueChange={handleLanguageChange}>
-                <SelectTrigger className="bg-slate-900 border-slate-600 text-white">
+                <SelectTrigger className="app-bg border-app-border app-text-primary">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-600">
+                <SelectContent className="app-panel-bg border-app-border">
                   <SelectItem value="en">English</SelectItem>
                   <SelectItem value="es">Spanish</SelectItem>
                   <SelectItem value="fr">French</SelectItem>
@@ -117,24 +122,24 @@ const PreferencesDialog: React.FC<PreferencesDialogProps> = ({
 
           {/* Notification Settings */}
           <div className="space-y-3">
-            <h3 className="text-lg font-medium text-white">Notifications</h3>
+            <h3 className="text-lg font-medium app-text-primary">Notifications</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-slate-300">Email Notifications</Label>
+                <Label className="app-text-secondary">Email Notifications</Label>
                 <Switch
                   checked={settings.notifications.email}
                   onCheckedChange={(checked) => handleNotificationChange('email', checked)}
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Label className="text-slate-300">Browser Notifications</Label>
+                <Label className="app-text-secondary">Browser Notifications</Label>
                 <Switch
                   checked={settings.notifications.browser}
                   onCheckedChange={(checked) => handleNotificationChange('browser', checked)}
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Label className="text-slate-300">Security Alerts</Label>
+                <Label className="app-text-secondary">Security Alerts</Label>
                 <Switch
                   checked={settings.notifications.security}
                   onCheckedChange={(checked) => handleNotificationChange('security', checked)}
@@ -145,17 +150,17 @@ const PreferencesDialog: React.FC<PreferencesDialogProps> = ({
 
           {/* Dashboard Settings */}
           <div className="space-y-3">
-            <h3 className="text-lg font-medium text-white">Dashboard</h3>
+            <h3 className="text-lg font-medium app-text-primary">Dashboard</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-slate-300">Auto Refresh</Label>
+                <Label className="app-text-secondary">Auto Refresh</Label>
                 <Switch
                   checked={settings.dashboard.autoRefresh}
                   onCheckedChange={(checked) => handleDashboardChange('autoRefresh', checked)}
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-300">
+                <Label className="app-text-secondary">
                   Refresh Interval: {settings.dashboard.refreshInterval}s
                 </Label>
                 <Slider
@@ -168,15 +173,15 @@ const PreferencesDialog: React.FC<PreferencesDialogProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-300">Default View</Label>
+                <Label className="app-text-secondary">Default View</Label>
                 <Select
                   value={settings.dashboard.defaultView}
                   onValueChange={(value) => handleDashboardChange('defaultView', value)}
                 >
-                  <SelectTrigger className="bg-slate-900 border-slate-600 text-white">
+                  <SelectTrigger className="app-bg border-app-border app-text-primary">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-600">
+                  <SelectContent className="app-panel-bg border-app-border">
                     <SelectItem value="topology">Network Topology</SelectItem>
                     <SelectItem value="analytics">Analytics</SelectItem>
                     <SelectItem value="monitoring">Monitoring</SelectItem>
@@ -188,25 +193,25 @@ const PreferencesDialog: React.FC<PreferencesDialogProps> = ({
 
           {/* Privacy Settings */}
           <div className="space-y-3">
-            <h3 className="text-lg font-medium text-white">Privacy</h3>
+            <h3 className="text-lg font-medium app-text-primary">Privacy</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-slate-300">Share Usage Data</Label>
+                <Label className="app-text-secondary">Share Usage Data</Label>
                 <Switch
                   checked={settings.privacy.shareUsageData}
                   onCheckedChange={(checked) => handlePrivacyChange('shareUsageData', checked)}
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-300">Profile Visibility</Label>
+                <Label className="app-text-secondary">Profile Visibility</Label>
                 <Select
                   value={settings.privacy.profileVisibility}
                   onValueChange={(value) => handlePrivacyChange('profileVisibility', value)}
                 >
-                  <SelectTrigger className="bg-slate-900 border-slate-600 text-white">
+                  <SelectTrigger className="app-bg border-app-border app-text-primary">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-600">
+                  <SelectContent className="app-panel-bg border-app-border">
                     <SelectItem value="public">Public</SelectItem>
                     <SelectItem value="private">Private</SelectItem>
                   </SelectContent>
@@ -219,7 +224,7 @@ const PreferencesDialog: React.FC<PreferencesDialogProps> = ({
         <div className="flex justify-end">
           <Button
             onClick={() => onOpenChange(false)}
-            className="bg-cyan-600 hover:bg-cyan-700"
+            className="app-accent-bg hover:app-accent-hover text-white"
           >
             Close
           </Button>
