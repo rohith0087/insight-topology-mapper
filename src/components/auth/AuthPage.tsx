@@ -3,22 +3,22 @@ import React, { useState, useEffect } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginForm from './LoginForm';
-import SignupForm from './SignupForm';
+import MultiStepSignupForm from './MultiStepSignupForm';
 import ForgotPasswordForm from './ForgotPasswordForm';
 import InviteSignupForm from './InviteSignupForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Network } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Network, Users, LogIn } from 'lucide-react';
 
 const AuthPage: React.FC = () => {
   const { user, loading } = useAuth();
   const [searchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState('login');
+  const [activeView, setActiveView] = useState<'login' | 'signup' | 'forgot' | 'invite-signup'>('login');
   const inviteToken = searchParams.get('invite');
 
   useEffect(() => {
     if (inviteToken) {
-      setActiveTab('invite-signup');
+      setActiveView('invite-signup');
     }
   }, [inviteToken]);
 
@@ -34,6 +34,26 @@ const AuthPage: React.FC = () => {
     return <Navigate to="/" replace />;
   }
 
+  const getCardTitle = () => {
+    switch (activeView) {
+      case 'login': return 'Welcome Back';
+      case 'signup': return 'Create Company Account';
+      case 'forgot': return 'Reset Password';
+      case 'invite-signup': return 'Join Your Team';
+      default: return 'Welcome';
+    }
+  };
+
+  const getCardDescription = () => {
+    switch (activeView) {
+      case 'login': return 'Sign in to your security operations center';
+      case 'signup': return 'Set up your company\'s unified security operations center';
+      case 'forgot': return 'Enter your email to reset your password';
+      case 'invite-signup': return 'Complete your account setup using the invitation';
+      default: return '';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -48,45 +68,66 @@ const AuthPage: React.FC = () => {
         <Card className="bg-slate-800 border-slate-700">
           <CardHeader>
             <CardTitle className="text-white text-center">
-              {activeTab === 'login' && 'Welcome Back'}
-              {activeTab === 'signup' && 'Create Company Account'}
-              {activeTab === 'forgot' && 'Reset Password'}
-              {activeTab === 'invite-signup' && 'Join Your Team'}
+              {getCardTitle()}
             </CardTitle>
             <CardDescription className="text-slate-400 text-center">
-              {activeTab === 'login' && 'Sign in to your account to continue'}
-              {activeTab === 'signup' && 'Set up your company security operations center'}
-              {activeTab === 'forgot' && 'Enter your email to reset your password'}
-              {activeTab === 'invite-signup' && 'Complete your account setup using the invitation'}
+              {getCardDescription()}
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Show invite signup if there's an invite token */}
             {inviteToken ? (
               <InviteSignupForm 
                 inviteToken={inviteToken} 
-                onBackToLogin={() => setActiveTab('login')}
+                onBackToLogin={() => setActiveView('login')}
               />
             ) : (
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-2 bg-slate-700">
-                  <TabsTrigger value="login" className="text-slate-300">Login</TabsTrigger>
-                  <TabsTrigger value="signup" className="text-slate-300">Sign Up</TabsTrigger>
-                </TabsList>
+              <>
+                {/* Authentication Mode Toggle */}
+                {activeView !== 'forgot' && (
+                  <div className="flex mb-6 bg-slate-700 rounded-lg p-1">
+                    <Button
+                      type="button"
+                      variant={activeView === 'login' ? 'default' : 'ghost'}
+                      className={`flex-1 text-sm ${
+                        activeView === 'login' 
+                          ? 'bg-cyan-600 text-white hover:bg-cyan-700' 
+                          : 'text-slate-300 hover:text-white hover:bg-slate-600'
+                      }`}
+                      onClick={() => setActiveView('login')}
+                    >
+                      <LogIn className="w-4 h-4 mr-2" />
+                      Sign In
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={activeView === 'signup' ? 'default' : 'ghost'}
+                      className={`flex-1 text-sm ${
+                        activeView === 'signup' 
+                          ? 'bg-cyan-600 text-white hover:bg-cyan-700' 
+                          : 'text-slate-300 hover:text-white hover:bg-slate-600'
+                      }`}
+                      onClick={() => setActiveView('signup')}
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      Create Account
+                    </Button>
+                  </div>
+                )}
                 
-                <TabsContent value="login" className="space-y-4">
-                  <LoginForm onForgotPassword={() => setActiveTab('forgot')} />
-                </TabsContent>
+                {/* Forms */}
+                {activeView === 'login' && (
+                  <LoginForm onForgotPassword={() => setActiveView('forgot')} />
+                )}
                 
-                <TabsContent value="signup" className="space-y-4">
-                  <SignupForm />
-                </TabsContent>
-              </Tabs>
-            )}
-
-            {activeTab === 'forgot' && (
-              <div className="mt-4">
-                <ForgotPasswordForm onBackToLogin={() => setActiveTab('login')} />
-              </div>
+                {activeView === 'signup' && (
+                  <MultiStepSignupForm onBackToLogin={() => setActiveView('login')} />
+                )}
+                
+                {activeView === 'forgot' && (
+                  <ForgotPasswordForm onBackToLogin={() => setActiveView('login')} />
+                )}
+              </>
             )}
           </CardContent>
         </Card>
