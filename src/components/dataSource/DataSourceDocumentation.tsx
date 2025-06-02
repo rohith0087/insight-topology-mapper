@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
@@ -623,11 +622,11 @@ const DataSourceDocumentation: React.FC<DataSourceDocumentationProps> = ({ onClo
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col min-w-0">
             {currentSource && (
               <>
                 {/* Source Header */}
-                <div className="p-6 border-b border-slate-700">
+                <div className="p-6 border-b border-slate-700 flex-shrink-0">
                   <div className="flex items-center space-x-4 mb-4">
                     <span className="text-3xl">{currentSource.icon}</span>
                     <div>
@@ -641,8 +640,8 @@ const DataSourceDocumentation: React.FC<DataSourceDocumentationProps> = ({ onClo
                 </div>
 
                 {/* Tabs */}
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-                  <div className="px-6 pt-4">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+                  <div className="px-6 pt-4 flex-shrink-0">
                     <TabsList className="grid w-full grid-cols-4 bg-slate-900">
                       <TabsTrigger value="overview" className="data-[state=active]:bg-cyan-600">
                         Overview
@@ -662,11 +661,11 @@ const DataSourceDocumentation: React.FC<DataSourceDocumentationProps> = ({ onClo
                     </TabsList>
                   </div>
 
-                  <div className="flex-1 overflow-hidden">
-                    <ScrollArea className="h-full">
-                      <div className="p-6">
-                        <TabsContent value="overview" className="mt-0">
-                          <div className="space-y-6">
+                  <div className="flex-1 min-h-0 overflow-hidden">
+                    <div className="h-full">
+                      <TabsContent value="overview" className="mt-0 h-full">
+                        <ScrollArea className="h-full">
+                          <div className="p-6 space-y-6">
                             <Card className="bg-slate-900 border-slate-600">
                               <CardHeader>
                                 <CardTitle className="text-cyan-400">Use Cases</CardTitle>
@@ -699,53 +698,59 @@ const DataSourceDocumentation: React.FC<DataSourceDocumentationProps> = ({ onClo
                               </CardContent>
                             </Card>
                           </div>
-                        </TabsContent>
+                        </ScrollArea>
+                      </TabsContent>
 
-                        <TabsContent value="credentials" className="mt-0">
-                          <Card className="bg-slate-900 border-slate-600">
-                            <CardHeader>
-                              <CardTitle className="text-cyan-400">{currentSource.credentialGuide.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                              <div>
-                                <h4 className="font-medium text-white mb-3">Setup Steps:</h4>
-                                <ol className="space-y-2">
-                                  {currentSource.credentialGuide.steps.map((step, index) => (
-                                    <li key={index} className="flex text-slate-300">
-                                      <span className="bg-cyan-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 mt-0.5 flex-shrink-0">
-                                        {index + 1}
-                                      </span>
-                                      {step}
-                                    </li>
-                                  ))}
-                                </ol>
-                              </div>
-
-                              {currentSource.credentialGuide.links.length > 0 && (
+                      <TabsContent value="credentials" className="mt-0 h-full">
+                        <ScrollArea className="h-full">
+                          <div className="p-6">
+                            <Card className="bg-slate-900 border-slate-600">
+                              <CardHeader>
+                                <CardTitle className="text-cyan-400">{currentSource.credentialGuide.title}</CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-6">
                                 <div>
-                                  <h4 className="font-medium text-white mb-3">Helpful Links:</h4>
-                                  <div className="space-y-2">
-                                    {currentSource.credentialGuide.links.map((link, index) => (
-                                      <a
-                                        key={index}
-                                        href={link.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center text-cyan-400 hover:text-cyan-300 transition-colors"
-                                      >
-                                        <ExternalLink className="w-4 h-4 mr-2" />
-                                        {link.text}
-                                      </a>
+                                  <h4 className="font-medium text-white mb-3">Setup Steps:</h4>
+                                  <ol className="space-y-2">
+                                    {currentSource.credentialGuide.steps.map((step, index) => (
+                                      <li key={index} className="flex text-slate-300">
+                                        <span className="bg-cyan-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 mt-0.5 flex-shrink-0">
+                                          {index + 1}
+                                        </span>
+                                        {step}
+                                      </li>
                                     ))}
-                                  </div>
+                                  </ol>
                                 </div>
-                              )}
-                            </CardContent>
-                          </Card>
-                        </TabsContent>
 
-                        <TabsContent value="configuration" className="mt-0">
-                          <div className="space-y-6">
+                                {currentSource.credentialGuide.links.length > 0 && (
+                                  <div>
+                                    <h4 className="font-medium text-white mb-3">Helpful Links:</h4>
+                                    <div className="space-y-2">
+                                      {currentSource.credentialGuide.links.map((link, index) => (
+                                        <a
+                                          key={index}
+                                          href={link.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="flex items-center text-cyan-400 hover:text-cyan-300 transition-colors"
+                                        >
+                                          <ExternalLink className="w-4 h-4 mr-2" />
+                                          {link.text}
+                                        </a>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </ScrollArea>
+                      </TabsContent>
+
+                      <TabsContent value="configuration" className="mt-0 h-full">
+                        <ScrollArea className="h-full">
+                          <div className="p-6 space-y-6">
                             <Card className="bg-slate-900 border-slate-600">
                               <CardHeader>
                                 <CardTitle className="text-cyan-400">Required Fields</CardTitle>
@@ -792,33 +797,37 @@ const DataSourceDocumentation: React.FC<DataSourceDocumentationProps> = ({ onClo
                               </Card>
                             )}
                           </div>
-                        </TabsContent>
+                        </ScrollArea>
+                      </TabsContent>
 
-                        <TabsContent value="troubleshooting" className="mt-0">
-                          <Card className="bg-slate-900 border-slate-600">
-                            <CardHeader>
-                              <CardTitle className="text-cyan-400">Common Issues & Solutions</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                              <div className="space-y-4">
-                                {currentSource.troubleshooting.map((item, index) => (
-                                  <div key={index} className="border border-slate-700 rounded-lg p-4">
-                                    <div className="font-medium text-red-400 mb-2 flex items-center">
-                                      <AlertTriangle className="w-4 h-4 mr-2" />
-                                      Issue: {item.issue}
+                      <TabsContent value="troubleshooting" className="mt-0 h-full">
+                        <ScrollArea className="h-full">
+                          <div className="p-6">
+                            <Card className="bg-slate-900 border-slate-600">
+                              <CardHeader>
+                                <CardTitle className="text-cyan-400">Common Issues & Solutions</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-4">
+                                  {currentSource.troubleshooting.map((item, index) => (
+                                    <div key={index} className="border border-slate-700 rounded-lg p-4">
+                                      <div className="font-medium text-red-400 mb-2 flex items-center">
+                                        <AlertTriangle className="w-4 h-4 mr-2" />
+                                        Issue: {item.issue}
+                                      </div>
+                                      <div className="text-green-400 flex items-center">
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        Solution: {item.solution}
+                                      </div>
                                     </div>
-                                    <div className="text-green-400 flex items-center">
-                                      <CheckCircle className="w-4 h-4 mr-2" />
-                                      Solution: {item.solution}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </TabsContent>
-                      </div>
-                    </ScrollArea>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </ScrollArea>
+                      </TabsContent>
+                    </div>
                   </div>
                 </Tabs>
               </>
