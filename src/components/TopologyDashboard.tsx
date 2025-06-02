@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import NetworkTopology from './NetworkTopology';
 import SearchAndFilters from './SearchAndFilters';
 import StatusBar from './StatusBar';
@@ -10,7 +11,7 @@ import NetworkInsightsPanel from './ai/NetworkInsightsPanel';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNetworkInsights } from '@/hooks/useNetworkAI';
 import { Button } from './ui/button';
-import { Database, Settings, Network, Users, Brain, Lightbulb } from 'lucide-react';
+import { Database, Settings, Network, Users, Brain, Lightbulb, X } from 'lucide-react';
 
 const TopologyDashboard = () => {
   const { profile } = useAuth();
@@ -20,6 +21,8 @@ const TopologyDashboard = () => {
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
+  const [showRightPanel, setShowRightPanel] = useState(false);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
   const [filterSettings, setFilterSettings] = useState({
     showDevices: true,
     showServices: true,
@@ -28,13 +31,46 @@ const TopologyDashboard = () => {
     showConnections: true
   });
 
+  // Handle click outside to close right panel
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (rightPanelRef.current && !rightPanelRef.current.contains(event.target as Node)) {
+        setShowRightPanel(false);
+        setSelectedNode(null);
+        setShowInsights(false);
+      }
+    };
+
+    if (showRightPanel) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showRightPanel]);
+
+  const handleNodeSelection = (node: any) => {
+    setSelectedNode(node);
+    setShowInsights(false);
+    setShowRightPanel(true);
+  };
+
   const handleGenerateInsights = async () => {
     try {
       await generateInsights('overview');
+      setSelectedNode(null);
       setShowInsights(true);
+      setShowRightPanel(true);
     } catch (error) {
       console.error('Failed to generate insights:', error);
     }
+  };
+
+  const handleCloseRightPanel = () => {
+    setShowRightPanel(false);
+    setSelectedNode(null);
+    setShowInsights(false);
   };
 
   return (
@@ -100,7 +136,7 @@ const TopologyDashboard = () => {
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
         {/* Left Sidebar - Fixed width with scroll */}
         <aside className="w-80 bg-slate-800 border-r border-slate-700 flex flex-col flex-shrink-0">
           <div className="p-4 border-b border-slate-700 flex-shrink-0">
@@ -148,26 +184,33 @@ const TopologyDashboard = () => {
           ) : (
             <NetworkTopology 
               selectedNode={selectedNode}
-              setSelectedNode={setSelectedNode}
+              setSelectedNode={handleNodeSelection}
               filterSettings={filterSettings}
             />
           )}
         </main>
 
-        {/* Right Panel - Dynamic content based on context */}
+        {/* Right Panel - Sliding panel */}
         {!showUserManagement && !showAIChat && (
-          <aside className="w-96 bg-slate-800 border-l border-slate-700 flex flex-col flex-shrink-0">
+          <div
+            ref={rightPanelRef}
+            className={`absolute top-0 right-0 h-full w-96 bg-slate-800 border-l border-slate-700 flex flex-col transition-transform duration-300 ease-in-out z-10 ${
+              showRightPanel ? 'transform translate-x-0' : 'transform translate-x-full'
+            }`}
+          >
             {selectedNode ? (
               <>
                 <div className="p-4 border-b border-slate-700 flex-shrink-0">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-cyan-400">Node Details</h3>
-                    <button 
-                      onClick={() => setSelectedNode(null)}
-                      className="text-slate-400 hover:text-white text-xl leading-none"
+                    <Button
+                      onClick={handleCloseRightPanel}
+                      variant="ghost"
+                      size="sm"
+                      className="text-slate-400 hover:text-white hover:bg-slate-700"
                     >
-                      ×
-                    </button>
+                      <X className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
                 
@@ -209,18 +252,10 @@ const TopologyDashboard = () => {
                 onInsightClick={(insight) => {
                   console.log('Insight clicked:', insight);
                 }}
-                onClose={() => setShowInsights(false)}
+                onClose={handleCloseRightPanel}
               />
-            ) : (
-              <div className="flex items-center justify-center h-full text-slate-400">
-                <div className="text-center">
-                  <Brain className="w-12 h-12 mx-auto mb-3" />
-                  <p>Select a node or generate insights</p>
-                  <p className="text-sm">to see detailed information</p>
-                </div>
-              </div>
-            )}
-          </aside>
+            ) : null}
+          </div>
         )}
       </div>
 
