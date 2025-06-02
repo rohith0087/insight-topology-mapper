@@ -111,25 +111,6 @@ const TopologyDashboard = () => {
     console.log('After calling startOnboarding, isOnboardingVisible should be:', isOnboardingVisible);
   };
 
-  // Demo webhook triggers for testing
-  const handleTestCriticalAlert = () => {
-    triggerAlert('critical', {
-      message: 'Critical network anomaly detected',
-      device: 'Router-01',
-      severity: 'critical',
-      timestamp: new Date().toISOString()
-    });
-  };
-
-  const handleTestDeviceOffline = () => {
-    triggerDeviceEvent('offline', {
-      device_id: 'device-123',
-      device_name: 'Core Switch',
-      last_seen: new Date().toISOString(),
-      location: 'Data Center A'
-    });
-  };
-
   // Check if we should show the Start Tour button
   const shouldShowStartTour = () => {
     if (onboardingLoading) {
@@ -485,26 +466,6 @@ const TopologyDashboard = () => {
 
         {/* Onboarding Modal */}
         <OnboardingModal />
-
-        {/* Demo webhook triggers for testing - remove in production */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="fixed bottom-4 right-4 space-y-2">
-            <Button
-              onClick={handleTestCriticalAlert}
-              size="sm"
-              className="bg-red-600 hover:bg-red-700 block"
-            >
-              Test Critical Alert
-            </Button>
-            <Button
-              onClick={handleTestDeviceOffline}
-              size="sm"
-              className="bg-orange-600 hover:bg-orange-700 block"
-            >
-              Test Device Offline
-            </Button>
-          </div>
-        )}
       </div>
     </HelpProvider>
   );
