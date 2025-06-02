@@ -19,7 +19,13 @@ import { Database, Settings, Network, Users, Brain, Lightbulb, X, BarChart3, Pla
 const TopologyDashboard = () => {
   const { profile } = useAuth();
   const { insights, generateInsights, isLoading: insightsLoading } = useNetworkInsights();
-  const { progress, startOnboarding, isLoading: onboardingLoading } = useOnboarding();
+  const { 
+    progress, 
+    startOnboarding, 
+    isLoading: onboardingLoading, 
+    isOnboardingVisible,
+    setIsOnboardingVisible 
+  } = useOnboarding();
   const [selectedNode, setSelectedNode] = useState(null);
   const [showDataSources, setShowDataSources] = useState(false);
   const [showUserManagement, setShowUserManagement] = useState(false);
@@ -38,8 +44,10 @@ const TopologyDashboard = () => {
 
   // Show onboarding for new users
   useEffect(() => {
+    console.log('Checking if should auto-start onboarding:', { profile, progress });
     if (profile && (!progress || (!progress.is_completed && progress.current_step === 1))) {
       const timer = setTimeout(() => {
+        console.log('Auto-starting onboarding for new user');
         startOnboarding();
       }, 1000); // Show after 1 second
       
@@ -90,16 +98,32 @@ const TopologyDashboard = () => {
   };
 
   const handleStartOnboarding = () => {
-    console.log('Start Tour button clicked');
+    console.log('Start Tour button clicked - Dashboard handler');
+    console.log('Current progress before starting:', progress);
     startOnboarding();
+    console.log('After calling startOnboarding, isOnboardingVisible should be:', isOnboardingVisible);
   };
 
   // Check if we should show the Start Tour button
   const shouldShowStartTour = () => {
-    if (onboardingLoading) return false;
-    if (!progress) return true; // No progress record means user hasn't started
-    return !progress.is_completed; // Show if onboarding is not completed
+    if (onboardingLoading) {
+      console.log('Not showing tour button - loading');
+      return false;
+    }
+    if (!progress) {
+      console.log('Showing tour button - no progress');
+      return true; // No progress record means user hasn't started
+    }
+    const shouldShow = !progress.is_completed;
+    console.log('Should show tour button:', shouldShow, 'Progress completed:', progress.is_completed);
+    return shouldShow; // Show if onboarding is not completed
   };
+
+  console.log('TopologyDashboard render - onboarding state:', {
+    isOnboardingVisible,
+    progress,
+    shouldShowStartTour: shouldShowStartTour()
+  });
 
   const getCurrentView = () => {
     if (showUserManagement) return 'user-management';

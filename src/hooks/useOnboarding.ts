@@ -75,6 +75,7 @@ export const useOnboarding = () => {
   const { data: progress, isLoading } = useQuery({
     queryKey: ['onboarding-progress'],
     queryFn: async (): Promise<OnboardingProgress | null> => {
+      console.log('Fetching onboarding progress...');
       const { data, error } = await supabase
         .from('user_onboarding')
         .select('*')
@@ -82,14 +83,18 @@ export const useOnboarding = () => {
 
       if (error) {
         if (error.code === 'PGRST116') {
+          console.log('No onboarding record exists yet');
           // No onboarding record exists yet
           return null;
         }
+        console.error('Error fetching onboarding progress:', error);
         throw error;
       }
 
+      console.log('Raw onboarding data from DB:', data);
+
       // Transform the data to match our interface, handling Json types properly
-      return {
+      const transformedData = {
         ...data,
         completed_steps: Array.isArray(data.completed_steps) 
           ? data.completed_steps as number[]
@@ -100,6 +105,9 @@ export const useOnboarding = () => {
           ? data.onboarding_data as Record<string, any>
           : {}
       } as OnboardingProgress;
+
+      console.log('Transformed onboarding progress:', transformedData);
+      return transformedData;
     },
   });
 
@@ -154,8 +162,12 @@ export const useOnboarding = () => {
   // Start onboarding
   const startOnboarding = () => {
     console.log('Starting onboarding, current progress:', progress);
+    console.log('Setting isOnboardingVisible to true');
     setIsOnboardingVisible(true);
+    
+    // If no progress exists, create initial progress
     if (!progress) {
+      console.log('No progress found, creating initial progress');
       updateProgressMutation.mutate({ step: 1 });
     }
   };
@@ -187,6 +199,12 @@ export const useOnboarding = () => {
     if (!progress) return 0;
     return Math.round((progress.completed_steps.length / ONBOARDING_STEPS.length) * 100);
   };
+
+  console.log('useOnboarding state:', {
+    isOnboardingVisible,
+    progress,
+    isLoading
+  });
 
   return {
     steps: ONBOARDING_STEPS,
