@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { 
   DataConflict, 
@@ -126,7 +125,8 @@ export class DataReconciliationEngine {
       const existingValue = existingData[fieldName];
       
       if (existingValue !== undefined && existingValue !== newValue) {
-        const conflictData = {
+        const conflictData: DataConflict = {
+          id: crypto.randomUUID(),
           [entityType === 'node' ? 'node_id' : 'connection_id']: entityId,
           field_name: fieldName,
           conflict_type: 'value_mismatch' as const,
@@ -138,7 +138,7 @@ export class DataReconciliationEngine {
           created_at: new Date().toISOString()
         };
         
-        conflicts.push(conflictData as DataConflict);
+        conflicts.push(conflictData);
       }
     }
     

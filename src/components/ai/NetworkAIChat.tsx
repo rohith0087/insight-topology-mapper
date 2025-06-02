@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -205,7 +204,7 @@ Please check your network data sources and try again. If the problem persists, c
                 className={`flex items-center space-x-1 text-xs ${
                   selectedAnalysisType === type.id 
                     ? `${type.color} text-white` 
-                    : 'border-slate-600 text-slate-300 hover:bg-slate-700'
+                    : 'border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white'
                 }`}
               >
                 <Icon className="w-3 h-3" />
@@ -225,7 +224,7 @@ Please check your network data sources and try again. If the problem persists, c
                 <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
                   message.type === 'user' ? 'bg-cyan-600' : 'bg-slate-600'
                 }`}>
-                  {message.type === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                  {message.type === 'user' ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
                 </div>
                 <div className={`rounded-lg p-3 ${
                   message.type === 'user' 
@@ -238,7 +237,7 @@ Please check your network data sources and try again. If the problem persists, c
                       {message.timestamp.toLocaleTimeString()}
                     </div>
                     {message.analysis_type && (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs border-slate-500 text-slate-300">
                         {analysisTypes.find(t => t.id === message.analysis_type)?.label || message.analysis_type}
                       </Badge>
                     )}
@@ -252,11 +251,11 @@ Please check your network data sources and try again. If the problem persists, c
             <div className="flex justify-start">
               <div className="flex items-start space-x-2">
                 <div className="flex-shrink-0 w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center">
-                  <Bot className="w-4 h-4" />
+                  <Bot className="w-4 h-4 text-white" />
                 </div>
                 <div className="bg-slate-700 rounded-lg p-3">
                   <div className="flex items-center space-x-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
                     <span className="text-sm text-slate-300">Analyzing your network...</span>
                   </div>
                 </div>
@@ -269,7 +268,7 @@ Please check your network data sources and try again. If the problem persists, c
 
         {/* Quick Questions */}
         {messages.length <= 1 && (
-          <div className="p-4 border-t border-slate-700">
+          <div className="p-4 border-t border-slate-700 bg-slate-800">
             <p className="text-sm text-slate-400 mb-3">Try these quick questions:</p>
             <div className="flex flex-wrap gap-2">
               {quickQuestions.map((question, index) => (
@@ -278,7 +277,7 @@ Please check your network data sources and try again. If the problem persists, c
                   onClick={() => handleQuickQuestion(question)}
                   variant="outline"
                   size="sm"
-                  className="text-xs border-slate-600 text-slate-300 hover:bg-slate-700"
+                  className="text-xs border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white bg-slate-800"
                   disabled={isLoading}
                 >
                   {question}
@@ -289,13 +288,13 @@ Please check your network data sources and try again. If the problem persists, c
         )}
 
         {/* Input Area */}
-        <div className="p-4 border-t border-slate-700 flex-shrink-0">
+        <div className="p-4 border-t border-slate-700 flex-shrink-0 bg-slate-800">
           <div className="flex space-x-2">
             <Textarea
               value={currentMessage}
               onChange={(e) => setCurrentMessage(e.target.value)}
               placeholder={selectedAnalysisType === 'custom' ? "Ask me anything about your network..." : `Ask about ${analysisTypes.find(t => t.id === selectedAnalysisType)?.label.toLowerCase()}...`}
-              className="flex-1 bg-slate-700 border-slate-600 text-white resize-none"
+              className="flex-1 bg-slate-700 border-slate-600 text-white placeholder-slate-400 resize-none"
               rows={2}
               disabled={isLoading}
               onKeyDown={(e) => {
