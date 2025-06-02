@@ -10,6 +10,10 @@ export interface DataLineage {
   created_at: string;
   updated_at: string;
   tenant_id?: string;
+  data_sources?: {
+    name: string;
+    type: string;
+  };
 }
 
 export interface DataConflict {
@@ -37,6 +41,10 @@ export interface DataSourcePriority {
   tenant_id?: string;
   created_at: string;
   updated_at: string;
+  data_sources?: {
+    name: string;
+    type: string;
+  };
 }
 
 export interface DataQualityMetric {
@@ -48,6 +56,10 @@ export interface DataQualityMetric {
   calculated_at: string;
   tenant_id?: string;
   metadata: Record<string, any>;
+  data_sources?: {
+    name: string;
+    type: string;
+  };
 }
 
 export interface ReconciliationResult {
@@ -63,4 +75,22 @@ export interface ReconciliationConfig {
   confidence_threshold: number;
   field_strategies: Record<string, string>;
   auto_resolve_threshold: number;
+}
+
+export interface NetworkAnalysisRequest {
+  query?: string;
+  analysis_type: 'overview' | 'security' | 'performance' | 'topology' | 'custom';
+  include_metrics?: boolean;
+  client_context?: Record<string, any>;
+}
+
+export interface NetworkInsight {
+  id: string;
+  title: string;
+  description: string;
+  type: 'recommendation' | 'warning' | 'info' | 'critical';
+  confidence: number;
+  affected_nodes: string[];
+  suggested_actions: string[];
+  created_at: string;
 }
