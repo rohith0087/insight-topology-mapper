@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
@@ -35,7 +34,8 @@ const getTypeIcon = (type: string) => {
     datadog: <img src="/lovable-uploads/29d45e0c-b15e-4e77-89ae-28286dda410d.png" alt="DataDog" className="w-6 h-6 object-contain" />,
     'microsoft-sentinel': <img src="/lovable-uploads/09db2bdd-5525-47a7-aaa8-e30b98d6901d.png" alt="Microsoft Sentinel" className="w-6 h-6 object-contain" />,
     qradar: <img src="/lovable-uploads/88b0bf91-c943-4248-baf0-5e75ef46c244.png" alt="QRadar" className="w-6 h-6 object-contain" />,
-    sentinelone: <img src="/lovable-uploads/fe727117-4df6-4009-85bb-536a2073baec.png" alt="SentinelOne" className="w-6 h-6 object-contain" />
+    sentinelone: <img src="/lovable-uploads/fe727117-4df6-4009-85bb-536a2073baec.png" alt="SentinelOne" className="w-6 h-6 object-contain" />,
+    splunk: <img src="/lovable-uploads/0b9997af-4433-4058-bd76-6a42290c5299.png" alt="Splunk" className="w-6 h-6 object-contain" />
   };
 
   if (iconImages[type]) {
@@ -44,7 +44,6 @@ const getTypeIcon = (type: string) => {
 
   const icons = {
     nmap: '🌐',
-    splunk: '🟢',
     snmp: '📡',
     api: '🔌'
   };
@@ -201,7 +200,7 @@ const dataSources: DataSourceDoc[] = [
   {
     id: 'splunk',
     name: 'Splunk SIEM',
-    icon: '🟢',
+    icon: getTypeIcon('splunk'),
     category: 'SIEM',
     description: 'Extract network topology and security insights from Splunk SIEM data and security events.',
     credentialGuide: {

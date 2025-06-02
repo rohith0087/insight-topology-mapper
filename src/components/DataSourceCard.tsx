@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Edit, Trash2, Power, PowerOff, TestTube, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Button } from './ui/button';
@@ -26,7 +27,8 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ source, onEdit, onDelet
       datadog: '/lovable-uploads/29d45e0c-b15e-4e77-89ae-28286dda410d.png',
       'microsoft-sentinel': '/lovable-uploads/09db2bdd-5525-47a7-aaa8-e30b98d6901d.png',
       qradar: '/lovable-uploads/88b0bf91-c943-4248-baf0-5e75ef46c244.png',
-      sentinelone: '/lovable-uploads/fe727117-4df6-4009-85bb-536a2073baec.png'
+      sentinelone: '/lovable-uploads/fe727117-4df6-4009-85bb-536a2073baec.png',
+      splunk: '/lovable-uploads/0b9997af-4433-4058-bd76-6a42290c5299.png'
     };
 
     if (iconImages[type]) {
@@ -35,7 +37,6 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ source, onEdit, onDelet
 
     const icons = {
       nmap: '🌐',
-      splunk: '🟢', // Splunk green
       snmp: '📡',
       api: '🔌'
     };
