@@ -4,6 +4,7 @@ import NetworkTopology from './NetworkTopology';
 import SearchAndFilters from './SearchAndFilters';
 import StatusBar from './StatusBar';
 import DataSourceManagement from './DataSourceManagement';
+import UserManagement from './UserManagement';
 import UserProfile from './UserProfile';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
@@ -13,6 +14,7 @@ const TopologyDashboard = () => {
   const { profile } = useAuth();
   const [selectedNode, setSelectedNode] = useState(null);
   const [showDataSources, setShowDataSources] = useState(false);
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [filterSettings, setFilterSettings] = useState({
     showDevices: true,
     showServices: true,
@@ -48,11 +50,12 @@ const TopologyDashboard = () => {
             
             {profile?.role && ['super_admin', 'tenant_admin'].includes(profile.role) && (
               <Button
+                onClick={() => setShowUserManagement(true)}
                 variant="outline"
                 className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
               >
                 <Users className="w-4 h-4 mr-2" />
-                Users
+                Manage Users
               </Button>
             )}
             
@@ -90,15 +93,31 @@ const TopologyDashboard = () => {
 
         {/* Main Topology View - Takes remaining space */}
         <main className="flex-1 relative min-w-0">
-          <NetworkTopology 
-            selectedNode={selectedNode}
-            setSelectedNode={setSelectedNode}
-            filterSettings={filterSettings}
-          />
+          {showUserManagement ? (
+            <div className="h-full overflow-y-auto p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-cyan-400">User Management</h2>
+                <Button
+                  onClick={() => setShowUserManagement(false)}
+                  variant="outline"
+                  className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+                >
+                  Back to Network
+                </Button>
+              </div>
+              <UserManagement />
+            </div>
+          ) : (
+            <NetworkTopology 
+              selectedNode={selectedNode}
+              setSelectedNode={setSelectedNode}
+              filterSettings={filterSettings}
+            />
+          )}
         </main>
 
         {/* Right Panel - Node Details with scroll */}
-        {selectedNode && (
+        {selectedNode && !showUserManagement && (
           <aside className="w-96 bg-slate-800 border-l border-slate-700 flex flex-col flex-shrink-0">
             <div className="p-4 border-b border-slate-700 flex-shrink-0">
               <div className="flex items-center justify-between">

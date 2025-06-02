@@ -279,7 +279,9 @@ export type Database = {
       }
       tenants: {
         Row: {
+          company_name: string | null
           created_at: string | null
+          domain: string | null
           id: string
           is_active: boolean | null
           metadata: Json | null
@@ -288,7 +290,9 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          company_name?: string | null
           created_at?: string | null
+          domain?: string | null
           id?: string
           is_active?: boolean | null
           metadata?: Json | null
@@ -297,7 +301,9 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          company_name?: string | null
           created_at?: string | null
+          domain?: string | null
           id?: string
           is_active?: boolean | null
           metadata?: Json | null
@@ -307,11 +313,73 @@ export type Database = {
         }
         Relationships: []
       }
+      user_invitations: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          expires_at: string
+          id: string
+          invite_token: string
+          invited_by: string
+          role: Database["public"]["Enums"]["user_role"]
+          tenant_id: string
+          used: boolean | null
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          expires_at?: string
+          id?: string
+          invite_token?: string
+          invited_by: string
+          role: Database["public"]["Enums"]["user_role"]
+          tenant_id: string
+          used?: boolean | null
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          expires_at?: string
+          id?: string
+          invite_token?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          tenant_id?: string
+          used?: boolean | null
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_invitations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      extract_domain: {
+        Args: { email: string }
+        Returns: string
+      }
+      get_tenant_by_domain: {
+        Args: { email_domain: string }
+        Returns: string
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -325,6 +393,10 @@ export type Database = {
           user_id: string
           required_role: Database["public"]["Enums"]["user_role"]
         }
+        Returns: boolean
+      }
+      is_valid_company_email: {
+        Args: { email: string }
         Returns: boolean
       }
     }

@@ -1,17 +1,26 @@
 
-import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import ForgotPasswordForm from './ForgotPasswordForm';
+import InviteSignupForm from './InviteSignupForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Network } from 'lucide-react';
 
 const AuthPage: React.FC = () => {
   const { user, loading } = useAuth();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('login');
+  const inviteToken = searchParams.get('invite');
+
+  useEffect(() => {
+    if (inviteToken) {
+      setActiveTab('invite-signup');
+    }
+  }, [inviteToken]);
 
   if (loading) {
     return (
@@ -40,30 +49,39 @@ const AuthPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="text-white text-center">
               {activeTab === 'login' && 'Welcome Back'}
-              {activeTab === 'signup' && 'Create Account'}
+              {activeTab === 'signup' && 'Create Company Account'}
               {activeTab === 'forgot' && 'Reset Password'}
+              {activeTab === 'invite-signup' && 'Join Your Team'}
             </CardTitle>
             <CardDescription className="text-slate-400 text-center">
               {activeTab === 'login' && 'Sign in to your account to continue'}
-              {activeTab === 'signup' && 'Create a new account to get started'}
+              {activeTab === 'signup' && 'Set up your company security operations center'}
               {activeTab === 'forgot' && 'Enter your email to reset your password'}
+              {activeTab === 'invite-signup' && 'Complete your account setup using the invitation'}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2 bg-slate-700">
-                <TabsTrigger value="login" className="text-slate-300">Login</TabsTrigger>
-                <TabsTrigger value="signup" className="text-slate-300">Sign Up</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="login" className="space-y-4">
-                <LoginForm onForgotPassword={() => setActiveTab('forgot')} />
-              </TabsContent>
-              
-              <TabsContent value="signup" className="space-y-4">
-                <SignupForm />
-              </TabsContent>
-            </Tabs>
+            {inviteToken ? (
+              <InviteSignupForm 
+                inviteToken={inviteToken} 
+                onBackToLogin={() => setActiveTab('login')}
+              />
+            ) : (
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-2 bg-slate-700">
+                  <TabsTrigger value="login" className="text-slate-300">Login</TabsTrigger>
+                  <TabsTrigger value="signup" className="text-slate-300">Sign Up</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="login" className="space-y-4">
+                  <LoginForm onForgotPassword={() => setActiveTab('forgot')} />
+                </TabsContent>
+                
+                <TabsContent value="signup" className="space-y-4">
+                  <SignupForm />
+                </TabsContent>
+              </Tabs>
+            )}
 
             {activeTab === 'forgot' && (
               <div className="mt-4">
