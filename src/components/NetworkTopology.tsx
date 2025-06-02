@@ -20,6 +20,9 @@ import CustomServiceNode from './nodes/CustomServiceNode';
 import CustomApplicationNode from './nodes/CustomApplicationNode';
 import CustomCloudNode from './nodes/CustomCloudNode';
 import { NodeData } from '../types/networkTypes';
+import { generateMockTopologyData } from '../utils/mockData';
+import { Alert, AlertDescription } from './ui/alert';
+import { Info } from 'lucide-react';
 
 const nodeTypes = {
   device: CustomDeviceNode,
@@ -41,16 +44,25 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
 }) => {
   const { data: networkData, isLoading, error } = useNetworkData();
   
-  const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>(networkData?.nodes || []);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(networkData?.edges || []);
+  // Use static data if no data is available from the database
+  const actualData = useMemo(() => {
+    if (networkData && (networkData.nodes.length > 0 || networkData.edges.length > 0)) {
+      return { ...networkData, isStatic: false };
+    }
+    const mockData = generateMockTopologyData();
+    return { ...mockData, isStatic: true };
+  }, [networkData]);
+  
+  const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>(actualData.nodes || []);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(actualData.edges || []);
 
   // Update nodes and edges when data changes
   useEffect(() => {
-    if (networkData) {
-      setNodes(networkData.nodes);
-      setEdges(networkData.edges);
+    if (actualData) {
+      setNodes(actualData.nodes);
+      setEdges(actualData.edges);
     }
-  }, [networkData, setNodes, setEdges]);
+  }, [actualData, setNodes, setEdges]);
 
   const onConnect = useCallback(
     (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -97,7 +109,18 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
   }
 
   return (
-    <div className="w-full h-full bg-slate-900">
+    <div className="w-full h-full bg-slate-900 relative">
+      {actualData.isStatic && (
+        <div className="absolute top-4 left-4 z-10 max-w-md">
+          <Alert className="border-cyan-500/50 bg-cyan-950/50 text-cyan-100">
+            <Info className="h-4 w-4 text-cyan-400" />
+            <AlertDescription className="text-sm">
+              <strong>Static Demo Data:</strong> No live data sources connected. Showing sample network topology for demonstration purposes.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+      
       <ReactFlow
         nodes={filteredNodes}
         edges={edges}
