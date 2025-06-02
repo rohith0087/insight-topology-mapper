@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import NetworkTopology from './NetworkTopology';
 import SearchAndFilters from './SearchAndFilters';
@@ -8,28 +9,19 @@ import UserProfile from './UserProfile';
 import NetworkAIChat from './ai/NetworkAIChat';
 import NetworkInsightsPanel from './ai/NetworkInsightsPanel';
 import ExecutiveDashboard from './executive/ExecutiveDashboard';
-import OnboardingModal from './onboarding/OnboardingModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNetworkInsights } from '@/hooks/useNetworkAI';
-import { useOnboarding } from '@/hooks/useOnboarding';
 import { useWebhooks } from '@/hooks/useWebhooks';
 import { HelpProvider } from '@/components/help/HelpSystem';
 import ContextualTooltip from '@/components/help/ContextualTooltip';
 import SmartHelpButton from '@/components/help/SmartHelpButton';
 import WebhookManager from '@/components/automation/WebhookManager';
 import { Button } from './ui/button';
-import { Database, Settings, Network, Users, Brain, Lightbulb, X, BarChart3, Play, Webhook } from 'lucide-react';
+import { Database, Settings, Network, Users, Brain, Lightbulb, X, BarChart3, Webhook } from 'lucide-react';
 
 const TopologyDashboard = () => {
   const { profile } = useAuth();
   const { insights, generateInsights, isLoading: insightsLoading } = useNetworkInsights();
-  const { 
-    progress, 
-    startOnboarding, 
-    isLoading: onboardingLoading, 
-    isOnboardingVisible,
-    setIsOnboardingVisible 
-  } = useOnboarding();
   const { triggerAlert, triggerDeviceEvent } = useWebhooks();
   
   const [selectedNode, setSelectedNode] = useState(null);
@@ -48,19 +40,6 @@ const TopologyDashboard = () => {
     showConnections: true
   });
   const [showWebhookManager, setShowWebhookManager] = useState(false);
-
-  // Show onboarding for new users
-  useEffect(() => {
-    console.log('Checking if should auto-start onboarding:', { profile, progress });
-    if (profile && (!progress || (!progress.is_completed && progress.current_step === 1))) {
-      const timer = setTimeout(() => {
-        console.log('Auto-starting onboarding for new user');
-        startOnboarding();
-      }, 1000); // Show after 1 second
-      
-      return () => clearTimeout(timer);
-    }
-  }, [profile, progress, startOnboarding]);
 
   // Handle click outside to close right panel
   useEffect(() => {
@@ -103,34 +82,6 @@ const TopologyDashboard = () => {
     setSelectedNode(null);
     setShowInsights(false);
   };
-
-  const handleStartOnboarding = () => {
-    console.log('Start Tour button clicked - Dashboard handler');
-    console.log('Current progress before starting:', progress);
-    startOnboarding();
-    console.log('After calling startOnboarding, isOnboardingVisible should be:', isOnboardingVisible);
-  };
-
-  // Check if we should show the Start Tour button
-  const shouldShowStartTour = () => {
-    if (onboardingLoading) {
-      console.log('Not showing tour button - loading');
-      return false;
-    }
-    if (!progress) {
-      console.log('Showing tour button - no progress');
-      return true; // No progress record means user hasn't started
-    }
-    const shouldShow = !progress.is_completed;
-    console.log('Should show tour button:', shouldShow, 'Progress completed:', progress.is_completed);
-    return shouldShow; // Show if onboarding is not completed
-  };
-
-  console.log('TopologyDashboard render - onboarding state:', {
-    isOnboardingVisible,
-    progress,
-    shouldShowStartTour: shouldShowStartTour()
-  });
 
   const getCurrentView = () => {
     if (showUserManagement) return 'user-management';
@@ -209,25 +160,6 @@ const TopologyDashboard = () => {
             
             {/* Action Buttons */}
             <div className="flex items-center space-x-2">
-              {/* Onboarding Button (show if not completed) */}
-              {profile && shouldShowStartTour() && (
-                <ContextualTooltip
-                  content="Start an interactive tour to learn about LumenNet's features and capabilities"
-                  context="onboarding"
-                  userRole={profile?.role}
-                  currentPage={getCurrentView()}
-                >
-                  <Button
-                    onClick={handleStartOnboarding}
-                    size="sm"
-                    className="bg-green-600 hover:bg-green-700 text-white border-0"
-                  >
-                    <Play className="w-4 h-4 mr-1" />
-                    Start Tour
-                  </Button>
-                </ContextualTooltip>
-              )}
-
               {/* Executive Dashboard */}
               <ContextualTooltip
                 content="Access high-level metrics and executive summaries of your network status"
@@ -463,9 +395,6 @@ const TopologyDashboard = () => {
         {showWebhookManager && (
           <WebhookManager onClose={() => setShowWebhookManager(false)} />
         )}
-
-        {/* Onboarding Modal */}
-        <OnboardingModal />
       </div>
     </HelpProvider>
   );
