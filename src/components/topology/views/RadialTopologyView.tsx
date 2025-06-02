@@ -62,7 +62,7 @@ const RadialTopologyView: React.FC<RadialTopologyViewProps> = ({
       fitView
       className="bg-slate-900"
     >
-      <Background color="#334155" gap={20} />
+      <Background color="#334155" gap={12} size={2} />
       <Controls className="bg-slate-800 border border-slate-600" />
       <MiniMap 
         nodeColor={(node) => {
