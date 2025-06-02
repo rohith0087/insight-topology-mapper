@@ -1,5 +1,5 @@
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import {
   ReactFlow,
   Node,
@@ -19,6 +19,11 @@ import CustomDeviceNode from './nodes/CustomDeviceNode';
 import CustomServiceNode from './nodes/CustomServiceNode';
 import CustomApplicationNode from './nodes/CustomApplicationNode';
 import CustomCloudNode from './nodes/CustomCloudNode';
+import TopologyViewSelector, { TopologyView } from './topology/TopologyViewSelector';
+import GridTopologyView from './topology/views/GridTopologyView';
+import RadialTopologyView from './topology/views/RadialTopologyView';
+import HierarchicalTopologyView from './topology/views/HierarchicalTopologyView';
+import ConnectionMatrixView from './topology/views/ConnectionMatrixView';
 import { NodeData } from '../types/networkTypes';
 import { generateMockTopologyData } from '../utils/mockData';
 import { Alert, AlertDescription } from './ui/alert';
@@ -43,6 +48,7 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
   filterSettings
 }) => {
   const { data: networkData, isLoading, error } = useNetworkData();
+  const [currentView, setCurrentView] = useState<TopologyView>('network');
   
   // Use static data if no data is available from the database
   const actualData = useMemo(() => {
@@ -108,6 +114,69 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
     );
   }
 
+  const renderTopologyView = () => {
+    const commonProps = {
+      nodes: filteredNodes,
+      edges,
+      onNodeClick,
+      nodeTypes
+    };
+
+    switch (currentView) {
+      case 'grid':
+        return <GridTopologyView {...commonProps} />;
+      case 'radial':
+        return <RadialTopologyView {...commonProps} />;
+      case 'hierarchical':
+        return <HierarchicalTopologyView {...commonProps} />;
+      case 'matrix':
+        return <ConnectionMatrixView {...commonProps} />;
+      case 'tree':
+      case 'force':
+        // Placeholder for future implementations
+        return (
+          <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-cyan-400 text-lg font-semibold mb-2">
+                {currentView === 'tree' ? 'Tree View' : 'Force Layout'}
+              </div>
+              <div className="text-slate-400">Coming soon...</div>
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <ReactFlow
+            nodes={filteredNodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeClick={onNodeClick}
+            nodeTypes={nodeTypes}
+            connectionMode={ConnectionMode.Loose}
+            fitView
+            className="bg-slate-900"
+          >
+            <Background color="#334155" gap={20} />
+            <Controls className="bg-slate-800 border border-slate-600" />
+            <MiniMap 
+              nodeColor={(node) => {
+                switch (node.data.type) {
+                  case 'device': return '#06b6d4';
+                  case 'service': return '#10b981';
+                  case 'application': return '#8b5cf6';
+                  case 'cloud': return '#f59e0b';
+                  default: return '#64748b';
+                }
+              }}
+              className="bg-slate-800 border border-slate-600"
+            />
+          </ReactFlow>
+        );
+    }
+  };
+
   return (
     <div className="w-full h-full bg-slate-900 relative">
       {actualData.isStatic && (
@@ -120,34 +189,16 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
           </Alert>
         </div>
       )}
-      
-      <ReactFlow
-        nodes={filteredNodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeClick={onNodeClick}
-        nodeTypes={nodeTypes}
-        connectionMode={ConnectionMode.Loose}
-        fitView
-        className="bg-slate-900"
-      >
-        <Background color="#334155" gap={20} />
-        <Controls className="bg-slate-800 border border-slate-600" />
-        <MiniMap 
-          nodeColor={(node) => {
-            switch (node.data.type) {
-              case 'device': return '#06b6d4';
-              case 'service': return '#10b981';
-              case 'application': return '#8b5cf6';
-              case 'cloud': return '#f59e0b';
-              default: return '#64748b';
-            }
-          }}
-          className="bg-slate-800 border border-slate-600"
+
+      {/* View Selector */}
+      <div className="absolute top-4 right-4 z-10">
+        <TopologyViewSelector 
+          currentView={currentView}
+          onViewChange={setCurrentView}
         />
-      </ReactFlow>
+      </div>
+      
+      {renderTopologyView()}
     </div>
   );
 };
