@@ -76,7 +76,7 @@ const dataSources: DataSourceDoc[] = [
   {
     id: 'aws',
     name: 'AWS Discovery',
-    icon: '☁️',
+    icon: '🟠',
     category: 'Cloud Infrastructure',
     description: 'Discover and map AWS cloud infrastructure including EC2 instances, VPCs, load balancers, and other AWS resources.',
     credentialGuide: {
@@ -177,7 +177,7 @@ const dataSources: DataSourceDoc[] = [
   {
     id: 'splunk',
     name: 'Splunk SIEM',
-    icon: '📊',
+    icon: '🟢',
     category: 'SIEM',
     description: 'Extract network topology and security insights from Splunk SIEM data and security events.',
     credentialGuide: {

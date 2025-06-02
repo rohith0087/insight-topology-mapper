@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Database, Network, Play, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useDataSources, useETLJobs, useRunETL } from '../hooks/useDataSources';
@@ -7,6 +6,22 @@ const DataSourcePanel = () => {
   const { data: dataSources, isLoading: sourcesLoading } = useDataSources();
   const { data: etlJobs, isLoading: jobsLoading } = useETLJobs();
   const runETL = useRunETL();
+
+  const getTypeIcon = (type: string) => {
+    const icons = {
+      nmap: '🌐',
+      aws: '🟠', // AWS orange
+      azure: '🔵', // Microsoft Azure blue
+      splunk: '🟢', // Splunk green
+      snmp: '📡',
+      api: '🔌',
+      sentinelone: '🛡️', // Security shield
+      qradar: '🔒', // IBM security
+      datadog: '🐕', // Datadog logo
+      'microsoft-sentinel': '🛡️' // Microsoft security
+    };
+    return icons[type] || '⚙️';
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -68,7 +83,7 @@ const DataSourcePanel = () => {
           <div key={source.id} className="bg-slate-900 rounded-lg p-4 border border-slate-600">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Database className="w-5 h-5 text-slate-400" />
+                <span className="text-lg">{getTypeIcon(source.type)}</span>
                 <div>
                   <p className="text-white font-medium text-sm">{source.name}</p>
                   <p className="text-slate-400 text-xs">{source.type.toUpperCase()}</p>

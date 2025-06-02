@@ -23,11 +23,15 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ source, onEdit, onDelet
   const getTypeIcon = (type: string) => {
     const icons = {
       nmap: '🌐',
-      aws: '☁️',
-      azure: '🔵',
-      splunk: '📊',
+      aws: '🟠', // AWS orange
+      azure: '🔵', // Microsoft Azure blue
+      splunk: '🟢', // Splunk green
       snmp: '📡',
-      api: '🔌'
+      api: '🔌',
+      sentinelone: '🛡️', // Security shield
+      qradar: '🔒', // IBM security
+      datadog: '🐕', // Datadog logo
+      'microsoft-sentinel': '🛡️' // Microsoft security
     };
     return icons[type] || '⚙️';
   };
