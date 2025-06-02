@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,9 +13,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { User, LogOut, Settings } from 'lucide-react';
+import ProfileSettingsDialog from '@/components/profile/ProfileSettingsDialog';
+import PreferencesDialog from '@/components/profile/PreferencesDialog';
 
 const UserProfile: React.FC = () => {
   const { user, profile, signOut } = useAuth();
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
 
   if (!user || !profile) return null;
 
@@ -52,59 +56,77 @@ const UserProfile: React.FC = () => {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
-          <Avatar className="h-10 w-10">
-            <AvatarFallback className="bg-cyan-600 text-white">
-              {getInitials(profile.first_name, profile.last_name, profile.email)}
-            </AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-80 bg-slate-800 border-slate-700" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-2">
-            <div className="flex items-center space-x-2">
-              <p className="text-sm font-medium leading-none text-white">
-                {profile.first_name && profile.last_name 
-                  ? `${profile.first_name} ${profile.last_name}`
-                  : 'User'
-                }
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
+            <Avatar className="h-10 w-10">
+              <AvatarFallback className="bg-cyan-600 text-white">
+                {getInitials(profile.first_name, profile.last_name, profile.email)}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-80 bg-slate-800 border-slate-700" align="end" forceMount>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-2">
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-medium leading-none text-white">
+                  {profile.first_name && profile.last_name 
+                    ? `${profile.first_name} ${profile.last_name}`
+                    : 'User'
+                  }
+                </p>
+                <Badge className={getRoleBadgeColor(profile.role)}>
+                  {formatRole(profile.role)}
+                </Badge>
+              </div>
+              <p className="text-xs leading-none text-slate-400">
+                {profile.email}
               </p>
-              <Badge className={getRoleBadgeColor(profile.role)}>
-                {formatRole(profile.role)}
-              </Badge>
+              {profile.last_login && (
+                <p className="text-xs leading-none text-slate-500">
+                  Last login: {new Date(profile.last_login).toLocaleDateString()}
+                </p>
+              )}
             </div>
-            <p className="text-xs leading-none text-slate-400">
-              {profile.email}
-            </p>
-            {profile.last_login && (
-              <p className="text-xs leading-none text-slate-500">
-                Last login: {new Date(profile.last_login).toLocaleDateString()}
-              </p>
-            )}
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-slate-700" />
-        <DropdownMenuItem className="text-slate-300 hover:bg-slate-700 hover:text-white cursor-pointer">
-          <User className="mr-2 h-4 w-4" />
-          <span>Profile Settings</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="text-slate-300 hover:bg-slate-700 hover:text-white cursor-pointer">
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Preferences</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-slate-700" />
-        <DropdownMenuItem 
-          className="text-red-400 hover:bg-red-950 hover:text-red-300 cursor-pointer"
-          onClick={handleSignOut}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Sign out</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-slate-700" />
+          <DropdownMenuItem 
+            className="text-slate-300 hover:bg-slate-700 hover:text-white cursor-pointer"
+            onClick={() => setShowProfileSettings(true)}
+          >
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile Settings</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            className="text-slate-300 hover:bg-slate-700 hover:text-white cursor-pointer"
+            onClick={() => setShowPreferences(true)}
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Preferences</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-slate-700" />
+          <DropdownMenuItem 
+            className="text-red-400 hover:bg-red-950 hover:text-red-300 cursor-pointer"
+            onClick={handleSignOut}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Sign out</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <ProfileSettingsDialog
+        open={showProfileSettings}
+        onOpenChange={setShowProfileSettings}
+      />
+
+      <PreferencesDialog
+        open={showPreferences}
+        onOpenChange={setShowPreferences}
+      />
+    </>
   );
 };
 

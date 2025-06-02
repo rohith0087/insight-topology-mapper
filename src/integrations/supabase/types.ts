@@ -367,6 +367,33 @@ export type Database = {
           },
         ]
       }
+      user_settings: {
+        Row: {
+          created_at: string
+          id: string
+          settings_key: string
+          settings_value: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          settings_key: string
+          settings_value?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          settings_key?: string
+          settings_value?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -384,6 +411,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      get_user_setting: {
+        Args: { p_settings_key: string }
+        Returns: Json
+      }
       get_user_tenant: {
         Args: { user_id: string }
         Returns: string
@@ -398,6 +429,17 @@ export type Database = {
       is_valid_company_email: {
         Args: { email: string }
         Returns: boolean
+      }
+      upsert_user_setting: {
+        Args: { p_settings_key: string; p_settings_value: Json }
+        Returns: {
+          created_at: string
+          id: string
+          settings_key: string
+          settings_value: Json
+          updated_at: string
+          user_id: string
+        }
       }
     }
     Enums: {
