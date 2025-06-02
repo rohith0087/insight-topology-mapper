@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { SupportAuthProvider } from "@/contexts/SupportAuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import SupportProtectedRoute from "@/components/support/SupportProtectedRoute";
+import LandingPage from "./pages/LandingPage";
 import AuthPage from "@/components/auth/AuthPage";
 import Index from "./pages/Index";
 import SupportLogin from "./pages/SupportLogin";
@@ -24,8 +25,17 @@ const App: React.FC = () => (
         <SupportAuthProvider>
           <TooltipProvider>
             <Routes>
+              <Route path="/landing" element={<LandingPage />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/support-login" element={<SupportLogin />} />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                } 
+              />
               <Route 
                 path="/" 
                 element={
