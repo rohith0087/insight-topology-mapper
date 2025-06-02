@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NLSearchFilters {
   showDevices: boolean;
@@ -23,6 +24,7 @@ interface NLSearchResult {
 
 export const useNaturalLanguageSearch = () => {
   const { toast } = useToast();
+  const { user, profile } = useAuth();
   const [lastResult, setLastResult] = useState<NLSearchResult | null>(null);
 
   const searchMutation = useMutation({
@@ -92,13 +94,19 @@ export const useNaturalLanguageSearch = () => {
   });
 
   const saveQuery = async (queryName: string, queryText: string, filters: NLSearchFilters) => {
+    if (!user || !profile?.tenant_id) {
+      throw new Error('User not authenticated or tenant not found');
+    }
+
     const { error } = await supabase
       .from('saved_queries')
       .insert({
         query_name: queryName,
         query_text: queryText,
         filters: filters as any,
-        is_favorite: false
+        is_favorite: false,
+        user_id: user.id,
+        tenant_id: profile.tenant_id
       });
 
     if (error) throw error;
