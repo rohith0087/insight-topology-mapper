@@ -19,9 +19,10 @@ interface TenantDetails {
 
 interface TenantTableProps {
   tenants: TenantDetails[];
+  onRefresh?: () => void;
 }
 
-const TenantTable: React.FC<TenantTableProps> = ({ tenants }) => {
+const TenantTable: React.FC<TenantTableProps> = ({ tenants, onRefresh }) => {
   return (
     <Table>
       <TableHeader>

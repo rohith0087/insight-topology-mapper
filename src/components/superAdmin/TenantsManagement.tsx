@@ -50,6 +50,11 @@ const TenantsManagement = () => {
 
   useEffect(() => {
     fetchTenants();
+    
+    // Set up interval to refresh data every 30 seconds
+    const interval = setInterval(fetchTenants, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const filteredTenants = tenants.filter(tenant =>
@@ -82,7 +87,7 @@ const TenantsManagement = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <TenantTable tenants={filteredTenants} />
+          <TenantTable tenants={filteredTenants} onRefresh={fetchTenants} />
         </CardContent>
       </Card>
     </div>
