@@ -39,34 +39,51 @@ serve(async (req) => {
           case 'aws':
             functionName = 'aws-discovery'
             break
+          case 'azure':
+            functionName = 'azure-discovery'
+            break
           case 'splunk':
             functionName = 'splunk-collector'
             break
-          case 'azure':
-            functionName = 'azure-discovery'
+          case 'snmp':
+            functionName = 'snmp-collector'
+            break
+          case 'api':
+            functionName = 'custom-api-collector'
             break
           default:
             console.log(`No ETL function for source type: ${source.type}`)
             continue
         }
 
-        // Call the appropriate ETL function
-        const response = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/${functionName}`, {
-          method: 'POST',
+        console.log(`Invoking ${functionName} for data source: ${source.name}`)
+
+        // Call the appropriate ETL function using Supabase client
+        const { data: result, error: functionError } = await supabaseClient.functions.invoke(functionName, {
           headers: {
-            'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
-            'data-source-id': source.id,
-            'Content-Type': 'application/json'
+            'data-source-id': source.id
           }
         })
 
-        const result = await response.json()
-        results.push({
-          source: source.name,
-          type: source.type,
-          success: response.ok,
-          result
-        })
+        if (functionError) {
+          console.error(`Error calling ${functionName}:`, functionError)
+          results.push({
+            source: source.name,
+            type: source.type,
+            success: false,
+            error: functionError.message,
+            function_name: functionName
+          })
+        } else {
+          console.log(`Successfully called ${functionName} for ${source.name}`)
+          results.push({
+            source: source.name,
+            type: source.type,
+            success: true,
+            result: result,
+            function_name: functionName
+          })
+        }
 
       } catch (error) {
         console.error(`Error processing source ${source.name}:`, error)
@@ -79,10 +96,18 @@ serve(async (req) => {
       }
     }
 
+    const successCount = results.filter(r => r.success).length
+    const totalCount = results.length
+
+    console.log(`ETL orchestration completed: ${successCount}/${totalCount} sources processed successfully`)
+
     return new Response(
       JSON.stringify({ 
         success: true,
-        processed: results.length,
+        message: `ETL orchestration completed: ${successCount}/${totalCount} sources processed successfully`,
+        processed: totalCount,
+        successful: successCount,
+        failed: totalCount - successCount,
         results 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -91,7 +116,11 @@ serve(async (req) => {
   } catch (error) {
     console.error('Orchestrator error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        success: false,
+        error: error.message,
+        message: 'ETL orchestration failed'
+      }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
