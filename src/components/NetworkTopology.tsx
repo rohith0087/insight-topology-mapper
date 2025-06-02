@@ -1,98 +1,125 @@
-
-import React, { useMemo } from 'react';
-import { Node, Edge, NodeProps } from 'reactflow';
-import { useNetworkData } from '@/hooks/useNetworkData';
-import { NodeData } from '@/types/networkTypes';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import {
+  ReactFlow,
+  Node,
+  Edge,
+  addEdge,
+  Background,
+  Controls,
+  MiniMap,
+  useNodesState,
+  useEdgesState,
+  Connection,
+  ConnectionMode,
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import { useNetworkData } from '../hooks/useNetworkData';
+import CustomDeviceNode from './nodes/CustomDeviceNode';
+import CustomServiceNode from './nodes/CustomServiceNode';
+import CustomApplicationNode from './nodes/CustomApplicationNode';
+import CustomCloudNode from './nodes/CustomCloudNode';
+import TopologyViewSelector, { TopologyView } from './topology/TopologyViewSelector';
 import GridTopologyView from './topology/views/GridTopologyView';
-import HierarchicalTopologyView from './topology/views/HierarchicalTopologyView';
 import RadialTopologyView from './topology/views/RadialTopologyView';
-import NetworkFlowView from './topology/views/NetworkFlowView';
-import { TopologyView } from './topology/TopologyViewSelector';
+import HierarchicalTopologyView from './topology/views/HierarchicalTopologyView';
+import ConnectionMatrixView from './topology/views/ConnectionMatrixView';
+import TreeTopologyView from './topology/views/TreeTopologyView';
+import ForceTopologyView from './topology/views/ForceTopologyView';
+import LayeredTopologyView from './topology/views/LayeredTopologyView';
+import { NodeData } from '../types/networkTypes';
+import { generateMockTopologyData } from '../utils/mockData';
+import { Alert, AlertDescription } from './ui/alert';
+import { Info } from 'lucide-react';
 
 const nodeTypes = {
-  // default: CustomNode
+  device: CustomDeviceNode,
+  service: CustomServiceNode,
+  application: CustomApplicationNode,
+  cloud: CustomCloudNode,
 };
 
 interface NetworkTopologyProps {
-  currentView: TopologyView;
-  onNodeClick: (event: React.MouseEvent, node: Node<NodeData>) => void;
-  filterSettings: {
-    showDevices: boolean;
-    showServices: boolean;
-    showApplications: boolean;
-    showCloudResources: boolean;
-    showConnections: boolean;
-  };
-  statusFilter?: string;
-  searchTerm?: string;
+  selectedNode: any;
+  setSelectedNode: (node: any) => void;
+  filterSettings: any;
 }
 
 const NetworkTopology: React.FC<NetworkTopologyProps> = ({
-  currentView,
-  onNodeClick,
-  filterSettings,
-  statusFilter = 'all',
-  searchTerm = ''
+  selectedNode,
+  setSelectedNode,
+  filterSettings
 }) => {
   const { data: networkData, isLoading, error } = useNetworkData();
-
-  const filteredData = useMemo(() => {
-    if (!networkData) return { nodes: [], edges: [] };
-
-    let filteredNodes = networkData.nodes.filter(node => {
-      // Type filter
-      const typeFilter = 
-        (node.data.type === 'device' && filterSettings.showDevices) ||
-        (node.data.type === 'service' && filterSettings.showServices) ||
-        (node.data.type === 'application' && filterSettings.showApplications) ||
-        (node.data.type === 'cloud' && filterSettings.showCloudResources);
-
-      // Status filter
-      const statusMatches = statusFilter === 'all' || node.data.status === statusFilter;
-
-      // Search filter
-      const searchMatches = searchTerm === '' || 
-        node.data.label.toLowerCase().includes(searchTerm.toLowerCase());
-
-      return typeFilter && statusMatches && searchMatches;
-    });
-
-    // Filter edges to only show connections between visible nodes
-    const visibleNodeIds = new Set(filteredNodes.map(node => node.id));
-    let filteredEdges = networkData.edges.filter(edge => 
-      visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
-    );
-
-    // Apply connection filter
-    if (!filterSettings.showConnections) {
-      filteredEdges = [];
+  const [currentView, setCurrentView] = useState<TopologyView>('network');
+  
+  // Use static data if no data is available from the database
+  const actualData = useMemo(() => {
+    if (networkData && (networkData.nodes.length > 0 || networkData.edges.length > 0)) {
+      return { ...networkData, isStatic: false };
     }
+    const mockData = generateMockTopologyData();
+    return { ...mockData, isStatic: true };
+  }, [networkData]);
+  
+  const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>(actualData.nodes || []);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(actualData.edges || []);
 
-    console.log('Filtered data:', { 
-      nodes: filteredNodes.length, 
-      edges: filteredEdges.length,
-      statusFilter,
-      searchTerm
+  // Update nodes and edges when data changes
+  useEffect(() => {
+    if (actualData) {
+      setNodes(actualData.nodes);
+      setEdges(actualData.edges);
+    }
+  }, [actualData, setNodes, setEdges]);
+
+  const onConnect = useCallback(
+    (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges]
+  );
+
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node<NodeData>) => {
+    setSelectedNode(node.data);
+  }, [setSelectedNode]);
+
+  // Filter nodes based on settings
+  const filteredNodes = useMemo(() => {
+    return nodes.filter(node => {
+      const nodeType = node.data.type;
+      switch (nodeType) {
+        case 'device':
+          return filterSettings.showDevices;
+        case 'service':
+          return filterSettings.showServices;
+        case 'application':
+          return filterSettings.showApplications;
+        case 'cloud':
+          return filterSettings.showCloudResources;
+        default:
+          return true;
+      }
     });
-
-    return {
-      nodes: filteredNodes,
-      edges: filteredEdges
-    };
-  }, [networkData, filterSettings, statusFilter, searchTerm]);
+  }, [nodes, filterSettings]);
 
   if (isLoading) {
-    return <div className="w-full h-full flex items-center justify-center text-slate-300">Loading network topology...</div>;
+    return (
+      <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+        <div className="text-white text-lg">Loading network topology...</div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="w-full h-full flex items-center justify-center text-red-400">Error: {error.message}</div>;
+    return (
+      <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+        <div className="text-red-400 text-lg">Error loading network data: {error.message}</div>
+      </div>
+    );
   }
 
   const renderTopologyView = () => {
     const commonProps = {
-      nodes: filteredData.nodes,
-      edges: filteredData.edges,
+      nodes: filteredNodes,
+      edges,
       onNodeClick,
       nodeTypes
     };
@@ -100,18 +127,72 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
     switch (currentView) {
       case 'grid':
         return <GridTopologyView {...commonProps} />;
-      case 'hierarchical':
-        return <HierarchicalTopologyView {...commonProps} />;
       case 'radial':
         return <RadialTopologyView {...commonProps} />;
-      case 'network':
+      case 'hierarchical':
+        return <HierarchicalTopologyView {...commonProps} />;
+      case 'tree':
+        return <TreeTopologyView {...commonProps} />;
+      case 'force':
+        return <ForceTopologyView {...commonProps} />;
+      case 'layered':
+        return <LayeredTopologyView {...commonProps} />;
+      case 'matrix':
+        return <ConnectionMatrixView {...commonProps} />;
       default:
-        return <NetworkFlowView {...commonProps} />;
+        return (
+          <ReactFlow
+            nodes={filteredNodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeClick={onNodeClick}
+            nodeTypes={nodeTypes}
+            connectionMode={ConnectionMode.Loose}
+            fitView
+            className="bg-slate-900"
+          >
+            <Background color="#334155" gap={20} />
+            <Controls className="bg-slate-800 border border-slate-600" />
+            <MiniMap 
+              nodeColor={(node) => {
+                switch (node.data.type) {
+                  case 'device': return '#06b6d4';
+                  case 'service': return '#10b981';
+                  case 'application': return '#8b5cf6';
+                  case 'cloud': return '#f59e0b';
+                  default: return '#64748b';
+                }
+              }}
+              className="bg-slate-800 border border-slate-600"
+            />
+          </ReactFlow>
+        );
     }
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full bg-slate-900 relative">
+      {actualData.isStatic && (
+        <div className="absolute top-4 left-4 z-10 max-w-md">
+          <Alert className="border-cyan-500/50 bg-cyan-950/50 text-cyan-100">
+            <Info className="h-4 w-4 text-cyan-400" />
+            <AlertDescription className="text-sm">
+              <strong>Static Demo Data:</strong> No live data sources connected. Showing sample network topology for demonstration purposes.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {/* View Selector */}
+      <div className="absolute top-4 right-4 z-10">
+        <TopologyViewSelector 
+          currentView={currentView}
+          onViewChange={setCurrentView}
+        />
+      </div>
+      
       {renderTopologyView()}
     </div>
   );
