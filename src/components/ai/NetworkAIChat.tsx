@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   MessageCircle, 
   Send, 
@@ -30,6 +31,98 @@ interface Message {
 interface NetworkAIChatProps {
   onClose?: () => void;
 }
+
+// Component to format AI text with markdown-like parsing
+const FormattedText: React.FC<{ content: string }> = ({ content }) => {
+  const formatText = (text: string) => {
+    const lines = text.split('\n');
+    const formattedLines: JSX.Element[] = [];
+
+    lines.forEach((line, index) => {
+      let formattedLine: JSX.Element;
+
+      // Main headings (### text)
+      if (line.startsWith('### ')) {
+        formattedLine = (
+          <h3 key={index} className="text-lg font-bold text-cyan-300 mt-4 mb-2 border-b border-slate-600 pb-1">
+            {line.replace('### ', '')}
+          </h3>
+        );
+      }
+      // Secondary headings (## text)
+      else if (line.startsWith('## ')) {
+        formattedLine = (
+          <h2 key={index} className="text-xl font-bold text-cyan-200 mt-4 mb-2">
+            {line.replace('## ', '')}
+          </h2>
+        );
+      }
+      // Tertiary headings (# text)
+      else if (line.startsWith('# ')) {
+        formattedLine = (
+          <h1 key={index} className="text-2xl font-bold text-cyan-100 mt-4 mb-3">
+            {line.replace('# ', '')}
+          </h1>
+        );
+      }
+      // Bold text (**text**)
+      else if (line.includes('**')) {
+        const parts = line.split(/(\*\*.*?\*\*)/);
+        formattedLine = (
+          <p key={index} className="mb-2 leading-relaxed">
+            {parts.map((part, partIndex) => {
+              if (part.startsWith('**') && part.endsWith('**')) {
+                return (
+                  <strong key={partIndex} className="font-semibold text-cyan-300">
+                    {part.slice(2, -2)}
+                  </strong>
+                );
+              }
+              return part;
+            })}
+          </p>
+        );
+      }
+      // List items (- text)
+      else if (line.startsWith('- ')) {
+        formattedLine = (
+          <div key={index} className="flex items-start mb-2">
+            <span className="text-cyan-400 mr-2 mt-1">•</span>
+            <span className="leading-relaxed">{line.replace('- ', '')}</span>
+          </div>
+        );
+      }
+      // Numbered lists (1. text)
+      else if (/^\d+\.\s/.test(line)) {
+        const match = line.match(/^(\d+)\.\s(.*)$/);
+        if (match) {
+          formattedLine = (
+            <div key={index} className="flex items-start mb-2">
+              <span className="text-cyan-400 mr-2 mt-1 font-medium">{match[1]}.</span>
+              <span className="leading-relaxed">{match[2]}</span>
+            </div>
+          );
+        } else {
+          formattedLine = <p key={index} className="mb-2 leading-relaxed">{line}</p>;
+        }
+      }
+      // Empty lines
+      else if (line.trim() === '') {
+        formattedLine = <div key={index} className="mb-2"></div>;
+      }
+      // Regular text
+      else {
+        formattedLine = <p key={index} className="mb-2 leading-relaxed">{line}</p>;
+      }
+
+      formattedLines.push(formattedLine);
+    });
+
+    return formattedLines;
+  };
+
+  return <div className="space-y-1">{formatText(content)}</div>;
+};
 
 const NetworkAIChat: React.FC<NetworkAIChatProps> = ({ onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -64,7 +157,15 @@ const NetworkAIChat: React.FC<NetworkAIChatProps> = ({ onClose }) => {
     setMessages([{
       id: crypto.randomUUID(),
       type: 'ai',
-      content: `Hello! I'm your AI network analyst. I can help you understand your network topology, identify security issues, analyze performance, and answer any questions about your infrastructure. 
+      content: `# Welcome to AI Network Analyst! 🤖
+
+I'm your AI network analyst. I can help you understand your network topology, identify security issues, analyze performance, and answer any questions about your infrastructure.
+
+## What I can do:
+- **Network Overview**: Comprehensive analysis of your network structure
+- **Security Analysis**: Identify vulnerabilities and threats
+- **Performance Analysis**: Find bottlenecks and optimization opportunities
+- **Topology Analysis**: Understand connectivity patterns
 
 Choose an analysis type or ask me anything about your network!`,
       timestamp: new Date()
@@ -131,13 +232,18 @@ Choose an analysis type or ask me anything about your network!`,
       const errorMessage: Message = {
         id: crypto.randomUUID(),
         type: 'ai',
-        content: `I apologize, but I encountered an error while analyzing your network. This might be due to:
+        content: `# Analysis Error ⚠️
 
-1. Network connectivity issues
-2. API configuration problems
-3. Insufficient data in your network topology
+I apologize, but I encountered an error while analyzing your network. This might be due to:
 
-Please check your network data sources and try again. If the problem persists, contact your system administrator.`,
+## Possible Issues:
+1. **Network connectivity issues**
+2. **API configuration problems**
+3. **Insufficient data in your network topology**
+
+## Next Steps:
+- Please check your network data sources and try again
+- If the problem persists, contact your system administrator`,
         timestamp: new Date()
       };
 
@@ -216,55 +322,63 @@ Please check your network data sources and try again. If the problem persists, c
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col p-0">
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => (
-            <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] flex items-start space-x-2 ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                  message.type === 'user' ? 'bg-cyan-600' : 'bg-slate-600'
-                }`}>
-                  {message.type === 'user' ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
-                </div>
-                <div className={`rounded-lg p-3 ${
-                  message.type === 'user' 
-                    ? 'bg-cyan-600 text-white' 
-                    : 'bg-slate-700 text-slate-100'
-                }`}>
-                  <div className="whitespace-pre-wrap text-sm">{message.content}</div>
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="text-xs opacity-70">
-                      {message.timestamp.toLocaleTimeString()}
+        {/* Messages Area with Scrolling */}
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-4">
+            {messages.map((message) => (
+              <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] flex items-start space-x-3 ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                    message.type === 'user' ? 'bg-cyan-600' : 'bg-slate-600'
+                  }`}>
+                    {message.type === 'user' ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
+                  </div>
+                  <div className={`rounded-lg p-4 ${
+                    message.type === 'user' 
+                      ? 'bg-cyan-600 text-white' 
+                      : 'bg-slate-700 text-slate-100'
+                  }`}>
+                    <div className="text-sm">
+                      {message.type === 'ai' ? (
+                        <FormattedText content={message.content} />
+                      ) : (
+                        <div className="whitespace-pre-wrap">{message.content}</div>
+                      )}
                     </div>
-                    {message.analysis_type && (
-                      <Badge variant="outline" className="text-xs border-slate-500 text-slate-300">
-                        {analysisTypes.find(t => t.id === message.analysis_type)?.label || message.analysis_type}
-                      </Badge>
-                    )}
+                    <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-600">
+                      <div className="text-xs opacity-70">
+                        {message.timestamp.toLocaleTimeString()}
+                      </div>
+                      {message.analysis_type && (
+                        <Badge variant="outline" className="text-xs border-slate-500 text-slate-300">
+                          {analysisTypes.find(t => t.id === message.analysis_type)?.label || message.analysis_type}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-          
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="flex items-start space-x-2">
-                <div className="flex-shrink-0 w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center">
-                  <Bot className="w-4 h-4 text-white" />
-                </div>
-                <div className="bg-slate-700 rounded-lg p-3">
-                  <div className="flex items-center space-x-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
-                    <span className="text-sm text-slate-300">Analyzing your network...</span>
+            ))}
+            
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center">
+                    <Bot className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="bg-slate-700 rounded-lg p-4">
+                    <div className="flex items-center space-x-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+                      <span className="text-sm text-slate-300">Analyzing your network...</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
-        </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollArea>
 
         {/* Quick Questions */}
         {messages.length <= 1 && (
