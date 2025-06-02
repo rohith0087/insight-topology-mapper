@@ -19,7 +19,7 @@ import { Database, Settings, Network, Users, Brain, Lightbulb, X, BarChart3, Pla
 const TopologyDashboard = () => {
   const { profile } = useAuth();
   const { insights, generateInsights, isLoading: insightsLoading } = useNetworkInsights();
-  const { progress, startOnboarding } = useOnboarding();
+  const { progress, startOnboarding, isLoading: onboardingLoading } = useOnboarding();
   const [selectedNode, setSelectedNode] = useState(null);
   const [showDataSources, setShowDataSources] = useState(false);
   const [showUserManagement, setShowUserManagement] = useState(false);
@@ -90,7 +90,15 @@ const TopologyDashboard = () => {
   };
 
   const handleStartOnboarding = () => {
+    console.log('Start Tour button clicked');
     startOnboarding();
+  };
+
+  // Check if we should show the Start Tour button
+  const shouldShowStartTour = () => {
+    if (onboardingLoading) return false;
+    if (!progress) return true; // No progress record means user hasn't started
+    return !progress.is_completed; // Show if onboarding is not completed
   };
 
   const getCurrentView = () => {
@@ -167,10 +175,10 @@ const TopologyDashboard = () => {
             </div>
           </div>
           
-          {/* Action Buttons - Better spacing */}
+          {/* Action Buttons */}
           <div className="flex items-center space-x-2">
             {/* Onboarding Button (show if not completed) */}
-            {profile && (!progress?.is_completed) && (
+            {profile && shouldShowStartTour() && (
               <Button
                 onClick={handleStartOnboarding}
                 size="sm"

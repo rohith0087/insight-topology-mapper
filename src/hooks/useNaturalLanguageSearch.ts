@@ -103,7 +103,7 @@ export const useNaturalLanguageSearch = () => {
       .insert({
         query_name: queryName,
         query_text: queryText,
-        filters: filters as any,
+        filters: JSON.parse(JSON.stringify(filters)), // Convert to plain object for Json type
         is_favorite: false,
         user_id: user.id,
         tenant_id: profile.tenant_id

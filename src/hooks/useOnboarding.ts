@@ -88,11 +88,17 @@ export const useOnboarding = () => {
         throw error;
       }
 
-      // Transform the data to match our interface
+      // Transform the data to match our interface, handling Json types properly
       return {
         ...data,
-        completed_steps: Array.isArray(data.completed_steps) ? data.completed_steps : [],
-        onboarding_data: data.onboarding_data || {}
+        completed_steps: Array.isArray(data.completed_steps) 
+          ? data.completed_steps as number[]
+          : typeof data.completed_steps === 'string' 
+          ? JSON.parse(data.completed_steps) 
+          : [],
+        onboarding_data: typeof data.onboarding_data === 'object' 
+          ? data.onboarding_data as Record<string, any>
+          : {}
       } as OnboardingProgress;
     },
   });
@@ -147,6 +153,7 @@ export const useOnboarding = () => {
 
   // Start onboarding
   const startOnboarding = () => {
+    console.log('Starting onboarding, current progress:', progress);
     setIsOnboardingVisible(true);
     if (!progress) {
       updateProgressMutation.mutate({ step: 1 });
