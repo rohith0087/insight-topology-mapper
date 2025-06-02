@@ -1,4 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Network, Shield, Activity, Database, Zap, Eye, Globe, Server, Lock, TrendingUp,
   CheckCircle, ArrowRight, Play, Menu, X, Star, Users, Clock, Target, Layers,
@@ -8,6 +10,7 @@ import {
 } from 'lucide-react';
 
 const LumenNetLanding: React.FC = () => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [activeStoryStep, setActiveStoryStep] = useState(0);
@@ -100,10 +103,16 @@ const LumenNetLanding: React.FC = () => {
             </div>
 
             <div className="hidden md:flex items-center space-x-3">
-              <button className="px-3 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors rounded-md">
+              <button 
+                onClick={() => navigate('/auth')}
+                className="px-3 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors rounded-md"
+              >
                 Sign in
               </button>
-              <button className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-md text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50">
+              <button 
+                onClick={() => navigate('/auth')}
+                className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-md text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50"
+              >
                 Start Your Project
               </button>
             </div>
@@ -126,10 +135,16 @@ const LumenNetLanding: React.FC = () => {
                   {item}
                 </a>
               ))}
-              <button className="w-full text-left block px-3 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-colors">
+              <button 
+                onClick={() => navigate('/auth')}
+                className="w-full text-left block px-3 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-colors"
+              >
                 Sign in
               </button>
-              <button className="w-full mt-2 px-3 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-md text-base font-medium transition-colors">
+              <button 
+                onClick={() => navigate('/auth')}
+                className="w-full mt-2 px-3 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-md text-base font-medium transition-colors"
+              >
                 Start Your Project
               </button>
             </div>
@@ -162,7 +177,10 @@ const LumenNetLanding: React.FC = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button className="px-7 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-cyan-500/30 flex items-center transform hover:scale-105">
+              <button 
+                onClick={() => navigate('/auth')}
+                className="px-7 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-cyan-500/30 flex items-center transform hover:scale-105"
+              >
                 Begin Your Security Story
                 <ArrowRight className="ml-2.5 w-5 h-5" />
               </button>
@@ -520,7 +538,10 @@ const LumenNetLanding: React.FC = () => {
               Join over a thousand security teams who trust LumenNet to illuminate their path to a stronger security posture.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
-              <button className="px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-cyan-500/30 transform hover:scale-105">
+              <button 
+                onClick={() => navigate('/auth')}
+                className="px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-cyan-500/30 transform hover:scale-105"
+              >
                 Start Your 30-Day Free Trial
               </button>
               <button className="px-8 py-3.5 border border-gray-600 hover:border-cyan-500 hover:text-cyan-300 rounded-lg font-semibold text-lg text-gray-300 transition-colors transform hover:scale-105">
