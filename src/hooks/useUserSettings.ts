@@ -21,7 +21,7 @@ export const useUserSettings = () => {
 
       if (error) throw error;
 
-      if (data && Object.keys(data).length > 0) {
+      if (data && typeof data === 'object' && Object.keys(data).length > 0) {
         setSettings({ ...DEFAULT_USER_SETTINGS, ...data });
       }
     } catch (error) {
