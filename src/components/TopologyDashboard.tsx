@@ -5,7 +5,7 @@ import SearchAndFilters from './SearchAndFilters';
 import StatusBar from './StatusBar';
 import DataSourceManagement from './DataSourceManagement';
 import { Button } from './ui/button';
-import { Database, Settings } from 'lucide-react';
+import { Database, Settings, Network } from 'lucide-react';
 
 const TopologyDashboard = () => {
   const [selectedNode, setSelectedNode] = useState(null);
@@ -23,9 +23,12 @@ const TopologyDashboard = () => {
       {/* Header */}
       <header className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-cyan-400">SOC Network Topology</h1>
-            <p className="text-slate-400 text-sm">Unified Security Operations Center Visualization</p>
+          <div className="flex items-center space-x-3">
+            <Network className="w-8 h-8 text-cyan-400" />
+            <div>
+              <h1 className="text-2xl font-bold text-cyan-400">LumenNet</h1>
+              <p className="text-slate-400 text-sm">Unified Security Operations Center Visualization</p>
+            </div>
           </div>
           <div className="flex items-center space-x-4">
             <Button

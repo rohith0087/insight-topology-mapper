@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Monitor, Link, Clock } from 'lucide-react';
 
 const StatusBar = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -21,16 +22,19 @@ const StatusBar = () => {
         <span className="text-slate-300">Live</span>
       </div>
       
-      <div className="text-slate-400">
-        Nodes: <span className="text-cyan-400 font-medium">{nodeCount}</span>
+      <div className="flex items-center space-x-2 text-slate-400">
+        <Monitor className="w-4 h-4 text-cyan-400" />
+        <span>Nodes: <span className="text-cyan-400 font-medium">{nodeCount}</span></span>
       </div>
       
-      <div className="text-slate-400">
-        Connections: <span className="text-cyan-400 font-medium">{connectionCount}</span>
+      <div className="flex items-center space-x-2 text-slate-400">
+        <Link className="w-4 h-4 text-green-400" />
+        <span>Connections: <span className="text-cyan-400 font-medium">{connectionCount}</span></span>
       </div>
       
-      <div className="text-slate-400">
-        {currentTime.toLocaleTimeString()}
+      <div className="flex items-center space-x-2 text-slate-400">
+        <Clock className="w-4 h-4 text-slate-400" />
+        <span>{currentTime.toLocaleTimeString()}</span>
       </div>
     </div>
   );
