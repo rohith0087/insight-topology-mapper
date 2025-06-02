@@ -8,19 +8,24 @@ import UserManagement from './UserManagement';
 import UserProfile from './UserProfile';
 import NetworkAIChat from './ai/NetworkAIChat';
 import NetworkInsightsPanel from './ai/NetworkInsightsPanel';
+import ExecutiveDashboard from './executive/ExecutiveDashboard';
+import OnboardingModal from './onboarding/OnboardingModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNetworkInsights } from '@/hooks/useNetworkAI';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { Button } from './ui/button';
-import { Database, Settings, Network, Users, Brain, Lightbulb, X } from 'lucide-react';
+import { Database, Settings, Network, Users, Brain, Lightbulb, X, BarChart3, Play } from 'lucide-react';
 
 const TopologyDashboard = () => {
   const { profile } = useAuth();
   const { insights, generateInsights, isLoading: insightsLoading } = useNetworkInsights();
+  const { progress, startOnboarding } = useOnboarding();
   const [selectedNode, setSelectedNode] = useState(null);
   const [showDataSources, setShowDataSources] = useState(false);
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
+  const [showExecutiveDashboard, setShowExecutiveDashboard] = useState(false);
   const [showRightPanel, setShowRightPanel] = useState(false);
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const [filterSettings, setFilterSettings] = useState({
@@ -30,6 +35,17 @@ const TopologyDashboard = () => {
     showCloudResources: true,
     showConnections: true
   });
+
+  // Show onboarding for new users
+  useEffect(() => {
+    if (profile && (!progress || (!progress.is_completed && progress.current_step === 1))) {
+      const timer = setTimeout(() => {
+        startOnboarding();
+      }, 1000); // Show after 1 second
+      
+      return () => clearTimeout(timer);
+    }
+  }, [profile, progress, startOnboarding]);
 
   // Handle click outside to close right panel
   useEffect(() => {
@@ -73,6 +89,71 @@ const TopologyDashboard = () => {
     setShowInsights(false);
   };
 
+  const handleStartOnboarding = () => {
+    startOnboarding();
+  };
+
+  const getCurrentView = () => {
+    if (showUserManagement) return 'user-management';
+    if (showAIChat) return 'ai-chat';
+    if (showExecutiveDashboard) return 'executive-dashboard';
+    return 'network-topology';
+  };
+
+  const renderMainContent = () => {
+    switch (getCurrentView()) {
+      case 'user-management':
+        return (
+          <div className="h-full overflow-y-auto p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-cyan-400">User Management</h2>
+              <Button
+                onClick={() => setShowUserManagement(false)}
+                variant="outline"
+                className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+              >
+                Back to Network
+              </Button>
+            </div>
+            <UserManagement />
+          </div>
+        );
+      
+      case 'ai-chat':
+        return (
+          <div className="h-full p-6">
+            <NetworkAIChat onClose={() => setShowAIChat(false)} />
+          </div>
+        );
+      
+      case 'executive-dashboard':
+        return (
+          <div className="h-full overflow-y-auto">
+            <div className="flex items-center justify-between p-6 pb-0">
+              <div></div>
+              <Button
+                onClick={() => setShowExecutiveDashboard(false)}
+                variant="outline"
+                className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+              >
+                Back to Network
+              </Button>
+            </div>
+            <ExecutiveDashboard />
+          </div>
+        );
+      
+      default:
+        return (
+          <NetworkTopology 
+            selectedNode={selectedNode}
+            setSelectedNode={handleNodeSelection}
+            filterSettings={filterSettings}
+          />
+        );
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-slate-900 text-white overflow-hidden">
       {/* Header */}
@@ -86,6 +167,28 @@ const TopologyDashboard = () => {
             </div>
           </div>
           <div className="flex items-center space-x-4">
+            {/* Onboarding Button (show if not completed) */}
+            {profile && (!progress?.is_completed) && (
+              <Button
+                onClick={handleStartOnboarding}
+                variant="outline"
+                className="border-green-600 hover:bg-green-700 bg-green-950 text-green-300 hover:text-white"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Start Tour
+              </Button>
+            )}
+
+            {/* Executive Dashboard */}
+            <Button
+              onClick={() => setShowExecutiveDashboard(true)}
+              variant="outline"
+              className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Executive
+            </Button>
+
             {/* AI Features */}
             <Button
               onClick={() => setShowAIChat(true)}
@@ -138,60 +241,38 @@ const TopologyDashboard = () => {
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden relative">
         {/* Left Sidebar - Fixed width with scroll */}
-        <aside className="w-80 bg-slate-800 border-r border-slate-700 flex flex-col flex-shrink-0">
-          <div className="p-4 border-b border-slate-700 flex-shrink-0">
-            <div className="flex items-center space-x-2">
-              <Settings className="w-5 h-5 text-cyan-400" />
-              <h3 className="text-lg font-semibold text-cyan-400">Search & Filters</h3>
-            </div>
-            {profile && (
-              <div className="mt-2 text-xs text-slate-500">
-                Role: {profile.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+        {getCurrentView() === 'network-topology' && (
+          <aside className="w-80 bg-slate-800 border-r border-slate-700 flex flex-col flex-shrink-0">
+            <div className="p-4 border-b border-slate-700 flex-shrink-0">
+              <div className="flex items-center space-x-2">
+                <Settings className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-lg font-semibold text-cyan-400">Search & Filters</h3>
               </div>
-            )}
-          </div>
-          
-          <div className="flex-1 overflow-y-auto">
-            <div className="p-4">
-              <SearchAndFilters 
-                filterSettings={filterSettings}
-                setFilterSettings={setFilterSettings}
-              />
+              {profile && (
+                <div className="mt-2 text-xs text-slate-500">
+                  Role: {profile.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </div>
+              )}
             </div>
-          </div>
-        </aside>
+            
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-4">
+                <SearchAndFilters 
+                  filterSettings={filterSettings}
+                  setFilterSettings={setFilterSettings}
+                />
+              </div>
+            </div>
+          </aside>
+        )}
 
-        {/* Main Topology View - Takes remaining space */}
+        {/* Main Content Area - Takes remaining space */}
         <main className="flex-1 relative min-w-0">
-          {showUserManagement ? (
-            <div className="h-full overflow-y-auto p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-cyan-400">User Management</h2>
-                <Button
-                  onClick={() => setShowUserManagement(false)}
-                  variant="outline"
-                  className="border-slate-600 hover:bg-slate-700 bg-slate-900 text-slate-300 hover:text-white"
-                >
-                  Back to Network
-                </Button>
-              </div>
-              <UserManagement />
-            </div>
-          ) : showAIChat ? (
-            <div className="h-full p-6">
-              <NetworkAIChat onClose={() => setShowAIChat(false)} />
-            </div>
-          ) : (
-            <NetworkTopology 
-              selectedNode={selectedNode}
-              setSelectedNode={handleNodeSelection}
-              filterSettings={filterSettings}
-            />
-          )}
+          {renderMainContent()}
         </main>
 
-        {/* Right Panel - Sliding panel */}
-        {!showUserManagement && !showAIChat && (
+        {/* Right Panel - Sliding panel (only for network topology view) */}
+        {getCurrentView() === 'network-topology' && (
           <div
             ref={rightPanelRef}
             className={`absolute top-0 right-0 h-full w-96 bg-slate-800 border-l border-slate-700 flex flex-col transition-transform duration-300 ease-in-out z-10 ${
@@ -263,6 +344,9 @@ const TopologyDashboard = () => {
       {showDataSources && (
         <DataSourceManagement onClose={() => setShowDataSources(false)} />
       )}
+
+      {/* Onboarding Modal */}
+      <OnboardingModal />
     </div>
   );
 };

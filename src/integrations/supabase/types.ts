@@ -322,6 +322,82 @@ export type Database = {
           },
         ]
       }
+      executive_metrics: {
+        Row: {
+          calculation_date: string
+          created_at: string | null
+          id: string
+          metric_type: string
+          metric_value: Json
+          tenant_id: string
+        }
+        Insert: {
+          calculation_date?: string
+          created_at?: string | null
+          id?: string
+          metric_type: string
+          metric_value: Json
+          tenant_id: string
+        }
+        Update: {
+          calculation_date?: string
+          created_at?: string | null
+          id?: string
+          metric_type?: string
+          metric_value?: Json
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "executive_metrics_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      natural_language_queries: {
+        Row: {
+          created_at: string | null
+          execution_count: number | null
+          id: string
+          last_executed_at: string | null
+          query_text: string
+          tenant_id: string
+          translated_filters: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          execution_count?: number | null
+          id?: string
+          last_executed_at?: string | null
+          query_text: string
+          tenant_id: string
+          translated_filters: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          execution_count?: number | null
+          id?: string
+          last_executed_at?: string | null
+          query_text?: string
+          tenant_id?: string
+          translated_filters?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "natural_language_queries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       network_connections: {
         Row: {
           confidence_score: number | null
@@ -521,6 +597,50 @@ export type Database = {
           },
         ]
       }
+      saved_queries: {
+        Row: {
+          created_at: string | null
+          filters: Json
+          id: string
+          is_favorite: boolean | null
+          query_name: string
+          query_text: string
+          tenant_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          filters: Json
+          id?: string
+          is_favorite?: boolean | null
+          query_name: string
+          query_text: string
+          tenant_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          filters?: Json
+          id?: string
+          is_favorite?: boolean | null
+          query_name?: string
+          query_text?: string
+          tenant_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_queries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           company_name: string | null
@@ -611,6 +731,53 @@ export type Database = {
           },
         ]
       }
+      user_onboarding: {
+        Row: {
+          completed_at: string | null
+          completed_steps: Json | null
+          current_step: number | null
+          id: string
+          is_completed: boolean | null
+          onboarding_data: Json | null
+          started_at: string | null
+          tenant_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_steps?: Json | null
+          current_step?: number | null
+          id?: string
+          is_completed?: boolean | null
+          onboarding_data?: Json | null
+          started_at?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_steps?: Json | null
+          current_step?: number | null
+          id?: string
+          is_completed?: boolean | null
+          onboarding_data?: Json | null
+          started_at?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_onboarding_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_settings: {
         Row: {
           created_at: string
@@ -643,6 +810,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_executive_metrics: {
+        Args: { p_tenant_id: string }
+        Returns: Json
+      }
       extract_domain: {
         Args: { email: string }
         Returns: string
@@ -673,6 +844,21 @@ export type Database = {
       is_valid_company_email: {
         Args: { email: string }
         Returns: boolean
+      }
+      update_onboarding_progress: {
+        Args: { p_step: number; p_step_data?: Json }
+        Returns: {
+          completed_at: string | null
+          completed_steps: Json | null
+          current_step: number | null
+          id: string
+          is_completed: boolean | null
+          onboarding_data: Json | null
+          started_at: string | null
+          tenant_id: string
+          updated_at: string | null
+          user_id: string
+        }
       }
       upsert_user_setting: {
         Args: { p_settings_key: string; p_settings_value: Json }
