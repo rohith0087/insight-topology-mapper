@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
@@ -31,7 +32,10 @@ const getTypeIcon = (type: string) => {
   const iconImages = {
     aws: <img src="/lovable-uploads/e1398d3d-578a-471e-bfde-4096d0238576.png" alt="AWS" className="w-6 h-6 object-contain" />,
     azure: <img src="/lovable-uploads/c8dd797a-375c-47db-991f-ea4bdbf311f1.png" alt="Azure" className="w-6 h-6 object-contain" />,
-    datadog: <img src="/lovable-uploads/29d45e0c-b15e-4e77-89ae-28286dda410d.png" alt="DataDog" className="w-6 h-6 object-contain" />
+    datadog: <img src="/lovable-uploads/29d45e0c-b15e-4e77-89ae-28286dda410d.png" alt="DataDog" className="w-6 h-6 object-contain" />,
+    'microsoft-sentinel': <img src="/lovable-uploads/09db2bdd-5525-47a7-aaa8-e30b98d6901d.png" alt="Microsoft Sentinel" className="w-6 h-6 object-contain" />,
+    qradar: <img src="/lovable-uploads/88b0bf91-c943-4248-baf0-5e75ef46c244.png" alt="QRadar" className="w-6 h-6 object-contain" />,
+    sentinelone: <img src="/lovable-uploads/fe727117-4df6-4009-85bb-536a2073baec.png" alt="SentinelOne" className="w-6 h-6 object-contain" />
   };
 
   if (iconImages[type]) {
@@ -42,10 +46,7 @@ const getTypeIcon = (type: string) => {
     nmap: '🌐',
     splunk: '🟢',
     snmp: '📡',
-    api: '🔌',
-    sentinelone: '🛡️',
-    qradar: '🔒',
-    'microsoft-sentinel': '🛡️'
+    api: '🔌'
   };
   return icons[type] || '⚙️';
 };
@@ -298,7 +299,7 @@ const dataSources: DataSourceDoc[] = [
   {
     id: 'sentinelone',
     name: 'SentinelOne EDR',
-    icon: '🛡️',
+    icon: getTypeIcon('sentinelone'),
     category: 'Endpoint Security',
     description: 'Collect endpoint and network information from SentinelOne EDR platform for security and topology analysis.',
     credentialGuide: {
@@ -350,7 +351,7 @@ const dataSources: DataSourceDoc[] = [
   {
     id: 'qradar',
     name: 'IBM QRadar SIEM',
-    icon: '🔒',
+    icon: getTypeIcon('qradar'),
     category: 'SIEM',
     description: 'Extract network topology and security insights from IBM QRadar SIEM platform.',
     credentialGuide: {
@@ -458,7 +459,7 @@ const dataSources: DataSourceDoc[] = [
   {
     id: 'microsoft-sentinel',
     name: 'Microsoft Sentinel',
-    icon: '🛡️',
+    icon: getTypeIcon('microsoft-sentinel'),
     category: 'SIEM',
     description: 'Extract security insights and network topology data from Microsoft Sentinel cloud-native SIEM.',
     credentialGuide: {
@@ -696,173 +697,157 @@ const DataSourceDocumentation: React.FC<DataSourceDocumentationProps> = ({ onClo
                     </TabsList>
                   </div>
 
-                  <div className="flex-1 min-h-0 overflow-hidden">
-                    <div className="h-full">
-                      <TabsContent value="overview" className="mt-0 h-full">
-                        <ScrollArea className="h-full">
-                          <div className="p-6 space-y-6">
-                            <Card className="bg-slate-900 border-slate-600">
-                              <CardHeader>
-                                <CardTitle className="text-cyan-400">Use Cases</CardTitle>
-                              </CardHeader>
-                              <CardContent>
-                                <ul className="space-y-2">
-                                  {currentSource.useCases.map((useCase, index) => (
-                                    <li key={index} className="flex items-center text-slate-300">
-                                      <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-                                      {useCase}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </CardContent>
-                            </Card>
+                  <div className="flex-1 min-h-0">
+                    <ScrollArea className="h-full">
+                      <TabsContent value="overview" className="mt-0 p-6 space-y-6">
+                        <Card className="bg-slate-900 border-slate-600">
+                          <CardHeader>
+                            <CardTitle className="text-cyan-400">Use Cases</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <ul className="space-y-2">
+                              {currentSource.useCases.map((useCase, index) => (
+                                <li key={index} className="flex items-center text-slate-300">
+                                  <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                                  {useCase}
+                                </li>
+                              ))}
+                            </ul>
+                          </CardContent>
+                        </Card>
 
-                            <Card className="bg-slate-900 border-slate-600">
-                              <CardHeader>
-                                <CardTitle className="text-yellow-400">Limitations</CardTitle>
-                              </CardHeader>
-                              <CardContent>
-                                <ul className="space-y-2">
-                                  {currentSource.limitations.map((limitation, index) => (
-                                    <li key={index} className="flex items-center text-slate-300">
-                                      <AlertTriangle className="w-4 h-4 text-yellow-500 mr-2 flex-shrink-0" />
-                                      {limitation}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </CardContent>
-                            </Card>
-                          </div>
-                        </ScrollArea>
+                        <Card className="bg-slate-900 border-slate-600">
+                          <CardHeader>
+                            <CardTitle className="text-yellow-400">Limitations</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <ul className="space-y-2">
+                              {currentSource.limitations.map((limitation, index) => (
+                                <li key={index} className="flex items-center text-slate-300">
+                                  <AlertTriangle className="w-4 h-4 text-yellow-500 mr-2 flex-shrink-0" />
+                                  {limitation}
+                                </li>
+                              ))}
+                            </ul>
+                          </CardContent>
+                        </Card>
                       </TabsContent>
 
-                      <TabsContent value="credentials" className="mt-0 h-full">
-                        <ScrollArea className="h-full">
-                          <div className="p-6">
-                            <Card className="bg-slate-900 border-slate-600">
-                              <CardHeader>
-                                <CardTitle className="text-cyan-400">{currentSource.credentialGuide.title}</CardTitle>
-                              </CardHeader>
-                              <CardContent className="space-y-6">
-                                <div>
-                                  <h4 className="font-medium text-white mb-3">Setup Steps:</h4>
-                                  <ol className="space-y-2">
-                                    {currentSource.credentialGuide.steps.map((step, index) => (
-                                      <li key={index} className="flex text-slate-300">
-                                        <span className="bg-cyan-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 mt-0.5 flex-shrink-0">
-                                          {index + 1}
-                                        </span>
-                                        {step}
-                                      </li>
-                                    ))}
-                                  </ol>
-                                </div>
+                      <TabsContent value="credentials" className="mt-0 p-6">
+                        <Card className="bg-slate-900 border-slate-600">
+                          <CardHeader>
+                            <CardTitle className="text-cyan-400">{currentSource.credentialGuide.title}</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-6">
+                            <div>
+                              <h4 className="font-medium text-white mb-3">Setup Steps:</h4>
+                              <ol className="space-y-2">
+                                {currentSource.credentialGuide.steps.map((step, index) => (
+                                  <li key={index} className="flex text-slate-300">
+                                    <span className="bg-cyan-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 mt-0.5 flex-shrink-0">
+                                      {index + 1}
+                                    </span>
+                                    {step}
+                                  </li>
+                                ))}
+                              </ol>
+                            </div>
 
-                                {currentSource.credentialGuide.links.length > 0 && (
-                                  <div>
-                                    <h4 className="font-medium text-white mb-3">Helpful Links:</h4>
-                                    <div className="space-y-2">
-                                      {currentSource.credentialGuide.links.map((link, index) => (
-                                        <a
-                                          key={index}
-                                          href={link.url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="flex items-center text-cyan-400 hover:text-cyan-300 transition-colors"
-                                        >
-                                          <ExternalLink className="w-4 h-4 mr-2" />
-                                          {link.text}
-                                        </a>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                              </CardContent>
-                            </Card>
-                          </div>
-                        </ScrollArea>
-                      </TabsContent>
-
-                      <TabsContent value="configuration" className="mt-0 h-full">
-                        <ScrollArea className="h-full">
-                          <div className="p-6 space-y-6">
-                            <Card className="bg-slate-900 border-slate-600">
-                              <CardHeader>
-                                <CardTitle className="text-cyan-400">Required Fields</CardTitle>
-                              </CardHeader>
-                              <CardContent>
-                                <div className="space-y-3">
-                                  {currentSource.configuration.required.map((field, index) => (
-                                    <div key={index} className="bg-slate-800 p-3 rounded">
-                                      <div className="font-medium text-white">{field}</div>
-                                      {currentSource.configuration.examples[field] && (
-                                        <div className="text-sm text-slate-400 mt-1">
-                                          Example: <code className="bg-slate-700 px-2 py-1 rounded">
-                                            {currentSource.configuration.examples[field]}
-                                          </code>
-                                        </div>
-                                      )}
-                                    </div>
+                            {currentSource.credentialGuide.links.length > 0 && (
+                              <div>
+                                <h4 className="font-medium text-white mb-3">Helpful Links:</h4>
+                                <div className="space-y-2">
+                                  {currentSource.credentialGuide.links.map((link, index) => (
+                                    <a
+                                      key={index}
+                                      href={link.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center text-cyan-400 hover:text-cyan-300 transition-colors"
+                                    >
+                                      <ExternalLink className="w-4 h-4 mr-2" />
+                                      {link.text}
+                                    </a>
                                   ))}
                                 </div>
-                              </CardContent>
-                            </Card>
-
-                            {currentSource.configuration.optional.length > 0 && (
-                              <Card className="bg-slate-900 border-slate-600">
-                                <CardHeader>
-                                  <CardTitle className="text-slate-400">Optional Fields</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="space-y-3">
-                                    {currentSource.configuration.optional.map((field, index) => (
-                                      <div key={index} className="bg-slate-800 p-3 rounded">
-                                        <div className="font-medium text-white">{field}</div>
-                                        {currentSource.configuration.examples[field] && (
-                                          <div className="text-sm text-slate-400 mt-1">
-                                            Example: <code className="bg-slate-700 px-2 py-1 rounded">
-                                              {currentSource.configuration.examples[field]}
-                                            </code>
-                                          </div>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </CardContent>
-                              </Card>
+                              </div>
                             )}
-                          </div>
-                        </ScrollArea>
+                          </CardContent>
+                        </Card>
                       </TabsContent>
 
-                      <TabsContent value="troubleshooting" className="mt-0 h-full">
-                        <ScrollArea className="h-full">
-                          <div className="p-6">
-                            <Card className="bg-slate-900 border-slate-600">
-                              <CardHeader>
-                                <CardTitle className="text-cyan-400">Common Issues & Solutions</CardTitle>
-                              </CardHeader>
-                              <CardContent>
-                                <div className="space-y-4">
-                                  {currentSource.troubleshooting.map((item, index) => (
-                                    <div key={index} className="border border-slate-700 rounded-lg p-4">
-                                      <div className="font-medium text-red-400 mb-2 flex items-center">
-                                        <AlertTriangle className="w-4 h-4 mr-2" />
-                                        Issue: {item.issue}
-                                      </div>
-                                      <div className="text-green-400 flex items-center">
-                                        <CheckCircle className="w-4 h-4 mr-2" />
-                                        Solution: {item.solution}
-                                      </div>
+                      <TabsContent value="configuration" className="mt-0 p-6 space-y-6">
+                        <Card className="bg-slate-900 border-slate-600">
+                          <CardHeader>
+                            <CardTitle className="text-cyan-400">Required Fields</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3">
+                              {currentSource.configuration.required.map((field, index) => (
+                                <div key={index} className="bg-slate-800 p-3 rounded">
+                                  <div className="font-medium text-white">{field}</div>
+                                  {currentSource.configuration.examples[field] && (
+                                    <div className="text-sm text-slate-400 mt-1">
+                                      Example: <code className="bg-slate-700 px-2 py-1 rounded">
+                                        {currentSource.configuration.examples[field]}
+                                      </code>
                                     </div>
-                                  ))}
+                                  )}
                                 </div>
-                              </CardContent>
-                            </Card>
-                          </div>
-                        </ScrollArea>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        {currentSource.configuration.optional.length > 0 && (
+                          <Card className="bg-slate-900 border-slate-600">
+                            <CardHeader>
+                              <CardTitle className="text-slate-400">Optional Fields</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-3">
+                                {currentSource.configuration.optional.map((field, index) => (
+                                  <div key={index} className="bg-slate-800 p-3 rounded">
+                                    <div className="font-medium text-white">{field}</div>
+                                    {currentSource.configuration.examples[field] && (
+                                      <div className="text-sm text-slate-400 mt-1">
+                                        Example: <code className="bg-slate-700 px-2 py-1 rounded">
+                                          {currentSource.configuration.examples[field]}
+                                        </code>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
                       </TabsContent>
-                    </div>
+
+                      <TabsContent value="troubleshooting" className="mt-0 p-6">
+                        <Card className="bg-slate-900 border-slate-600">
+                          <CardHeader>
+                            <CardTitle className="text-cyan-400">Common Issues & Solutions</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              {currentSource.troubleshooting.map((item, index) => (
+                                <div key={index} className="border border-slate-700 rounded-lg p-4">
+                                  <div className="font-medium text-red-400 mb-2 flex items-center">
+                                    <AlertTriangle className="w-4 h-4 mr-2" />
+                                    Issue: {item.issue}
+                                  </div>
+                                  <div className="text-green-400 flex items-center">
+                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                    Solution: {item.solution}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </TabsContent>
+                    </ScrollArea>
                   </div>
                 </Tabs>
               </>

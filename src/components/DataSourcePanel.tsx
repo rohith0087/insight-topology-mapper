@@ -11,7 +11,10 @@ const DataSourcePanel = () => {
     const iconImages = {
       aws: '/lovable-uploads/e1398d3d-578a-471e-bfde-4096d0238576.png',
       azure: '/lovable-uploads/c8dd797a-375c-47db-991f-ea4bdbf311f1.png',
-      datadog: '/lovable-uploads/29d45e0c-b15e-4e77-89ae-28286dda410d.png'
+      datadog: '/lovable-uploads/29d45e0c-b15e-4e77-89ae-28286dda410d.png',
+      'microsoft-sentinel': '/lovable-uploads/09db2bdd-5525-47a7-aaa8-e30b98d6901d.png',
+      qradar: '/lovable-uploads/88b0bf91-c943-4248-baf0-5e75ef46c244.png',
+      sentinelone: '/lovable-uploads/fe727117-4df6-4009-85bb-536a2073baec.png'
     };
 
     if (iconImages[type]) {
@@ -20,12 +23,9 @@ const DataSourcePanel = () => {
 
     const icons = {
       nmap: '🌐',
-      splunk: '🟢', // Splunk green
+      splunk: '🟢',
       snmp: '📡',
-      api: '🔌',
-      sentinelone: '🛡️', // Security shield
-      qradar: '🔒', // IBM security
-      'microsoft-sentinel': '🛡️' // Microsoft security
+      api: '🔌'
     };
     return <span className="text-lg">{icons[type] || '⚙️'}</span>;
   };
