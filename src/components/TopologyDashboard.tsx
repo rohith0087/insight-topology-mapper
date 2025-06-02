@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import NetworkTopology from './NetworkTopology';
 import SearchAndFilters from './SearchAndFilters';
@@ -205,28 +204,13 @@ const TopologyDashboard = () => {
                 </div>
               </>
             ) : showInsights && insights.length > 0 ? (
-              <>
-                <div className="p-4 border-b border-slate-700 flex-shrink-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-cyan-400">AI Insights</h3>
-                    <button 
-                      onClick={() => setShowInsights(false)}
-                      className="text-slate-400 hover:text-white text-xl leading-none"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="flex-1 overflow-y-auto">
-                  <NetworkInsightsPanel 
-                    insights={insights}
-                    onInsightClick={(insight) => {
-                      console.log('Insight clicked:', insight);
-                    }}
-                  />
-                </div>
-              </>
+              <NetworkInsightsPanel 
+                insights={insights}
+                onInsightClick={(insight) => {
+                  console.log('Insight clicked:', insight);
+                }}
+                onClose={() => setShowInsights(false)}
+              />
             ) : (
               <div className="flex items-center justify-center h-full text-slate-400">
                 <div className="text-center">

@@ -11,42 +11,45 @@ import {
   TrendingUp,
   Shield,
   Network,
-  Clock
+  Clock,
+  X
 } from 'lucide-react';
 import { NetworkInsight } from '@/types/dataReconciliation';
 
 interface NetworkInsightsPanelProps {
   insights: NetworkInsight[];
   onInsightClick?: (insight: NetworkInsight) => void;
+  onClose?: () => void;
 }
 
 const NetworkInsightsPanel: React.FC<NetworkInsightsPanelProps> = ({
   insights,
-  onInsightClick
+  onInsightClick,
+  onClose
 }) => {
   const getInsightIcon = (type: string) => {
     switch (type) {
       case 'critical':
-        return <AlertCircle className="w-5 h-5 text-red-500" />;
+        return <AlertCircle className="w-5 h-5 text-red-400" />;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
+        return <AlertTriangle className="w-5 h-5 text-yellow-400" />;
       case 'recommendation':
-        return <Lightbulb className="w-5 h-5 text-blue-500" />;
+        return <Lightbulb className="w-5 h-5 text-blue-400" />;
       default:
-        return <Info className="w-5 h-5 text-cyan-500" />;
+        return <Info className="w-5 h-5 text-cyan-400" />;
     }
   };
 
   const getInsightColor = (type: string) => {
     switch (type) {
       case 'critical':
-        return 'border-red-500 bg-red-50 dark:bg-red-950';
+        return 'border-l-4 border-l-red-500 bg-red-900/20 hover:bg-red-900/30';
       case 'warning':
-        return 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950';
+        return 'border-l-4 border-l-yellow-500 bg-yellow-900/20 hover:bg-yellow-900/30';
       case 'recommendation':
-        return 'border-blue-500 bg-blue-50 dark:bg-blue-950';
+        return 'border-l-4 border-l-blue-500 bg-blue-900/20 hover:bg-blue-900/30';
       default:
-        return 'border-cyan-500 bg-cyan-50 dark:bg-cyan-950';
+        return 'border-l-4 border-l-cyan-500 bg-cyan-900/20 hover:bg-cyan-900/30';
     }
   };
 
@@ -63,106 +66,129 @@ const NetworkInsightsPanel: React.FC<NetworkInsightsPanelProps> = ({
 
   if (!insights || insights.length === 0) {
     return (
-      <Card className="bg-slate-800 border-slate-600">
-        <CardHeader>
-          <CardTitle className="text-slate-300 flex items-center space-x-2">
-            <Lightbulb className="w-5 h-5" />
-            <span>Network Insights</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="h-full flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b border-slate-600">
+          <div className="flex items-center space-x-2">
+            <Lightbulb className="w-5 h-5 text-cyan-400" />
+            <h3 className="text-lg font-semibold text-cyan-400">Network Insights</h3>
+          </div>
+          {onClose && (
+            <Button
+              onClick={onClose}
+              variant="ghost"
+              size="sm"
+              className="text-slate-400 hover:text-white hover:bg-slate-700"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
+        
+        <div className="flex-1 flex items-center justify-center">
           <div className="text-center py-8 text-slate-400">
             <Network className="w-12 h-12 mx-auto mb-3" />
-            <p>No insights available</p>
-            <p className="text-sm">Run an AI analysis to generate insights</p>
+            <p className="text-slate-300 font-medium">No insights available</p>
+            <p className="text-sm text-slate-400">Run an AI analysis to generate insights</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="bg-slate-800 border-slate-600">
-      <CardHeader>
-        <CardTitle className="text-slate-300 flex items-center space-x-2">
-          <Lightbulb className="w-5 h-5" />
-          <span>Network Insights</span>
-          <Badge variant="outline" className="ml-2">
+    <div className="h-full flex flex-col bg-slate-800">
+      <div className="flex items-center justify-between p-4 border-b border-slate-600">
+        <div className="flex items-center space-x-2">
+          <Lightbulb className="w-5 h-5 text-cyan-400" />
+          <h3 className="text-lg font-semibold text-cyan-400">Network Insights</h3>
+          <Badge variant="outline" className="border-cyan-500 text-cyan-300 bg-cyan-900/30">
             {insights.length} insights
           </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4 max-h-96 overflow-y-auto">
+        </div>
+        {onClose && (
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            size="sm"
+            className="text-slate-400 hover:text-white hover:bg-slate-700"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {insights.map((insight) => (
-          <Card 
+          <div 
             key={insight.id} 
-            className={`${getInsightColor(insight.type)} border-l-4 cursor-pointer hover:shadow-md transition-shadow`}
+            className={`${getInsightColor(insight.type)} rounded-lg p-4 cursor-pointer transition-all duration-200 bg-slate-700/50 hover:bg-slate-700/70`}
             onClick={() => onInsightClick?.(insight)}
           >
-            <CardContent className="p-4">
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0">
-                  {getInsightIcon(insight.type)}
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-0.5">
+                {getInsightIcon(insight.type)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="font-semibold text-white text-sm leading-tight">{insight.title}</h4>
+                  <Badge 
+                    variant={getBadgeVariant(insight.type)} 
+                    className="ml-2 text-xs flex-shrink-0"
+                  >
+                    {insight.type}
+                  </Badge>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <h4 className="font-medium text-slate-100">{insight.title}</h4>
-                    <Badge variant={getBadgeVariant(insight.type)} className="ml-2">
-                      {insight.type}
+                
+                <p className="text-sm text-slate-200 mb-3 leading-relaxed">
+                  {insight.description}
+                </p>
+                
+                {insight.suggested_actions && insight.suggested_actions.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-xs font-medium text-slate-300 mb-2">Suggested Actions:</p>
+                    <ul className="text-xs text-slate-200 space-y-1">
+                      {insight.suggested_actions.slice(0, 2).map((action, index) => (
+                        <li key={index} className="flex items-start space-x-2">
+                          <span className="w-1 h-1 bg-cyan-400 rounded-full mt-2 flex-shrink-0"></span>
+                          <span className="leading-relaxed">{action}</span>
+                        </li>
+                      ))}
+                      {insight.suggested_actions.length > 2 && (
+                        <li className="text-slate-400 text-xs ml-3">
+                          +{insight.suggested_actions.length - 2} more actions
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+                
+                <div className="flex items-center justify-between pt-2 border-t border-slate-600">
+                  <div className="flex items-center space-x-2 text-xs text-slate-400">
+                    <Clock className="w-3 h-3" />
+                    <span>{new Date(insight.created_at).toLocaleDateString()}</span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-slate-400">Confidence:</span>
+                    <Badge variant="outline" className="text-xs border-slate-500 text-slate-300 bg-slate-600/50">
+                      {Math.round(insight.confidence * 100)}%
                     </Badge>
                   </div>
-                  
-                  <p className="text-sm text-slate-300 mt-1 line-clamp-2">
-                    {insight.description}
-                  </p>
-                  
-                  {insight.suggested_actions && insight.suggested_actions.length > 0 && (
-                    <div className="mt-3">
-                      <p className="text-xs text-slate-400 mb-1">Suggested Actions:</p>
-                      <ul className="text-xs text-slate-300 space-y-1">
-                        {insight.suggested_actions.slice(0, 2).map((action, index) => (
-                          <li key={index} className="flex items-center space-x-1">
-                            <span className="w-1 h-1 bg-slate-400 rounded-full"></span>
-                            <span>{action}</span>
-                          </li>
-                        ))}
-                        {insight.suggested_actions.length > 2 && (
-                          <li className="text-slate-500">
-                            +{insight.suggested_actions.length - 2} more
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center space-x-2 text-xs text-slate-400">
-                      <Clock className="w-3 h-3" />
-                      <span>{new Date(insight.created_at).toLocaleDateString()}</span>
-                    </div>
-                    
-                    <div className="flex items-center space-x-1">
-                      <span className="text-xs text-slate-400">Confidence:</span>
-                      <Badge variant="outline" className="text-xs">
-                        {Math.round(insight.confidence * 100)}%
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  {insight.affected_nodes && insight.affected_nodes.length > 0 && (
-                    <div className="mt-2">
-                      <span className="text-xs text-slate-400">
-                        Affects {insight.affected_nodes.length} node(s)
-                      </span>
-                    </div>
-                  )}
                 </div>
+                
+                {insight.affected_nodes && insight.affected_nodes.length > 0 && (
+                  <div className="mt-2 pt-2 border-t border-slate-600">
+                    <span className="text-xs text-slate-400">
+                      Affects {insight.affected_nodes.length} node(s)
+                    </span>
+                  </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
