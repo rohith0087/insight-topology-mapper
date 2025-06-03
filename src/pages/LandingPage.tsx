@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -154,8 +153,8 @@ const LumenNetLanding: React.FC = () => {
 
       {/* Hero Section */}
       <section id="hero-section" className="relative pt-36 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-cyan-500/10 rounded-full blur-3xl animate-pulse-slow opacity-50"></div>
-        <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-purple-500/10 rounded-full blur-3xl animate-pulse-slower opacity-50"></div>
+        <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-cyan-500/10 rounded-full blur-3xl animate-pulse opacity-50"></div>
+        <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-purple-500/10 rounded-full blur-3xl animate-pulse opacity-50"></div>
         
         <div className="max-w-7xl mx-auto relative">
           <div className="text-center mb-16">
