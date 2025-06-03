@@ -25,7 +25,7 @@ const AuthPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-white text-lg">Loading...</div>
       </div>
     );
@@ -56,111 +56,130 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-32 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl"></div>
-        <div className="absolute -bottom-32 -left-40 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl"></div>
+    <div className="min-h-screen bg-gray-950 text-white relative selection:bg-cyan-500 selection:text-white">
+      {/* Background Grid */}
+      <div className="fixed inset-0 opacity-20 -z-10">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(56, 189, 248, 0.07) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(56, 189, 248, 0.07) 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px'
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/5 via-transparent to-purple-600/5" />
       </div>
 
-      <div className="relative w-full max-w-md">
-        {/* Header with navigation back to landing */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/landing')}
-              className="text-slate-400 hover:text-white p-2"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
-            
-            <div className="flex items-center space-x-2">
-              <Shield className="w-6 h-6 text-cyan-400" />
-              <span className="text-sm text-slate-400">Secure Login</span>
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-32 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl animate-pulse opacity-50"></div>
+        <div className="absolute -bottom-32 -left-40 w-80 h-80 rounded-full bg-purple-500/10 blur-3xl animate-pulse opacity-50"></div>
+      </div>
+
+      <div className="relative min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          {/* Header with navigation back to landing */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/landing')}
+                className="text-gray-400 hover:text-cyan-400 p-2 hover:bg-gray-800/50 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
+              
+              <div className="flex items-center space-x-2">
+                <Shield className="w-6 h-6 text-cyan-400" />
+                <span className="text-sm text-gray-400">Secure Login</span>
+              </div>
             </div>
+
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Network className="w-7 h-7 text-white" />
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent tracking-tight">LumenNet</h1>
+            </div>
+            <p className="text-gray-400">Unified Security Operations Center</p>
           </div>
 
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <Network className="w-12 h-12 text-cyan-400" />
-            <h1 className="text-4xl font-bold text-cyan-400">LumenNet</h1>
+          <Card className="bg-gray-900/80 backdrop-blur-lg border border-gray-700/50 shadow-2xl">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-white text-center text-2xl font-bold">
+                {getCardTitle()}
+              </CardTitle>
+              <CardDescription className="text-gray-400 text-center">
+                {getCardDescription()}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Show invite signup if there's an invite token */}
+              {inviteToken ? (
+                <InviteSignupForm 
+                  inviteToken={inviteToken} 
+                  onBackToLogin={() => setActiveView('login')}
+                />
+              ) : (
+                <>
+                  {/* Authentication Mode Toggle */}
+                  {activeView !== 'forgot' && (
+                    <div className="flex mb-6 bg-gray-800/50 rounded-lg p-1 backdrop-blur-sm">
+                      <Button
+                        type="button"
+                        variant={activeView === 'login' ? 'default' : 'ghost'}
+                        className={`flex-1 text-sm transition-all ${
+                          activeView === 'login' 
+                            ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:from-cyan-700 hover:to-blue-700 shadow-lg' 
+                            : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                        }`}
+                        onClick={() => setActiveView('login')}
+                      >
+                        <LogIn className="w-4 h-4 mr-2" />
+                        Sign In
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={activeView === 'signup' ? 'default' : 'ghost'}
+                        className={`flex-1 text-sm transition-all ${
+                          activeView === 'signup' 
+                            ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:from-cyan-700 hover:to-blue-700 shadow-lg' 
+                            : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                        }`}
+                        onClick={() => setActiveView('signup')}
+                      >
+                        <Users className="w-4 h-4 mr-2" />
+                        Create Account
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* Forms */}
+                  {activeView === 'login' && (
+                    <LoginForm onForgotPassword={() => setActiveView('forgot')} />
+                  )}
+                  
+                  {activeView === 'signup' && (
+                    <MultiStepSignupForm onBackToLogin={() => setActiveView('login')} />
+                  )}
+                  
+                  {activeView === 'forgot' && (
+                    <ForgotPasswordForm onBackToLogin={() => setActiveView('login')} />
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Footer */}
+          <div className="text-center mt-6">
+            <p className="text-gray-500 text-sm">
+              © {new Date().getFullYear()} LumenNet Technologies, Inc. All rights reserved.
+            </p>
           </div>
-          <p className="text-slate-400">Unified Security Operations Center</p>
-        </div>
-
-        <Card className="bg-slate-800/80 backdrop-blur-sm border-slate-700 shadow-2xl">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-white text-center text-2xl">
-              {getCardTitle()}
-            </CardTitle>
-            <CardDescription className="text-slate-400 text-center">
-              {getCardDescription()}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* Show invite signup if there's an invite token */}
-            {inviteToken ? (
-              <InviteSignupForm 
-                inviteToken={inviteToken} 
-                onBackToLogin={() => setActiveView('login')}
-              />
-            ) : (
-              <>
-                {/* Authentication Mode Toggle */}
-                {activeView !== 'forgot' && (
-                  <div className="flex mb-6 bg-slate-700/50 rounded-lg p-1 backdrop-blur-sm">
-                    <Button
-                      type="button"
-                      variant={activeView === 'login' ? 'default' : 'ghost'}
-                      className={`flex-1 text-sm transition-all ${
-                        activeView === 'login' 
-                          ? 'bg-cyan-600 text-white hover:bg-cyan-700 shadow-lg' 
-                          : 'text-slate-300 hover:text-white hover:bg-slate-600/50'
-                      }`}
-                      onClick={() => setActiveView('login')}
-                    >
-                      <LogIn className="w-4 h-4 mr-2" />
-                      Sign In
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={activeView === 'signup' ? 'default' : 'ghost'}
-                      className={`flex-1 text-sm transition-all ${
-                        activeView === 'signup' 
-                          ? 'bg-cyan-600 text-white hover:bg-cyan-700 shadow-lg' 
-                          : 'text-slate-300 hover:text-white hover:bg-slate-600/50'
-                      }`}
-                      onClick={() => setActiveView('signup')}
-                    >
-                      <Users className="w-4 h-4 mr-2" />
-                      Create Account
-                    </Button>
-                  </div>
-                )}
-                
-                {/* Forms */}
-                {activeView === 'login' && (
-                  <LoginForm onForgotPassword={() => setActiveView('forgot')} />
-                )}
-                
-                {activeView === 'signup' && (
-                  <MultiStepSignupForm onBackToLogin={() => setActiveView('login')} />
-                )}
-                
-                {activeView === 'forgot' && (
-                  <ForgotPasswordForm onBackToLogin={() => setActiveView('login')} />
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Footer */}
-        <div className="text-center mt-6">
-          <p className="text-slate-500 text-sm">
-            © 2024 LumenNet. All rights reserved.
-          </p>
         </div>
       </div>
     </div>

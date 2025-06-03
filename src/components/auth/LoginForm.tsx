@@ -42,11 +42,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword }) => {
       )}
       
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-slate-200 text-sm font-medium">
+        <Label htmlFor="email" className="text-gray-200 text-sm font-medium">
           Email Address
         </Label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
             id="email"
             type="email"
@@ -55,17 +55,17 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword }) => {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={loading}
-            className="pl-10 bg-slate-900/80 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500/20 transition-colors"
+            className="pl-10 bg-gray-800/80 border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500 focus:ring-cyan-500/20 transition-colors"
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-slate-200 text-sm font-medium">
+        <Label htmlFor="password" className="text-gray-200 text-sm font-medium">
           Password
         </Label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
             id="password"
             type={showPassword ? "text" : "password"}
@@ -74,12 +74,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword }) => {
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={loading}
-            className="pl-10 pr-10 bg-slate-900/80 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500/20 transition-colors"
+            className="pl-10 pr-10 bg-gray-800/80 border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500 focus:ring-cyan-500/20 transition-colors"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
@@ -89,7 +89,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword }) => {
       <Button
         type="submit"
         disabled={loading}
-        className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium py-2.5 transition-all shadow-lg"
+        className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium py-2.5 transition-all shadow-lg hover:shadow-cyan-500/30"
       >
         {loading ? (
           <>
@@ -109,16 +109,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword }) => {
         >
           Forgot your password?
         </button>
-      </div>
-
-      {/* Demo credentials */}
-      <div className="mt-6 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
-        <p className="text-xs text-slate-300 text-center mb-2 font-medium">
-          Demo Credentials
-        </p>
-        <p className="text-xs text-slate-400 text-center">
-          Email: demo@lumennet.com | Password: demo123
-        </p>
       </div>
     </form>
   );
