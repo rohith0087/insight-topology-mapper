@@ -8,10 +8,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 interface LoginFormProps {
-  onForgotPassword: () => void;
+  onForgotPasswordClick: () => void;
+  onSignupClick?: () => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick, onSignupClick }) => {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -101,14 +102,27 @@ const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword }) => {
         )}
       </Button>
 
-      <div className="text-center">
+      <div className="text-center space-y-3">
         <button
           type="button"
-          onClick={onForgotPassword}
+          onClick={onForgotPasswordClick}
           className="text-sm text-cyan-400 hover:text-cyan-300 underline transition-colors"
         >
           Forgot your password?
         </button>
+        
+        {onSignupClick && (
+          <div className="text-sm text-gray-400">
+            Don't have an account?{' '}
+            <button
+              type="button"
+              onClick={onSignupClick}
+              className="text-cyan-400 hover:text-cyan-300 underline transition-colors"
+            >
+              Sign up
+            </button>
+          </div>
+        )}
       </div>
     </form>
   );

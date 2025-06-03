@@ -617,7 +617,7 @@ const LumenNetLanding: React.FC = () => {
       </footer>
       
       {/* Additional CSS for subtle animations if needed */}
-      <style jsx global>{`
+      <style>{`
         .animate-pulse-slow {
           animation: pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
