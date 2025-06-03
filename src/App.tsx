@@ -25,19 +25,11 @@ const App: React.FC = () => (
         <SupportAuthProvider>
           <TooltipProvider>
             <Routes>
-              <Route path="/landing" element={<LandingPage />} />
+              <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/support-login" element={<SupportLogin />} />
               <Route 
                 path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/" 
                 element={
                   <ProtectedRoute>
                     <Index />

@@ -28,7 +28,7 @@ const NotFound = () => {
 
         <div className="space-y-3">
           <Button
-            onClick={() => navigate('/landing')}
+            onClick={() => navigate('/')}
             className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
           >
             <Home className="w-4 h-4 mr-2" />

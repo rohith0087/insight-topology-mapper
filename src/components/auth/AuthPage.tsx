@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { Network } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Network, ArrowLeft } from 'lucide-react';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import ForgotPasswordForm from './ForgotPasswordForm';
@@ -9,6 +10,7 @@ type AuthMode = 'login' | 'signup' | 'forgot-password';
 
 const AuthPage = () => {
   const [mode, setMode] = useState<AuthMode>('login');
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-950 text-white relative">
@@ -27,19 +29,33 @@ const AuthPage = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/5 via-transparent to-purple-600/5" />
       </div>
 
-      <div className="relative flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          {/* Logo and Title */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center space-x-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Network className="w-8 h-8 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold text-cyan-400">LumenNet</h1>
-            </div>
-            <p className="text-gray-400">SOC Intelligence Platform</p>
-          </div>
+      {/* Header with Back Navigation */}
+      <nav className="relative z-10 bg-gray-950/80 backdrop-blur-lg border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center space-x-2 text-gray-300 hover:text-cyan-400 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm font-medium">Back to Home</span>
+            </button>
 
+            <div className="flex items-center space-x-3">
+              <div className="w-9 h-9 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
+                <Network className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-bold tracking-tight">LumenNet</span>
+              <span className="hidden sm:inline text-xs text-gray-500 ml-1 pt-0.5">SOC Intelligence Platform</span>
+            </div>
+
+            <div className="w-24"></div> {/* Spacer for centering */}
+          </div>
+        </div>
+      </nav>
+
+      <div className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
+        <div className="w-full max-w-md">
           {/* Auth Form Container */}
           <div className="bg-gray-900/70 backdrop-blur-md border border-gray-700/50 rounded-2xl p-8 shadow-2xl">
             {mode === 'login' && (
