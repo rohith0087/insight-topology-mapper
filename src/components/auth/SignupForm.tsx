@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Mail, Lock, User, Building } from 'lucide-react';
 
-const SignupForm: React.FC = () => {
+interface SignupFormProps {
+  onLoginClick: () => void;
+}
+
+const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
   const { signUp } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
@@ -233,6 +236,19 @@ const SignupForm: React.FC = () => {
           'Create Company Account'
         )}
       </Button>
+
+      <div className="text-center">
+        <div className="text-sm text-gray-400">
+          Already have an account?{' '}
+          <button
+            type="button"
+            onClick={onLoginClick}
+            className="text-cyan-400 hover:text-cyan-300 underline transition-colors"
+          >
+            Sign in
+          </button>
+        </div>
+      </div>
     </form>
   );
 };
