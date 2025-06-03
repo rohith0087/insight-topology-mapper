@@ -219,7 +219,7 @@ const LumenNetLanding: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30 text-green-300 text-sm font-semibold mb-6 shadow-sm">
+              <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30 text-green-300 text-sm font-medium mb-6 shadow-sm">
                 Chapter 1: The Genesis of Data
               </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
