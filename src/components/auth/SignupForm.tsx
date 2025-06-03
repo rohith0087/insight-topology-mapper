@@ -1,10 +1,12 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Mail, Lock, User, Building } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Building, Eye, EyeOff, Shield } from 'lucide-react';
+import { sanitizeInput, validateInput } from '@/utils/securityUtils';
 
 interface SignupFormProps {
   onLoginClick: () => void;
@@ -23,18 +25,115 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    // Sanitize input based on field type
+    let sanitized = value;
+    
+    switch (name) {
+      case 'email':
+        sanitized = sanitizeInput(value, { maxLength: 254, allowSpecialChars: true });
+        break;
+      case 'password':
+      case 'confirmPassword':
+        sanitized = sanitizeInput(value, { maxLength: 128, allowSpecialChars: true });
+        break;
+      case 'firstName':
+      case 'lastName':
+        sanitized = sanitizeInput(value, { maxLength: 50 });
+        break;
+      case 'companyName':
+        sanitized = sanitizeInput(value, { maxLength: 100, allowSpecialChars: true, preserveSpaces: true });
+        break;
+      default:
+        sanitized = sanitizeInput(value);
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: sanitized
     }));
+    
+    // Clear validation error for this field
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: []
+      }));
+    }
   };
 
-  const isPersonalEmail = (email: string) => {
+  const validateForm = (): boolean => {
+    const errors: Record<string, string[]> = {};
+    
+    // Validate each field
+    const emailValidation = validateInput(formData.email, 'email');
+    if (!emailValidation.isValid) {
+      errors.email = emailValidation.errors;
+    }
+    
+    const passwordValidation = validateInput(formData.password, 'password');
+    if (!passwordValidation.isValid) {
+      errors.password = passwordValidation.errors;
+    }
+    
+    const firstNameValidation = validateInput(formData.firstName, 'text');
+    if (!firstNameValidation.isValid) {
+      errors.firstName = firstNameValidation.errors;
+    }
+    
+    const lastNameValidation = validateInput(formData.lastName, 'text');
+    if (!lastNameValidation.isValid) {
+      errors.lastName = lastNameValidation.errors;
+    }
+    
+    const companyValidation = validateInput(formData.companyName, 'text');
+    if (!companyValidation.isValid) {
+      errors.companyName = companyValidation.errors;
+    }
+    
+    // Additional validations
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = ['Passwords do not match'];
+    }
+    
+    if (formData.password.length < 8) {
+      errors.password = [...(errors.password || []), 'Password must be at least 8 characters long'];
+    }
+    
+    // Check for strong password
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+    if (!strongPasswordRegex.test(formData.password)) {
+      errors.password = [...(errors.password || []), 'Password must contain uppercase, lowercase, number, and special character'];
+    }
+    
+    // Check for personal email domains
     const personalDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com', 'aol.com'];
-    const domain = email.split('@')[1]?.toLowerCase();
-    return personalDomains.includes(domain);
+    const domain = formData.email.split('@')[1]?.toLowerCase();
+    if (personalDomains.includes(domain)) {
+      errors.email = [...(errors.email || []), 'Please use your work email address, not a personal email'];
+    }
+    
+    // Required field checks
+    if (!formData.firstName.trim()) {
+      errors.firstName = ['First name is required'];
+    }
+    
+    if (!formData.lastName.trim()) {
+      errors.lastName = ['Last name is required'];
+    }
+    
+    if (!formData.companyName.trim()) {
+      errors.companyName = ['Company name is required'];
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,50 +142,37 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
     setError('');
     setSuccess(false);
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+    // Validate form
+    if (!validateForm()) {
       setLoading(false);
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      setLoading(false);
-      return;
-    }
-
-    if (isPersonalEmail(formData.email)) {
-      setError('Please use your work email address, not a personal email like Gmail or Outlook');
-      setLoading(false);
-      return;
-    }
-
-    if (!formData.companyName.trim()) {
-      setError('Company name is required');
-      setLoading(false);
-      return;
-    }
-
-    const { error } = await signUp(
-      formData.email,
-      formData.password,
-      formData.firstName,
-      formData.lastName,
-      formData.companyName
-    );
-    
-    if (error) {
-      setError(error.message);
-    } else {
-      setSuccess(true);
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        companyName: ''
-      });
+    try {
+      const { error } = await signUp(
+        formData.email,
+        formData.password,
+        formData.firstName,
+        formData.lastName,
+        formData.companyName
+      );
+      
+      if (error) {
+        setError(error.message);
+      } else {
+        setSuccess(true);
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          companyName: ''
+        });
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+      console.error('Signup error:', err);
     }
     
     setLoading(false);
@@ -96,12 +182,14 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
         <Alert className="border-red-500/50 bg-red-950/50 text-red-100">
+          <Shield className="w-4 h-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
       
       {success && (
         <Alert className="border-green-500/50 bg-green-950/50 text-green-100">
+          <Shield className="w-4 h-4" />
           <AlertDescription>
             Account created successfully! Please check your email to verify your account.
             As the first user from your company, you have been granted Super Admin privileges.
@@ -122,9 +210,18 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
             onChange={handleChange}
             required
             disabled={loading}
+            maxLength={100}
+            autoComplete="organization"
             className="pl-10 bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
           />
         </div>
+        {validationErrors.companyName && (
+          <div className="text-red-400 text-xs">
+            {validationErrors.companyName.map((error, index) => (
+              <div key={index}>{error}</div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -141,9 +238,18 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
               onChange={handleChange}
               disabled={loading}
               required
+              maxLength={50}
+              autoComplete="given-name"
               className="pl-10 bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
             />
           </div>
+          {validationErrors.firstName && (
+            <div className="text-red-400 text-xs">
+              {validationErrors.firstName.map((error, index) => (
+                <div key={index}>{error}</div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -159,9 +265,18 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
               onChange={handleChange}
               disabled={loading}
               required
+              maxLength={50}
+              autoComplete="family-name"
               className="pl-10 bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
             />
           </div>
+          {validationErrors.lastName && (
+            <div className="text-red-400 text-xs">
+              {validationErrors.lastName.map((error, index) => (
+                <div key={index}>{error}</div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       
@@ -178,9 +293,18 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
             onChange={handleChange}
             required
             disabled={loading}
+            maxLength={254}
+            autoComplete="email"
             className="pl-10 bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
           />
         </div>
+        {validationErrors.email && (
+          <div className="text-red-400 text-xs">
+            {validationErrors.email.map((error, index) => (
+              <div key={index}>{error}</div>
+            ))}
+          </div>
+        )}
         <p className="text-xs text-slate-400">
           Please use your work email address (not Gmail, Outlook, etc.)
         </p>
@@ -193,15 +317,32 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
           <Input
             id="password"
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Enter your password"
             value={formData.password}
             onChange={handleChange}
             required
             disabled={loading}
-            className="pl-10 bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
+            maxLength={128}
+            autoComplete="new-password"
+            className="pl-10 pr-10 bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
+            disabled={loading}
+          >
+            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
         </div>
+        {validationErrors.password && (
+          <div className="text-red-400 text-xs">
+            {validationErrors.password.map((error, index) => (
+              <div key={index}>{error}</div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -211,29 +352,49 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
           <Input
             id="confirmPassword"
             name="confirmPassword"
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             placeholder="Confirm your password"
             value={formData.confirmPassword}
             onChange={handleChange}
             required
             disabled={loading}
-            className="pl-10 bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
+            maxLength={128}
+            autoComplete="new-password"
+            className="pl-10 pr-10 bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
           />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
+            disabled={loading}
+          >
+            {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
         </div>
+        {validationErrors.confirmPassword && (
+          <div className="text-red-400 text-xs">
+            {validationErrors.confirmPassword.map((error, index) => (
+              <div key={index}>{error}</div>
+            ))}
+          </div>
+        )}
       </div>
 
       <Button
         type="submit"
         disabled={loading}
-        className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
+        className="w-full bg-cyan-600 hover:bg-cyan-700 text-white disabled:opacity-50"
       >
         {loading ? (
           <>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Creating account...
+            Creating secure account...
           </>
         ) : (
-          'Create Company Account'
+          <>
+            <Shield className="w-4 h-4 mr-2" />
+            Create Secure Company Account
+          </>
         )}
       </Button>
 
@@ -244,6 +405,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
             type="button"
             onClick={onLoginClick}
             className="text-cyan-400 hover:text-cyan-300 underline transition-colors"
+            disabled={loading}
           >
             Sign in
           </button>
