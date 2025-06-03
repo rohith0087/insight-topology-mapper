@@ -3,7 +3,7 @@ import React from 'react';
 import { useSupportAuth } from '@/contexts/SupportAuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Shield, LogOut } from 'lucide-react';
+import { Network, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SuperAdminHeader = () => {
@@ -20,9 +20,11 @@ const SuperAdminHeader = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-3">
-            <Shield className="w-8 h-8 text-red-400" />
+            <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
+              <Network className="w-5 h-5 text-white" />
+            </div>
             <div>
-              <h1 className="text-xl font-bold text-red-400">LumenNet Customer Support</h1>
+              <h1 className="text-xl font-bold text-cyan-400">LumenNet Customer Support</h1>
               <p className="text-slate-400 text-sm">Multi-Tenant Management Portal</p>
             </div>
           </div>
