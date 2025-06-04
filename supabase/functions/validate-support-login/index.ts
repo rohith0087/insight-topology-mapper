@@ -21,8 +21,11 @@ serve(async (req) => {
 
     const { username, password } = await req.json()
 
+    console.log('Validating login for username:', username)
+
     // Validate input
     if (!username || !password) {
+      console.error('Missing username or password')
       return new Response(
         JSON.stringify({ error: 'Username and password are required' }),
         { 
@@ -34,6 +37,8 @@ serve(async (req) => {
 
     // Basic input sanitization
     const sanitizedUsername = username.trim().toLowerCase()
+    
+    console.log('Calling validate_support_admin function')
     
     // Validate credentials using the database function
     const { data, error } = await supabaseClient.rpc('validate_support_admin', {
@@ -52,7 +57,10 @@ serve(async (req) => {
       )
     }
 
+    console.log('Database function returned:', data)
+
     if (data && data.valid) {
+      console.log('Login successful for user:', data.username)
       return new Response(
         JSON.stringify({ 
           success: true, 
@@ -68,6 +76,7 @@ serve(async (req) => {
         }
       )
     } else {
+      console.log('Invalid credentials provided')
       return new Response(
         JSON.stringify({ error: 'Invalid credentials' }),
         { 
