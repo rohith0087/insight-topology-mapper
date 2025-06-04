@@ -1,11 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Server, Database, Users, Globe, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Server, Database, Users, Globe, AlertTriangle, CheckCircle, FileText } from 'lucide-react';
+import SystemLogs from './SystemLogs';
 
 const SystemHealth = () => {
+  const [activeView, setActiveView] = useState<'overview' | 'logs'>('overview');
+
   const healthMetrics = [
     {
       name: 'API Response Time',
@@ -80,13 +84,39 @@ const SystemHealth = () => {
     return 'text-red-400';
   };
 
+  if (activeView === 'logs') {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center space-x-4 px-6 pt-6">
+          <Button 
+            variant="outline" 
+            onClick={() => setActiveView('overview')}
+            className="border-slate-600 text-slate-300 hover:text-white"
+          >
+            ← Back to Overview
+          </Button>
+        </div>
+        <SystemLogs />
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-2">System Health</h2>
-        <p className="text-slate-400">
-          Monitor platform performance and service availability
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white mb-2">System Health</h2>
+          <p className="text-slate-400">
+            Monitor platform performance and service availability
+          </p>
+        </div>
+        <Button 
+          onClick={() => setActiveView('logs')}
+          className="bg-blue-600 hover:bg-blue-700"
+        >
+          <FileText className="w-4 h-4 mr-2" />
+          View Logs
+        </Button>
       </div>
 
       {/* Overall Health Score */}

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSupportAuth } from '@/contexts/SupportAuthContext';
 
 export interface SupportTicket {
   id: string;
@@ -29,6 +30,7 @@ export const useTickets = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { profile } = useAuth();
+  const { user: supportUser } = useSupportAuth();
 
   const fetchTickets = async () => {
     try {
@@ -42,9 +44,10 @@ export const useTickets = () => {
         `)
         .order('created_at', { ascending: false });
 
-      // Regular users only see their tenant's tickets
-      if (profile?.role !== 'super_admin') {
-        query = query.eq('tenant_id', profile?.tenant_id);
+      // If this is a support admin, show all tickets
+      // If this is a regular user, only show their tenant's tickets
+      if (!supportUser && profile?.role !== 'super_admin' && profile?.tenant_id) {
+        query = query.eq('tenant_id', profile.tenant_id);
       }
 
       const { data, error } = await query;
@@ -128,7 +131,7 @@ export const useTickets = () => {
 
   useEffect(() => {
     fetchTickets();
-  }, [profile?.tenant_id]);
+  }, [profile?.tenant_id, supportUser]);
 
   return {
     tickets,
