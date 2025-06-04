@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Mail, Lock, User, Building, Eye, EyeOff, Shield } from 'lucide-react';
 import { sanitizeInput, validateInput } from '@/utils/securityUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SignupFormProps {
   onLoginClick: () => void;
@@ -26,9 +27,50 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [isFirstUser, setIsFirstUser] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
+
+  // Check if user will be first from their company
+  const checkIfFirstUser = async (email: string) => {
+    if (!email || !email.includes('@')) return false;
+    
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (!domain) return false;
+
+    try {
+      // Check if any existing users have the same domain
+      const { data: existingUsers, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .ilike('email', `%@${domain}`)
+        .limit(1);
+
+      if (error) {
+        console.error('Error checking existing users:', error);
+        return false;
+      }
+
+      return !existingUsers || existingUsers.length === 0;
+    } catch (error) {
+      console.error('Error checking existing users:', error);
+      return false;
+    }
+  };
+
+  // Check when email changes
+  useEffect(() => {
+    const checkUser = async () => {
+      if (formData.email && formData.email.includes('@')) {
+        const firstUser = await checkIfFirstUser(formData.email);
+        setIsFirstUser(firstUser);
+      }
+    };
+
+    const debounceTimeout = setTimeout(checkUser, 500);
+    return () => clearTimeout(debounceTimeout);
+  }, [formData.email]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -166,7 +208,12 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
       console.log('SignUp result:', { error: error?.message });
       
       if (error) {
-        setError(error.message);
+        // Check if it's a "user already exists" error
+        if (error.message?.includes('already registered') || error.message?.includes('already exists')) {
+          setError('An account with this email already exists. Please try signing in instead.');
+        } else {
+          setError(error.message);
+        }
       } else {
         setSuccess(true);
         setFormData({
@@ -206,7 +253,9 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
             <Shield className="w-4 h-4" />
             <AlertDescription>
               Account created successfully! Please check your email to verify your account.
-              As the first user from your company, you have been granted Super Admin privileges.
+              {isFirstUser && (
+                <span> As the first user from your company, you have been granted Super Admin privileges.</span>
+              )}
             </AlertDescription>
           </Alert>
         )}
@@ -321,6 +370,11 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
           )}
           <p className="text-xs text-slate-400">
             Please use your work email address (not Gmail, Outlook, etc.)
+            {formData.email && !isFirstUser && (
+              <span className="text-yellow-400 block mt-1">
+                Note: Other users from your company domain already exist in the system.
+              </span>
+            )}
           </p>
         </div>
 
