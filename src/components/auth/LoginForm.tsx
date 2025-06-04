@@ -15,6 +15,8 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onForgotPasswordClick, onSignupClick }) => {
+  console.log('LoginForm component rendered - this should be for SIGN IN only');
+  
   const {
     email,
     password,
