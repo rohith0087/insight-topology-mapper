@@ -12,6 +12,8 @@ const AuthPage = () => {
   const [mode, setMode] = useState<AuthMode>('login');
   const navigate = useNavigate();
 
+  console.log('AuthPage rendered with mode:', mode);
+
   return (
     <div className="min-h-screen bg-gray-950 text-white relative">
       {/* Background Grid */}
@@ -60,15 +62,31 @@ const AuthPage = () => {
           <div className="bg-gray-900/70 backdrop-blur-md border border-gray-700/50 rounded-2xl p-8 shadow-2xl">
             {mode === 'login' && (
               <LoginForm 
-                onSignupClick={() => setMode('signup')}
-                onForgotPasswordClick={() => setMode('forgot-password')}
+                onSignupClick={() => {
+                  console.log('Switching to signup mode');
+                  setMode('signup');
+                }}
+                onForgotPasswordClick={() => {
+                  console.log('Switching to forgot password mode');
+                  setMode('forgot-password');
+                }}
               />
             )}
             {mode === 'signup' && (
-              <SignupForm onLoginClick={() => setMode('login')} />
+              <SignupForm 
+                onLoginClick={() => {
+                  console.log('Switching to login mode');
+                  setMode('login');
+                }} 
+              />
             )}
             {mode === 'forgot-password' && (
-              <ForgotPasswordForm onBackToLogin={() => setMode('login')} />
+              <ForgotPasswordForm 
+                onBackToLogin={() => {
+                  console.log('Switching back to login mode');
+                  setMode('login');
+                }} 
+              />
             )}
           </div>
         </div>
