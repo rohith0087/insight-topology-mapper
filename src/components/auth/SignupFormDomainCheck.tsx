@@ -34,6 +34,8 @@ const SignupFormDomainCheck: React.FC<SignupFormDomainCheckProps> = ({
       // Convert domain to slug format (replace . with -)
       const slug = domain.toLowerCase().replace(/\./g, '-');
       
+      console.log('Checking for tenant with slug:', slug);
+      
       // Check if tenant already exists with this slug
       const { data: existingTenant, error } = await supabase
         .from('tenants')
@@ -49,12 +51,15 @@ const SignupFormDomainCheck: React.FC<SignupFormDomainCheckProps> = ({
       }
 
       if (existingTenant) {
-        // Tenant exists, show error and redirect to login
+        console.log('Found existing tenant:', existingTenant);
+        // Tenant exists, show error and DO NOT proceed
         setError('An administrator account has already been created for this company domain. Please contact your administrator or sign in with your existing account.');
         setLoading(false);
+        // IMPORTANT: Return here to prevent calling onDomainVerified
         return;
       }
 
+      console.log('No existing tenant found, proceeding with signup');
       // Domain is available, proceed with signup
       onDomainVerified(domain, true);
     } catch (error) {
