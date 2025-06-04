@@ -22,7 +22,11 @@ const SignupFormDomainCheck: React.FC<SignupFormDomainCheckProps> = ({
   const handleDomainCheck = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('=== DOMAIN CHECK STARTED ===');
+    console.log('Original domain input:', domain);
+    
     if (!domain.trim()) {
+      console.log('ERROR: Empty domain provided');
       setError('Please enter your company domain');
       return;
     }
@@ -33,41 +37,58 @@ const SignupFormDomainCheck: React.FC<SignupFormDomainCheckProps> = ({
     try {
       // Convert domain to slug format (replace . with -)
       const slug = domain.toLowerCase().replace(/\./g, '-');
+      console.log('Converted slug:', slug);
       
-      console.log('Checking for tenant with slug:', slug);
-      
-      // Check if tenant already exists with this slug
-      const { data: existingTenant, error } = await supabase
+      // Check if tenant already exists with this slug - FIXED: Remove .single()
+      console.log('About to query tenants table with slug:', slug);
+      const { data: existingTenants, error } = await supabase
         .from('tenants')
         .select('id, name, is_active')
-        .eq('slug', slug)
-        .single();
+        .eq('slug', slug);
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error checking tenant:', error);
+      console.log('Supabase query completed');
+      console.log('Query error:', error);
+      console.log('Query data:', existingTenants);
+      console.log('Number of tenants found:', existingTenants?.length || 0);
+
+      if (error) {
+        console.error('Supabase query error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
         setError('Unable to verify domain. Please try again.');
         setLoading(false);
         return;
       }
 
-      if (existingTenant) {
+      // Check if any tenants were found
+      if (existingTenants && existingTenants.length > 0) {
+        const existingTenant = existingTenants[0]; // Get the first tenant
         console.log('Found existing tenant:', existingTenant);
+        console.log('Tenant is active:', existingTenant.is_active);
+        
         // Tenant exists, show error and DO NOT proceed
         setError('An administrator account has already been created for this company domain. Please contact your administrator or sign in with your existing account.');
         setLoading(false);
+        console.log('=== BLOCKING SIGNUP - TENANT EXISTS ===');
         // IMPORTANT: Return here to prevent calling onDomainVerified
         return;
       }
 
-      console.log('No existing tenant found, proceeding with signup');
+      console.log('No existing tenant found for slug:', slug);
+      console.log('=== PROCEEDING WITH SIGNUP ===');
       // Domain is available, proceed with signup
       onDomainVerified(domain, true);
     } catch (error) {
-      console.error('Domain check error:', error);
+      console.error('Domain check catch block error:', error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack available');
       setError('Unable to verify domain. Please try again.');
     }
     
     setLoading(false);
+    console.log('=== DOMAIN CHECK COMPLETED ===');
   };
 
   return (
