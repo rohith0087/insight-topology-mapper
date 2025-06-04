@@ -39,7 +39,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
     setFormData,
     setSignupResult,
     handleChange,
-    validateForm
+    validateForm,
+    checkIfUserExists
   } = useSignupForm();
 
   const checkIfFirstUserAfterSignup = async (email: string) => {
@@ -78,6 +79,14 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
 
     // Validate form
     if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
+
+    // Check if user already exists before attempting signup
+    const userExists = await checkIfUserExists(formData.email);
+    if (userExists) {
+      setError('An account with this email already exists. Please try signing in instead.');
       setLoading(false);
       return;
     }

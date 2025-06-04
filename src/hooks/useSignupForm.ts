@@ -21,6 +21,29 @@ export const useSignupForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
 
+  // Check if user already exists in the database
+  const checkIfUserExists = async (email: string): Promise<boolean> => {
+    if (!email || !email.includes('@')) return false;
+    
+    try {
+      const { data: existingUser, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email.toLowerCase())
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+        console.error('Error checking if user exists:', error);
+        return false;
+      }
+
+      return !!existingUser;
+    } catch (error) {
+      console.error('Error checking if user exists:', error);
+      return false;
+    }
+  };
+
   // Check if user will be first from their company
   const checkIfFirstUser = async (email: string) => {
     if (!email || !email.includes('@')) return false;
@@ -191,6 +214,7 @@ export const useSignupForm = () => {
     setFormData,
     setSignupResult,
     handleChange,
-    validateForm
+    validateForm,
+    checkIfUserExists
   };
 };
