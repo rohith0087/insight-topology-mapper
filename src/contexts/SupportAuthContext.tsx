@@ -20,7 +20,7 @@ const SupportAuthContext = createContext<SupportAuthContextType | undefined>(und
 export const useSupportAuth = () => {
   const context = useContext(SupportAuthContext);
   if (context === undefined) {
-    throw new error('useSupportAuth must be used within a SupportAuthProvider');
+    throw new Error('useSupportAuth must be used within a SupportAuthProvider');
   }
   return context;
 };
