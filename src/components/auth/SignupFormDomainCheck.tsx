@@ -23,10 +23,9 @@ const SignupFormDomainCheck: React.FC<SignupFormDomainCheckProps> = ({
     e.preventDefault();
     
     console.log('=== DOMAIN CHECK STARTED ===');
-    console.log('Original domain input:', domain);
+    console.log('Domain input:', domain);
     
     if (!domain.trim()) {
-      console.log('ERROR: Empty domain provided');
       setError('Please enter your company domain');
       return;
     }
@@ -38,66 +37,16 @@ const SignupFormDomainCheck: React.FC<SignupFormDomainCheckProps> = ({
       const normalizedDomain = domain.toLowerCase().trim();
       console.log('Normalized domain:', normalizedDomain);
       
-      // DEBUGGING: Check current auth state
-      console.log('=== DEBUGGING: Auth state ===');
-      const { data: authData } = await supabase.auth.getUser();
-      console.log('Current auth user:', authData.user?.email || 'No user');
-      
-      // DEBUGGING: Check if we can access the tenants table at all
-      console.log('=== DEBUGGING: Testing basic tenants table access ===');
-      const { data: countData, error: countError, count } = await supabase
+      // Check if domain already exists in tenants table
+      const { data: existingTenants, error: domainQueryError } = await supabase
         .from('tenants')
-        .select('*', { count: 'exact', head: true });
-      
-      console.log('Tenants table count:', count);
-      console.log('Count error:', countError);
-      
-      // DEBUGGING: Try to fetch ALL tenants with different approaches
-      console.log('=== DEBUGGING: Fetching ALL tenants (approach 1) ===');
-      const { data: allTenants1, error: allTenantsError1 } = await supabase
-        .from('tenants')
-        .select('*');
-      
-      console.log('ALL TENANTS (approach 1):', allTenants1);
-      console.log('ALL TENANTS ERROR (approach 1):', allTenantsError1);
-      
-      // DEBUGGING: Try with specific columns
-      console.log('=== DEBUGGING: Fetching tenants with specific columns ===');
-      const { data: allTenants2, error: allTenantsError2 } = await supabase
-        .from('tenants')
-        .select('id, name, slug, domain, is_active, created_at');
-      
-      console.log('ALL TENANTS (specific columns):', allTenants2);
-      console.log('ALL TENANTS ERROR (specific columns):', allTenantsError2);
-      
-      // PRIMARY CHECK: Use domain column directly
-      console.log('=== PRIMARY CHECK: Domain-based lookup ===');
-      console.log('Searching for domain:', normalizedDomain);
-      const { data: existingTenantsByDomain, error: domainQueryError } = await supabase
-        .from('tenants')
-        .select('id, name, slug, domain, is_active, created_at')
+        .select('id, name, domain, is_active')
         .eq('domain', normalizedDomain);
 
       console.log('Domain query completed');
       console.log('Domain query error:', domainQueryError);
-      console.log('Domain query data:', existingTenantsByDomain);
-      console.log('Number of tenants found by domain:', existingTenantsByDomain?.length || 0);
+      console.log('Domain query data:', existingTenants);
 
-      // SECONDARY CHECK: Also check slug for backward compatibility
-      const slug = normalizedDomain.replace(/\./g, '-');
-      console.log('=== SECONDARY CHECK: Slug-based lookup ===');
-      console.log('Searching for slug:', slug);
-      const { data: existingTenantsBySlug, error: slugQueryError } = await supabase
-        .from('tenants')
-        .select('id, name, slug, domain, is_active, created_at')
-        .eq('slug', slug);
-
-      console.log('Slug query completed');
-      console.log('Slug query error:', slugQueryError);
-      console.log('Slug query data:', existingTenantsBySlug);
-      console.log('Number of tenants found by slug:', existingTenantsBySlug?.length || 0);
-
-      // Check for any errors
       if (domainQueryError) {
         console.error('Domain query error details:', {
           code: domainQueryError.code,
@@ -105,54 +54,28 @@ const SignupFormDomainCheck: React.FC<SignupFormDomainCheckProps> = ({
           details: domainQueryError.details,
           hint: domainQueryError.hint
         });
-      }
-      
-      if (slugQueryError) {
-        console.error('Slug query error details:', {
-          code: slugQueryError.code,
-          message: slugQueryError.message,
-          details: slugQueryError.details,
-          hint: slugQueryError.hint
-        });
-      }
-
-      // If there are any query errors, show user-friendly message
-      if (domainQueryError || slugQueryError) {
         setError('Unable to verify domain. Please try again.');
         setLoading(false);
         return;
       }
 
-      // Combine results - prioritize domain match over slug match
-      const foundTenants = existingTenantsByDomain && existingTenantsByDomain.length > 0 
-        ? existingTenantsByDomain 
-        : existingTenantsBySlug || [];
-
-      console.log('=== FINAL DECISION ===');
-      console.log('Combined found tenants:', foundTenants);
-      console.log('Total tenants found:', foundTenants.length);
-
-      if (foundTenants && foundTenants.length > 0) {
-        const existingTenant = foundTenants[0];
+      if (existingTenants && existingTenants.length > 0) {
+        const existingTenant = existingTenants[0];
         console.log('Found existing tenant:', existingTenant);
-        console.log('Tenant is active:', existingTenant.is_active);
         
-        // Tenant exists, show error and DO NOT proceed
+        // Tenant exists, show error and block signup
         setError('An administrator account has already been created for this company domain. Please contact your administrator or sign in with your existing account.');
         setLoading(false);
         console.log('=== BLOCKING SIGNUP - TENANT EXISTS ===');
-        // IMPORTANT: Return here to prevent calling onDomainVerified
         return;
       }
 
       console.log('No existing tenant found for domain:', normalizedDomain);
-      console.log('No existing tenant found for slug:', slug);
       console.log('=== PROCEEDING WITH SIGNUP ===');
       // Domain is available, proceed with signup
       onDomainVerified(domain, true);
     } catch (error) {
       console.error('Domain check catch block error:', error);
-      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack available');
       setError('Unable to verify domain. Please try again.');
     }
     
