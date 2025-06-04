@@ -54,7 +54,6 @@ export const useLoginSubmit = (
         loginRateLimiter.reset(clientId);
         setAttempts(0);
         console.log('Login successful - user should be redirected to dashboard');
-        navigate('/app'); 
       }
     } catch (err) {
       console.error('Unexpected login error:', err);
