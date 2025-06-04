@@ -1,10 +1,9 @@
 
 import React, { useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Building, AlertCircle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { useDomainCheck } from '@/hooks/useDomainCheck';
+import DomainCheckError from './DomainCheckError';
+import DomainInputField from './DomainInputField';
 
 interface SignupFormDomainCheckProps {
   onDomainVerified: (domain: string, isFirstUser: boolean) => void;
@@ -16,71 +15,16 @@ const SignupFormDomainCheck: React.FC<SignupFormDomainCheckProps> = ({
   onSwitchToLogin
 }) => {
   const [domain, setDomain] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { loading, error, setError, checkDomain } = useDomainCheck();
 
   const handleDomainCheck = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('=== DOMAIN CHECK STARTED ===');
-    console.log('Domain input:', domain);
+    const { isAvailable, isFirstUser } = await checkDomain(domain);
     
-    if (!domain.trim()) {
-      setError('Please enter your company domain');
-      return;
+    if (isAvailable) {
+      onDomainVerified(domain, isFirstUser);
     }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const normalizedDomain = domain.toLowerCase().trim();
-      console.log('Normalized domain:', normalizedDomain);
-      
-      // Check if domain already exists in tenants table
-      const { data: existingTenants, error: domainQueryError } = await supabase
-        .from('tenants')
-        .select('id, name, domain, is_active')
-        .eq('domain', normalizedDomain);
-
-      console.log('Domain query completed');
-      console.log('Domain query error:', domainQueryError);
-      console.log('Domain query data:', existingTenants);
-
-      if (domainQueryError) {
-        console.error('Domain query error details:', {
-          code: domainQueryError.code,
-          message: domainQueryError.message,
-          details: domainQueryError.details,
-          hint: domainQueryError.hint
-        });
-        setError('Unable to verify domain. Please try again.');
-        setLoading(false);
-        return;
-      }
-
-      if (existingTenants && existingTenants.length > 0) {
-        const existingTenant = existingTenants[0];
-        console.log('Found existing tenant:', existingTenant);
-        
-        // Tenant exists, show error and block signup
-        setError('An administrator account has already been created for this company domain. Please contact your administrator or sign in with your existing account.');
-        setLoading(false);
-        console.log('=== BLOCKING SIGNUP - TENANT EXISTS ===');
-        return;
-      }
-
-      console.log('No existing tenant found for domain:', normalizedDomain);
-      console.log('=== PROCEEDING WITH SIGNUP ===');
-      // Domain is available, proceed with signup
-      onDomainVerified(domain, true);
-    } catch (error) {
-      console.error('Domain check catch block error:', error);
-      setError('Unable to verify domain. Please try again.');
-    }
-    
-    setLoading(false);
-    console.log('=== DOMAIN CHECK COMPLETED ===');
   };
 
   return (
@@ -91,46 +35,13 @@ const SignupFormDomainCheck: React.FC<SignupFormDomainCheckProps> = ({
       </div>
 
       <form onSubmit={handleDomainCheck} className="space-y-4">
-        {error && (
-          <div className="bg-red-950/50 border border-red-500/50 rounded-md p-4">
-            <div className="flex items-start space-x-3">
-              <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-red-100 text-sm">{error}</p>
-                {error.includes('administrator account has already been created') && (
-                  <button
-                    type="button"
-                    onClick={onSwitchToLogin}
-                    className="mt-2 text-cyan-400 hover:text-cyan-300 underline text-sm"
-                  >
-                    Go to Sign In
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        <DomainCheckError error={error} onSwitchToLogin={onSwitchToLogin} />
 
-        <div className="space-y-2">
-          <Label htmlFor="domain" className="text-slate-200">Company Domain</Label>
-          <div className="relative">
-            <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-            <Input
-              id="domain"
-              name="domain"
-              type="text"
-              placeholder="example.com"
-              value={domain}
-              onChange={(e) => setDomain(e.target.value)}
-              required
-              disabled={loading}
-              className="pl-10 bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
-            />
-          </div>
-          <p className="text-xs text-gray-500">
-            Enter your company's email domain (e.g., auburn.edu, company.com)
-          </p>
-        </div>
+        <DomainInputField
+          domain={domain}
+          onChange={(e) => setDomain(e.target.value)}
+          disabled={loading}
+        />
 
         <Button
           type="submit"
