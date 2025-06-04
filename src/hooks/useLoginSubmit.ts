@@ -18,7 +18,7 @@ export const useLoginSubmit = (
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('Login form submitted', { email, hasPassword: !!password });
+    console.log('Login form submitted - attempting SIGN IN', { email, hasPassword: !!password });
     
     // Check rate limiting
     const clientId = `${email}_${new Date().getDate()}`; // Basic client identification
@@ -37,7 +37,7 @@ export const useLoginSubmit = (
     }
 
     try {
-      console.log('Attempting to sign in...');
+      console.log('Calling signIn function for existing user...');
       const { error } = await signIn(email, password);
       
       console.log('Sign in result:', { error: error?.message });
@@ -52,7 +52,7 @@ export const useLoginSubmit = (
         // Reset rate limiter on successful login
         loginRateLimiter.reset(clientId);
         setAttempts(0);
-        console.log('Login successful');
+        console.log('Login successful - user should be redirected to dashboard');
       }
     } catch (err) {
       console.error('Unexpected login error:', err);
