@@ -87,10 +87,10 @@ const SupportLogin: React.FC = () => {
         <Card className="bg-slate-800 border-slate-700">
           <CardHeader>
             <CardTitle className="text-white text-center">
-              Support Team Access
+              Super Support Access
             </CardTitle>
             <CardDescription className="text-slate-400 text-center">
-              Secure authentication required for support dashboard access
+              Secure authentication required for super_super_admin access
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -165,10 +165,10 @@ const SupportLogin: React.FC = () => {
 
               <div className="mt-4 p-3 bg-slate-700 rounded-lg">
                 <p className="text-xs text-slate-300 text-center">
-                  🔒 Secure authentication system active
+                  🔒 Super Support Authentication System Active
                 </p>
                 <p className="text-xs text-slate-400 text-center mt-1">
-                  Contact your administrator for access credentials
+                  Role: super_super_admin required for access
                 </p>
               </div>
             </form>

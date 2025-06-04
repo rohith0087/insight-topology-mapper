@@ -641,6 +641,39 @@ export type Database = {
           },
         ]
       }
+      support_admins: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          last_login: string | null
+          password_hash: string
+          role: Database["public"]["Enums"]["support_role"]
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          password_hash: string
+          role?: Database["public"]["Enums"]["support_role"]
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          password_hash?: string
+          role?: Database["public"]["Enums"]["support_role"]
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
       support_tickets: {
         Row: {
           assigned_to: string | null
@@ -905,6 +938,10 @@ export type Database = {
         Args: { p_tenant_id: string }
         Returns: Json
       }
+      create_support_admin: {
+        Args: { p_username: string; p_password: string }
+        Returns: string
+      }
       create_support_ticket: {
         Args: { p_title: string; p_description: string; p_priority?: string }
         Returns: {
@@ -1018,8 +1055,13 @@ export type Database = {
           user_id: string
         }
       }
+      validate_support_admin: {
+        Args: { p_username: string; p_password: string }
+        Returns: Json
+      }
     }
     Enums: {
+      support_role: "super_super_admin"
       user_role:
         | "super_admin"
         | "tenant_admin"
@@ -1141,6 +1183,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      support_role: ["super_super_admin"],
       user_role: [
         "super_admin",
         "tenant_admin",

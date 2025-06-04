@@ -36,11 +36,11 @@ const SuperAdminHeader = () => {
               <p className="text-white font-medium">
                 {user?.username}
               </p>
-              <p className="text-red-400 text-xs">Support Administrator</p>
+              <p className="text-red-400 text-xs">Super Support Administrator</p>
             </div>
             <Avatar className="w-8 h-8">
               <AvatarFallback className="bg-red-600 text-white text-sm">
-                SA
+                SSA
               </AvatarFallback>
             </Avatar>
           </div>

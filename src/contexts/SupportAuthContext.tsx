@@ -1,10 +1,11 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SupportUser {
   id: string;
   username: string;
-  role: 'support_admin';
+  role: 'super_super_admin';
 }
 
 interface SupportAuthContextType {
@@ -19,7 +20,7 @@ const SupportAuthContext = createContext<SupportAuthContextType | undefined>(und
 export const useSupportAuth = () => {
   const context = useContext(SupportAuthContext);
   if (context === undefined) {
-    throw new Error('useSupportAuth must be used within a SupportAuthProvider');
+    throw new error('useSupportAuth must be used within a SupportAuthProvider');
   }
   return context;
 };
@@ -72,26 +73,18 @@ const validateCredentials = (username: string, password: string): boolean => {
   return true;
 };
 
-const hashString = async (str: string): Promise<string> => {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(str);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-};
-
 export const SupportAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<SupportUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in via sessionStorage (more secure than localStorage)
+    // Check if user is already logged in via sessionStorage
     const savedUser = sessionStorage.getItem('support_user_session');
     if (savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser);
         // Validate the stored session
-        if (parsedUser.id && parsedUser.username && parsedUser.role === 'support_admin') {
+        if (parsedUser.id && parsedUser.username && parsedUser.role === 'super_super_admin') {
           setUser(parsedUser);
         } else {
           sessionStorage.removeItem('support_user_session');
@@ -116,34 +109,43 @@ export const SupportAuthProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
       
       // Rate limiting simulation (in production, this would be server-side)
-      const lastAttempt = localStorage.getItem('last_login_attempt');
+      const lastAttempt = localStorage.getItem('last_support_login_attempt');
       const now = Date.now();
       if (lastAttempt && now - parseInt(lastAttempt) < 3000) {
         return { error: { message: 'Too many attempts. Please wait.' } };
       }
-      localStorage.setItem('last_login_attempt', now.toString());
+      localStorage.setItem('last_support_login_attempt', now.toString());
       
-      // In production, this would validate against a secure backend
-      // For now, we'll use environment-based validation or secure configuration
-      const isValidCredentials = await validateSupportCredentials(sanitizedUsername, sanitizedPassword);
-      
-      if (isValidCredentials) {
-        const supportUser: SupportUser = {
-          id: `support_${await hashString(sanitizedUsername)}`,
+      // Call the validation edge function
+      const { data, error } = await supabase.functions.invoke('validate-support-login', {
+        body: {
           username: sanitizedUsername,
-          role: 'support_admin'
+          password: sanitizedPassword
+        }
+      });
+
+      if (error) {
+        console.error('Support authentication error:', error);
+        return { error: { message: 'Authentication system error' } };
+      }
+
+      if (data.success && data.admin) {
+        const supportUser: SupportUser = {
+          id: data.admin.id,
+          username: data.admin.username,
+          role: 'super_super_admin'
         };
         
         setUser(supportUser);
-        // Use sessionStorage instead of localStorage for better security
+        // Use sessionStorage for better security
         sessionStorage.setItem('support_user_session', JSON.stringify(supportUser));
         
         // Clear rate limiting
-        localStorage.removeItem('last_login_attempt');
+        localStorage.removeItem('last_support_login_attempt');
         
         return { error: null };
       } else {
-        return { error: { message: 'Authentication failed' } };
+        return { error: { message: data.error || 'Authentication failed' } };
       }
     } catch (error) {
       console.error('Authentication error:', error);
@@ -154,7 +156,7 @@ export const SupportAuthProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const signOut = () => {
     setUser(null);
     sessionStorage.removeItem('support_user_session');
-    localStorage.removeItem('last_login_attempt');
+    localStorage.removeItem('last_support_login_attempt');
   };
 
   const value = {
@@ -169,19 +171,4 @@ export const SupportAuthProvider: React.FC<{ children: React.ReactNode }> = ({ c
       {children}
     </SupportAuthContext.Provider>
   );
-};
-
-// Secure credential validation function
-// In production, this should validate against a secure backend API
-const validateSupportCredentials = async (username: string, password: string): Promise<boolean> => {
-  // This is a placeholder - in production, you should:
-  // 1. Make an API call to your secure backend
-  // 2. Use proper password hashing (bcrypt, Argon2, etc.)
-  // 3. Implement proper session management
-  // 4. Use environment variables for configuration
-  
-  // For now, return false to disable default login
-  // You'll need to implement proper backend authentication
-  console.warn('Support authentication requires backend implementation');
-  return false;
 };
