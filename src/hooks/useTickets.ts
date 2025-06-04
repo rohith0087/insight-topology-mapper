@@ -35,6 +35,7 @@ export const useTickets = () => {
   const fetchTickets = async () => {
     try {
       setLoading(true);
+      console.log('Fetching tickets...', { profile, supportUser });
       
       let query = supabase
         .from('support_tickets')
@@ -44,15 +45,22 @@ export const useTickets = () => {
         `)
         .order('created_at', { ascending: false });
 
-      // If this is a support admin, show all tickets
-      // If this is a regular user, only show their tenant's tickets
-      if (!supportUser && profile?.role !== 'super_admin' && profile?.tenant_id) {
+      // If this is NOT a support admin, filter by tenant
+      if (!supportUser && profile?.tenant_id) {
+        console.log('Filtering by tenant_id:', profile.tenant_id);
         query = query.eq('tenant_id', profile.tenant_id);
+      } else {
+        console.log('Support admin - showing all tickets');
       }
 
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching tickets:', error);
+        throw error;
+      }
+      
+      console.log('Fetched tickets:', data);
       
       const typedTickets = (data || []).map(ticket => ({
         ...ticket,
@@ -65,7 +73,7 @@ export const useTickets = () => {
       console.error('Error fetching tickets:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch tickets",
+        description: "Failed to fetch tickets: " + error.message,
         variant: "destructive",
       });
     } finally {

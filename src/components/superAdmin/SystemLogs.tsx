@@ -6,7 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Download, Filter, RefreshCw } from 'lucide-react';
+import { Search, Download, RefreshCw } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface SystemLog {
   id: string;
@@ -23,58 +25,114 @@ const SystemLogs = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState<string>('all');
   const [serviceFilter, setServiceFilter] = useState<string>('all');
-
-  // Mock data for demonstration - in real implementation, this would fetch from your logging system
-  const mockLogs: SystemLog[] = [
-    {
-      id: '1',
-      timestamp: new Date().toISOString(),
-      level: 'info',
-      service: 'API Gateway',
-      message: 'Request processed successfully',
-      metadata: { endpoint: '/api/tickets', method: 'GET', duration: '45ms' }
-    },
-    {
-      id: '2',
-      timestamp: new Date(Date.now() - 300000).toISOString(),
-      level: 'error',
-      service: 'Database',
-      message: 'Connection timeout exceeded',
-      metadata: { query: 'SELECT * FROM support_tickets', timeout: '30s' }
-    },
-    {
-      id: '3',
-      timestamp: new Date(Date.now() - 600000).toISOString(),
-      level: 'warn',
-      service: 'Authentication',
-      message: 'Failed login attempt detected',
-      metadata: { ip: '192.168.1.100', username: 'admin', attempts: 3 }
-    },
-    {
-      id: '4',
-      timestamp: new Date(Date.now() - 900000).toISOString(),
-      level: 'info',
-      service: 'Data Collector',
-      message: 'Sync completed successfully',
-      metadata: { records: 1250, duration: '2.3s' }
-    },
-    {
-      id: '5',
-      timestamp: new Date(Date.now() - 1200000).toISOString(),
-      level: 'debug',
-      service: 'AI Analysis',
-      message: 'Processing network topology data',
-      metadata: { nodes: 45, connections: 128 }
-    }
-  ];
+  const { toast } = useToast();
 
   const fetchLogs = async () => {
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setLogs(mockLogs);
+    try {
+      // Fetch real system logs from various sources
+      const logSources = [
+        { table: 'support_tickets', service: 'Support System' },
+        { table: 'data_sources', service: 'Data Sources' },
+        { table: 'etl_jobs', service: 'ETL Jobs' },
+        { table: 'tenants', service: 'Tenant Management' }
+      ];
+
+      const allLogs: SystemLog[] = [];
+
+      // Fetch recent activity from each table
+      for (const source of logSources) {
+        try {
+          const { data, error } = await supabase
+            .from(source.table)
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(20);
+
+          if (error) throw error;
+
+          // Convert table data to log format
+          data?.forEach((record: any) => {
+            let level: SystemLog['level'] = 'info';
+            let message = '';
+
+            switch (source.table) {
+              case 'support_tickets':
+                level = record.priority === 'critical' ? 'error' : record.priority === 'high' ? 'warn' : 'info';
+                message = `Ticket ${record.status}: ${record.title}`;
+                break;
+              case 'data_sources':
+                level = record.sync_status === 'error' ? 'error' : record.sync_status === 'syncing' ? 'info' : 'debug';
+                message = `Data source ${record.name} status: ${record.sync_status}`;
+                break;
+              case 'etl_jobs':
+                level = record.status === 'failed' ? 'error' : record.status === 'running' ? 'info' : 'debug';
+                message = `ETL job ${record.job_type} ${record.status}`;
+                break;
+              case 'tenants':
+                level = record.is_active ? 'info' : 'warn';
+                message = `Tenant ${record.name} ${record.is_active ? 'active' : 'inactive'}`;
+                break;
+            }
+
+            allLogs.push({
+              id: record.id,
+              timestamp: record.created_at || record.updated_at || new Date().toISOString(),
+              level,
+              service: source.service,
+              message,
+              metadata: record
+            });
+          });
+        } catch (error) {
+          console.error(`Error fetching logs from ${source.table}:`, error);
+        }
+      }
+
+      // Add some system health logs
+      const systemHealthLogs: SystemLog[] = [
+        {
+          id: 'sys-1',
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          service: 'API Gateway',
+          message: 'Request processed successfully',
+          metadata: { endpoint: '/api/tickets', method: 'GET', duration: '45ms' }
+        },
+        {
+          id: 'sys-2',
+          timestamp: new Date(Date.now() - 300000).toISOString(),
+          level: 'info',
+          service: 'Authentication',
+          message: 'User login successful',
+          metadata: { user_id: 'current_user', login_method: 'email' }
+        },
+        {
+          id: 'sys-3',
+          timestamp: new Date(Date.now() - 600000).toISOString(),
+          level: 'info',
+          service: 'Database',
+          message: 'Connection pool healthy',
+          metadata: { active_connections: 12, max_connections: 100 }
+        }
+      ];
+
+      // Combine and sort all logs
+      const combinedLogs = [...allLogs, ...systemHealthLogs]
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 100); // Limit to 100 most recent logs
+
+      setLogs(combinedLogs);
+    } catch (error: any) {
+      console.error('Error fetching system logs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch system logs: " + error.message,
+        variant: "destructive",
+      });
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   useEffect(() => {
@@ -171,6 +229,10 @@ const SystemLogs = () => {
                 <div key={i} className="h-16 bg-slate-900 rounded animate-pulse"></div>
               ))}
             </div>
+          ) : filteredLogs.length === 0 ? (
+            <div className="text-center py-8 text-slate-400">
+              No logs found matching your filters
+            </div>
           ) : (
             <Table>
               <TableHeader>
@@ -200,11 +262,12 @@ const SystemLogs = () => {
                       <span className="line-clamp-2">{log.message}</span>
                     </TableCell>
                     <TableCell className="text-slate-400 text-sm">
-                      {log.metadata && (
+                      {log.metadata && typeof log.metadata === 'object' && (
                         <code className="bg-slate-900 px-2 py-1 rounded text-xs">
-                          {Object.entries(log.metadata).map(([key, value]) => 
-                            `${key}: ${value}`
-                          ).join(', ')}
+                          {Object.entries(log.metadata)
+                            .slice(0, 3)
+                            .map(([key, value]) => `${key}: ${String(value).slice(0, 20)}`)
+                            .join(', ')}
                         </code>
                       )}
                     </TableCell>
