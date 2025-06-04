@@ -39,11 +39,31 @@ const SignupFormDomainCheck: React.FC<SignupFormDomainCheckProps> = ({
       const slug = domain.toLowerCase().replace(/\./g, '-');
       console.log('Converted slug:', slug);
       
-      // Check if tenant already exists with this slug - FIXED: Remove .single()
+      // DEBUGGING: First, let's see ALL tenants to understand what's in the database
+      console.log('=== DEBUGGING: Fetching ALL tenants ===');
+      const { data: allTenants, error: allTenantsError } = await supabase
+        .from('tenants')
+        .select('id, name, slug, domain, is_active');
+      
+      console.log('ALL TENANTS:', allTenants);
+      console.log('ALL TENANTS ERROR:', allTenantsError);
+      
+      // DEBUGGING: Check by domain directly
+      console.log('=== DEBUGGING: Checking by domain directly ===');
+      const { data: tenantsByDomain, error: domainError } = await supabase
+        .from('tenants')
+        .select('id, name, slug, domain, is_active')
+        .eq('domain', domain.toLowerCase());
+      
+      console.log('TENANTS BY DOMAIN:', tenantsByDomain);
+      console.log('DOMAIN ERROR:', domainError);
+      
+      // Original slug check
+      console.log('=== ORIGINAL SLUG CHECK ===');
       console.log('About to query tenants table with slug:', slug);
       const { data: existingTenants, error } = await supabase
         .from('tenants')
-        .select('id, name, is_active')
+        .select('id, name, is_active, slug, domain')
         .eq('slug', slug);
 
       console.log('Supabase query completed');
@@ -63,9 +83,10 @@ const SignupFormDomainCheck: React.FC<SignupFormDomainCheckProps> = ({
         return;
       }
 
-      // Check if any tenants were found
-      if (existingTenants && existingTenants.length > 0) {
-        const existingTenant = existingTenants[0]; // Get the first tenant
+      // Check if any tenants were found (by slug OR by domain)
+      const foundTenants = existingTenants || tenantsByDomain || [];
+      if (foundTenants && foundTenants.length > 0) {
+        const existingTenant = foundTenants[0]; // Get the first tenant
         console.log('Found existing tenant:', existingTenant);
         console.log('Tenant is active:', existingTenant.is_active);
         
@@ -78,6 +99,7 @@ const SignupFormDomainCheck: React.FC<SignupFormDomainCheckProps> = ({
       }
 
       console.log('No existing tenant found for slug:', slug);
+      console.log('No existing tenant found for domain:', domain.toLowerCase());
       console.log('=== PROCEEDING WITH SIGNUP ===');
       // Domain is available, proceed with signup
       onDomainVerified(domain, true);
