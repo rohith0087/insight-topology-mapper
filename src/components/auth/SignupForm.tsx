@@ -1,8 +1,8 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSignupForm } from '@/hooks/useSignupForm';
 import { supabase } from '@/integrations/supabase/client';
+import SignupFormDomainCheck from './SignupFormDomainCheck';
 import SignupFormHeader from './SignupFormHeader';
 import SignupFormError from './SignupFormError';
 import SignupFormSuccess from './SignupFormSuccess';
@@ -20,13 +20,16 @@ interface SignupFormProps {
 const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
   console.log('SignupForm component rendered - this should only show when mode is signup');
   
+  const [showDomainCheck, setShowDomainCheck] = useState(true);
+  const [verifiedDomain, setVerifiedDomain] = useState('');
+  const [isFirstUser, setIsFirstUser] = useState(false);
+  
   const { signUp } = useAuth();
   const {
     formData,
     loading,
     error,
     success,
-    isFirstUser,
     actualIsFirstUser,
     showPassword,
     showConfirmPassword,
@@ -42,6 +45,19 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
     validateForm,
     checkIfUserExists
   } = useSignupForm();
+
+  const handleDomainVerified = (domain: string, firstUser: boolean) => {
+    setVerifiedDomain(domain);
+    setIsFirstUser(firstUser);
+    setShowDomainCheck(false);
+    
+    // Pre-fill company name based on domain
+    const companyName = domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1);
+    setFormData(prev => ({
+      ...prev,
+      companyName: companyName
+    }));
+  };
 
   const checkIfFirstUserAfterSignup = async (email: string) => {
     const domain = email.split('@')[1]?.toLowerCase();
@@ -83,6 +99,14 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
       return;
     }
 
+    // Validate email domain matches verified domain
+    const emailDomain = formData.email.split('@')[1]?.toLowerCase();
+    if (emailDomain !== verifiedDomain.toLowerCase()) {
+      setError(`Email domain must match your company domain: ${verifiedDomain}`);
+      setLoading(false);
+      return;
+    }
+
     // Check if user already exists before attempting signup
     const userExists = await checkIfUserExists(formData.email);
     if (userExists) {
@@ -111,9 +135,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
           setError(error.message);
         }
       } else {
-        // Check if this user was actually the first from their company
-        const wasFirstUser = await checkIfFirstUserAfterSignup(formData.email);
-        setSignupResult(wasFirstUser);
+        // For first user from a new domain, they are always the first user
+        setSignupResult(isFirstUser);
         
         setSuccess(true);
         setFormData({
@@ -132,6 +155,16 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
     
     setLoading(false);
   };
+
+  // Show domain check first
+  if (showDomainCheck) {
+    return (
+      <SignupFormDomainCheck
+        onDomainVerified={handleDomainVerified}
+        onSwitchToLogin={onLoginClick}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -177,6 +210,11 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
           passwordErrors={validationErrors.password || []}
           confirmPasswordErrors={validationErrors.confirmPassword || []}
         />
+
+        <div className="text-xs text-gray-500 bg-slate-800/50 p-3 rounded-md">
+          <p><strong>Domain:</strong> {verifiedDomain}</p>
+          <p>Your email must use this domain to complete registration.</p>
+        </div>
 
         <SignupFormSubmitButton loading={loading} />
 
