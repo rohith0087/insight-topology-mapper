@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import NetworkTopology from './NetworkTopology';
 import SearchAndFilters from './SearchAndFilters';
 import StatusBar from './StatusBar';
@@ -19,13 +20,41 @@ import { Button } from './ui/button';
 import { Database, Settings, Network, Users, Brain, Lightbulb, X, BarChart3, Webhook, Shield } from 'lucide-react';
 
 const TopologyDashboard = () => {
-  const { profile } = useAuth();
+  const { profile, user, loading } = useAuth();
+  const navigate = useNavigate();
   const { insights, generateInsights, isLoading: insightsLoading } = useNetworkInsights();
   const { triggerAlert, triggerDeviceEvent } = useWebhooks();
   
   // Debug user role
   console.log('User profile:', profile);
   console.log('User role:', profile?.role);
+  console.log('User object:', user);
+  console.log('Loading state:', loading);
+  
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      console.log('User not authenticated, redirecting to auth page');
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-900 text-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if user is not authenticated
+  if (!user) {
+    return null;
+  }
   
   const [selectedNode, setSelectedNode] = useState(null);
   const [showDataSources, setShowDataSources] = useState(false);

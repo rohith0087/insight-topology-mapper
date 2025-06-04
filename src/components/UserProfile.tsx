@@ -25,11 +25,18 @@ const UserProfile: React.FC = () => {
   const [ticketsDialogOpen, setTicketsDialogOpen] = useState(false);
 
   const handleSignOut = async () => {
+    console.log('UserProfile: Signing out...');
     await signOut();
+    console.log('UserProfile: Sign out complete, redirecting to auth');
     navigate('/auth');
   };
 
-  if (!profile) return null;
+  if (!profile) {
+    console.log('UserProfile: No profile found, returning null');
+    return null;
+  }
+
+  console.log('UserProfile: Rendering with profile:', profile);
 
   return (
     <>

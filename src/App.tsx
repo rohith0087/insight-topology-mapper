@@ -13,6 +13,7 @@ import SupportLogin from "./pages/SupportLogin";
 import SupportSetup from "./pages/SupportSetup";
 import SupportPortal from "./pages/SupportPortal";
 import SupportProtectedRoute from "./components/support/SupportProtectedRoute";
+import AuthPage from "./components/auth/AuthPage";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <SupportAuthProvider>
             <Routes>
               <Route path="/" element={<LandingPage />} />
+              <Route path="/auth" element={<AuthPage />} />
               <Route path="/app" element={<Index />} />
               <Route path="/support-login" element={<SupportLogin />} />
               <Route path="/support-setup" element={<SupportSetup />} />
