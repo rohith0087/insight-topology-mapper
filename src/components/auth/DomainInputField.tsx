@@ -20,7 +20,7 @@ const DomainInputField: React.FC<DomainInputFieldProps> = ({ domain, onChange, d
           id="domain"
           name="domain"
           type="text"
-          placeholder="example.com"
+          placeholder="company.com"
           value={domain}
           onChange={onChange}
           required
@@ -28,9 +28,12 @@ const DomainInputField: React.FC<DomainInputFieldProps> = ({ domain, onChange, d
           className="pl-10 bg-slate-900 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500"
         />
       </div>
-      <p className="text-xs text-gray-500">
-        Enter your company's email domain (e.g., auburn.edu, company.com)
-      </p>
+      <div className="text-xs text-gray-500 space-y-1">
+        <p>Enter your company's domain (e.g., auburn.edu, microsoft.com)</p>
+        <p className="text-yellow-400">
+          ⚠️ Personal email domains (Gmail, Outlook, Yahoo, etc.) are not allowed
+        </p>
+      </div>
     </div>
   );
 };
