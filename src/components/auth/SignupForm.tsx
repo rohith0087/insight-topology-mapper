@@ -2,6 +2,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSignupForm } from '@/hooks/useSignupForm';
+import { supabase } from '@/integrations/supabase/client';
 import SignupFormHeader from './SignupFormHeader';
 import SignupFormError from './SignupFormError';
 import SignupFormSuccess from './SignupFormSuccess';
@@ -26,6 +27,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
     error,
     success,
     isFirstUser,
+    actualIsFirstUser,
     showPassword,
     showConfirmPassword,
     validationErrors,
@@ -35,9 +37,34 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
     setShowPassword,
     setShowConfirmPassword,
     setFormData,
+    setSignupResult,
     handleChange,
     validateForm
   } = useSignupForm();
+
+  const checkIfFirstUserAfterSignup = async (email: string) => {
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (!domain) return false;
+
+    try {
+      // Check how many users exist with this domain after signup
+      const { data: existingUsers, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .ilike('email', `%@${domain}`);
+
+      if (error) {
+        console.error('Error checking users after signup:', error);
+        return false;
+      }
+
+      // If only 1 user exists (the one we just created), they're the first
+      return existingUsers && existingUsers.length === 1;
+    } catch (error) {
+      console.error('Error checking users after signup:', error);
+      return false;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +102,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
           setError(error.message);
         }
       } else {
+        // Check if this user was actually the first from their company
+        const wasFirstUser = await checkIfFirstUserAfterSignup(formData.email);
+        setSignupResult(wasFirstUser);
+        
         setSuccess(true);
         setFormData({
           firstName: '',
@@ -99,7 +130,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onLoginClick }) => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <SignupFormError error={error} />
-        <SignupFormSuccess success={success} isFirstUser={isFirstUser} />
+        <SignupFormSuccess success={success} isFirstUser={actualIsFirstUser} />
 
         <SignupFormCompanyField
           value={formData.companyName}

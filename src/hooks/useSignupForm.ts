@@ -16,6 +16,7 @@ export const useSignupForm = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isFirstUser, setIsFirstUser] = useState(false);
+  const [actualIsFirstUser, setActualIsFirstUser] = useState(false); // For the actual signup result
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
@@ -47,7 +48,7 @@ export const useSignupForm = () => {
     }
   };
 
-  // Check when email changes
+  // Check when email changes (for UI feedback)
   useEffect(() => {
     const checkUser = async () => {
       if (formData.email && formData.email.includes('@')) {
@@ -167,12 +168,18 @@ export const useSignupForm = () => {
     return Object.keys(errors).length === 0;
   };
 
+  // Function to set the actual first user status after signup
+  const setSignupResult = (wasFirstUser: boolean) => {
+    setActualIsFirstUser(wasFirstUser);
+  };
+
   return {
     formData,
     loading,
     error,
     success,
-    isFirstUser,
+    isFirstUser, // For UI feedback during email input
+    actualIsFirstUser, // For the actual signup success message
     showPassword,
     showConfirmPassword,
     validationErrors,
@@ -182,6 +189,7 @@ export const useSignupForm = () => {
     setShowPassword,
     setShowConfirmPassword,
     setFormData,
+    setSignupResult,
     handleChange,
     validateForm
   };
