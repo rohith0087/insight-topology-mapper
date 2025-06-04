@@ -19,6 +19,7 @@ export const useLoginSubmit = (
     e.stopPropagation();
     
     console.log('Login form submitted - attempting SIGN IN', { email, hasPassword: !!password });
+    console.log('signIn function from useAuth:', typeof signIn, signIn);
     
     // Check rate limiting
     const clientId = `${email}_${new Date().getDate()}`; // Basic client identification
@@ -37,7 +38,7 @@ export const useLoginSubmit = (
     }
 
     try {
-      console.log('Calling signIn function for existing user...');
+      console.log('About to call signIn function with email:', email);
       const { error } = await signIn(email, password);
       
       console.log('Sign in result:', { error: error?.message });
