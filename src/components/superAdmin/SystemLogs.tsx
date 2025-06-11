@@ -30,63 +30,119 @@ const SystemLogs = () => {
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      // Fetch real system logs from various sources
-      const logSources = [
-        { table: 'support_tickets', service: 'Support System' },
-        { table: 'data_sources', service: 'Data Sources' },
-        { table: 'etl_jobs', service: 'ETL Jobs' },
-        { table: 'tenants', service: 'Tenant Management' }
-      ];
-
       const allLogs: SystemLog[] = [];
 
-      // Fetch recent activity from each table
-      for (const source of logSources) {
-        try {
-          const { data, error } = await supabase
-            .from(source.table)
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(20);
+      // Fetch support tickets
+      try {
+        const { data: tickets, error: ticketsError } = await supabase
+          .from('support_tickets')
+          .select(`
+            *,
+            tenant:tenants(name, company_name)
+          `)
+          .order('created_at', { ascending: false })
+          .limit(20);
 
-          if (error) throw error;
+        if (ticketsError) throw ticketsError;
 
-          // Convert table data to log format
-          data?.forEach((record: any) => {
-            let level: SystemLog['level'] = 'info';
-            let message = '';
+        tickets?.forEach((ticket: any) => {
+          let level: SystemLog['level'] = 'info';
+          if (ticket.priority === 'critical') level = 'error';
+          else if (ticket.priority === 'high') level = 'warn';
 
-            switch (source.table) {
-              case 'support_tickets':
-                level = record.priority === 'critical' ? 'error' : record.priority === 'high' ? 'warn' : 'info';
-                message = `Ticket ${record.status}: ${record.title}`;
-                break;
-              case 'data_sources':
-                level = record.sync_status === 'error' ? 'error' : record.sync_status === 'syncing' ? 'info' : 'debug';
-                message = `Data source ${record.name} status: ${record.sync_status}`;
-                break;
-              case 'etl_jobs':
-                level = record.status === 'failed' ? 'error' : record.status === 'running' ? 'info' : 'debug';
-                message = `ETL job ${record.job_type} ${record.status}`;
-                break;
-              case 'tenants':
-                level = record.is_active ? 'info' : 'warn';
-                message = `Tenant ${record.name} ${record.is_active ? 'active' : 'inactive'}`;
-                break;
-            }
-
-            allLogs.push({
-              id: record.id,
-              timestamp: record.created_at || record.updated_at || new Date().toISOString(),
-              level,
-              service: source.service,
-              message,
-              metadata: record
-            });
+          allLogs.push({
+            id: ticket.id,
+            timestamp: ticket.created_at,
+            level,
+            service: 'Support System',
+            message: `Ticket ${ticket.status}: ${ticket.title}`,
+            metadata: ticket
           });
-        } catch (error) {
-          console.error(`Error fetching logs from ${source.table}:`, error);
-        }
+        });
+      } catch (error) {
+        console.error('Error fetching support tickets:', error);
+      }
+
+      // Fetch data sources
+      try {
+        const { data: dataSources, error: dataSourcesError } = await supabase
+          .from('data_sources')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (dataSourcesError) throw dataSourcesError;
+
+        dataSources?.forEach((ds: any) => {
+          let level: SystemLog['level'] = 'debug';
+          if (ds.sync_status === 'error') level = 'error';
+          else if (ds.sync_status === 'syncing') level = 'info';
+
+          allLogs.push({
+            id: ds.id,
+            timestamp: ds.updated_at || ds.created_at,
+            level,
+            service: 'Data Sources',
+            message: `Data source ${ds.name} status: ${ds.sync_status}`,
+            metadata: ds
+          });
+        });
+      } catch (error) {
+        console.error('Error fetching data sources:', error);
+      }
+
+      // Fetch ETL jobs
+      try {
+        const { data: etlJobs, error: etlJobsError } = await supabase
+          .from('etl_jobs')
+          .select('*')
+          .order('started_at', { ascending: false })
+          .limit(20);
+
+        if (etlJobsError) throw etlJobsError;
+
+        etlJobs?.forEach((job: any) => {
+          let level: SystemLog['level'] = 'debug';
+          if (job.status === 'failed') level = 'error';
+          else if (job.status === 'running') level = 'info';
+
+          allLogs.push({
+            id: job.id,
+            timestamp: job.started_at,
+            level,
+            service: 'ETL Jobs',
+            message: `ETL job ${job.job_type} ${job.status}`,
+            metadata: job
+          });
+        });
+      } catch (error) {
+        console.error('Error fetching ETL jobs:', error);
+      }
+
+      // Fetch tenants
+      try {
+        const { data: tenants, error: tenantsError } = await supabase
+          .from('tenants')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (tenantsError) throw tenantsError;
+
+        tenants?.forEach((tenant: any) => {
+          let level: SystemLog['level'] = tenant.is_active ? 'info' : 'warn';
+
+          allLogs.push({
+            id: tenant.id,
+            timestamp: tenant.updated_at || tenant.created_at,
+            level,
+            service: 'Tenant Management',
+            message: `Tenant ${tenant.name} ${tenant.is_active ? 'active' : 'inactive'}`,
+            metadata: tenant
+          });
+        });
+      } catch (error) {
+        console.error('Error fetching tenants:', error);
       }
 
       // Add some system health logs
