@@ -43,7 +43,7 @@ export const useAuthState = () => {
                 
                 // Auto-redirect to dashboard after successful login
                 if (window.location.pathname === '/auth') {
-                  window.location.href = '/dashboard';
+                  window.location.href = '/app';
                 }
               }
             } catch (error) {
@@ -67,7 +67,7 @@ export const useAuthState = () => {
       if (session?.user) {
         // If user is already logged in and on auth page, redirect
         if (window.location.pathname === '/auth') {
-          window.location.href = '/dashboard';
+          window.location.href = '/app';
         }
         
         setTimeout(async () => {
