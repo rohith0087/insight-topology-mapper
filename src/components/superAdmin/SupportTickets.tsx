@@ -7,16 +7,38 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTickets, SupportTicket } from '@/hooks/useTickets';
-import { Search, Plus, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Search, Plus, Clock, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 import TicketDialog from './TicketDialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { useSupportAuth } from '@/contexts/SupportAuthContext';
 
 const SupportTickets = () => {
-  const { tickets, loading } = useTickets();
+  const { tickets, loading, fetchTickets, createTicket } = useTickets();
+  const { user: supportUser } = useSupportAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newTicket, setNewTicket] = useState({
+    title: '',
+    description: '',
+    priority: 'medium'
+  });
+
+  const handleCreateTestTicket = async () => {
+    if (!newTicket.title.trim() || !newTicket.description.trim()) return;
+
+    try {
+      await createTicket(newTicket.title, newTicket.description, newTicket.priority);
+      setNewTicket({ title: '', description: '', priority: 'medium' });
+      setCreateDialogOpen(false);
+    } catch (error) {
+      // Error handling is done in the hook
+    }
+  };
 
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,6 +86,12 @@ const SupportTickets = () => {
     setTicketDialogOpen(true);
   };
 
+  console.log('=== SUPPORT TICKETS COMPONENT DEBUG ===');
+  console.log('Support user:', supportUser);
+  console.log('Loading:', loading);
+  console.log('Tickets:', tickets);
+  console.log('Filtered tickets:', filteredTickets);
+
   if (loading) {
     return (
       <div className="p-6">
@@ -88,7 +116,94 @@ const SupportTickets = () => {
             Manage customer support requests and issues
           </p>
         </div>
+        <div className="flex items-center space-x-2">
+          <Button onClick={fetchTickets} variant="outline" className="border-slate-600 text-slate-300 hover:text-white">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+          {supportUser && (
+            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Test Ticket
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-slate-800 border-slate-700">
+                <DialogHeader>
+                  <DialogTitle className="text-white">Create Test Support Ticket</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-300 mb-2 block">
+                      Title
+                    </label>
+                    <Input
+                      value={newTicket.title}
+                      onChange={(e) => setNewTicket({ ...newTicket, title: e.target.value })}
+                      placeholder="Brief description of the issue"
+                      className="bg-slate-900 border-slate-600 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-300 mb-2 block">
+                      Description
+                    </label>
+                    <Textarea
+                      value={newTicket.description}
+                      onChange={(e) => setNewTicket({ ...newTicket, description: e.target.value })}
+                      placeholder="Detailed description of the issue..."
+                      rows={4}
+                      className="bg-slate-900 border-slate-600 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-300 mb-2 block">
+                      Priority
+                    </label>
+                    <Select value={newTicket.priority} onValueChange={(value) => setNewTicket({ ...newTicket, priority: value })}>
+                      <SelectTrigger className="bg-slate-900 border-slate-600 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="critical">Critical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleCreateTestTicket} className="bg-blue-600 hover:bg-blue-700">
+                      Create Ticket
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </div>
+
+      {/* Debug Information */}
+      {supportUser && (
+        <Card className="bg-slate-900 border-yellow-600">
+          <CardHeader>
+            <CardTitle className="text-yellow-400 text-sm">Debug Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-xs text-slate-300 space-y-1">
+              <p>Support User: {supportUser ? 'Yes' : 'No'}</p>
+              <p>Total Tickets in DB: {tickets.length}</p>
+              <p>Filtered Tickets: {filteredTickets.length}</p>
+              <p>Loading: {loading ? 'Yes' : 'No'}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="bg-slate-800 border-slate-700">
         <CardHeader>
@@ -132,68 +247,91 @@ const SupportTickets = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow className="border-slate-700">
-                <TableHead className="text-slate-300">Ticket</TableHead>
-                <TableHead className="text-slate-300">Client</TableHead>
-                <TableHead className="text-slate-300">Priority</TableHead>
-                <TableHead className="text-slate-300">Status</TableHead>
-                <TableHead className="text-slate-300">Created</TableHead>
-                <TableHead className="text-slate-300">Updated</TableHead>
-                <TableHead className="text-slate-300">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTickets.map((ticket) => (
-                <TableRow key={ticket.id} className="border-slate-700">
-                  <TableCell>
-                    <div>
-                      <p className="font-medium text-white">{ticket.title}</p>
-                      <p className="text-sm text-slate-400 line-clamp-1">
-                        {ticket.description}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <p className="text-white">{ticket.tenant?.name}</p>
-                      <p className="text-sm text-slate-400">{ticket.tenant?.company_name}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getPriorityColor(ticket.priority)}>
-                      {ticket.priority}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Badge className={getStatusColor(ticket.status)}>
-                        {getStatusIcon(ticket.status)}
-                        <span className="ml-1">{ticket.status.replace('_', ' ')}</span>
-                      </Badge>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-slate-400">
-                    {new Date(ticket.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className="text-slate-400">
-                    {new Date(ticket.updated_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-slate-300 hover:text-white"
-                      onClick={() => handleViewTicket(ticket)}
-                    >
-                      View
-                    </Button>
-                  </TableCell>
+          {filteredTickets.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-slate-400 mb-4">
+                {tickets.length === 0 ? (
+                  <>
+                    <Clock className="w-12 h-12 mx-auto mb-4 text-slate-600" />
+                    <p className="text-lg mb-2">No support tickets found</p>
+                    <p className="text-sm">No tickets exist in the database yet.</p>
+                    {supportUser && (
+                      <p className="text-xs mt-2 text-blue-400">Click "Create Test Ticket" to add some sample data.</p>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-12 h-12 mx-auto mb-4 text-slate-600" />
+                    <p className="text-lg mb-2">No tickets match your filters</p>
+                    <p className="text-sm">Try adjusting your search criteria.</p>
+                  </>
+                )}
+              </div>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="border-slate-700">
+                  <TableHead className="text-slate-300">Ticket</TableHead>
+                  <TableHead className="text-slate-300">Client</TableHead>
+                  <TableHead className="text-slate-300">Priority</TableHead>
+                  <TableHead className="text-slate-300">Status</TableHead>
+                  <TableHead className="text-slate-300">Created</TableHead>
+                  <TableHead className="text-slate-300">Updated</TableHead>
+                  <TableHead className="text-slate-300">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredTickets.map((ticket) => (
+                  <TableRow key={ticket.id} className="border-slate-700">
+                    <TableCell>
+                      <div>
+                        <p className="font-medium text-white">{ticket.title}</p>
+                        <p className="text-sm text-slate-400 line-clamp-1">
+                          {ticket.description}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="text-white">{ticket.tenant?.name || 'Unknown'}</p>
+                        <p className="text-sm text-slate-400">{ticket.tenant?.company_name || 'No company'}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getPriorityColor(ticket.priority)}>
+                        {ticket.priority}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={getStatusColor(ticket.status)}>
+                          {getStatusIcon(ticket.status)}
+                          <span className="ml-1">{ticket.status.replace('_', ' ')}</span>
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-slate-400">
+                      {new Date(ticket.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-slate-400">
+                      {new Date(ticket.updated_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-slate-300 hover:text-white"
+                        onClick={() => handleViewTicket(ticket)}
+                      >
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 

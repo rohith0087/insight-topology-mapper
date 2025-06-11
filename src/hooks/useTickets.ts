@@ -35,7 +35,10 @@ export const useTickets = () => {
   const fetchTickets = async () => {
     try {
       setLoading(true);
-      console.log('Fetching tickets...', { profile, supportUser });
+      console.log('=== FETCHING TICKETS DEBUG ===');
+      console.log('Profile:', profile);
+      console.log('Support User:', supportUser);
+      console.log('Is Support Admin:', !!supportUser);
       
       let query = supabase
         .from('support_tickets')
@@ -60,7 +63,8 @@ export const useTickets = () => {
         throw error;
       }
       
-      console.log('Fetched tickets:', data);
+      console.log('Raw ticket data from DB:', data);
+      console.log('Number of tickets found:', data?.length || 0);
       
       const typedTickets = (data || []).map(ticket => ({
         ...ticket,
@@ -68,6 +72,7 @@ export const useTickets = () => {
         status: ticket.status as SupportTicket['status'],
       }));
       
+      console.log('Processed tickets:', typedTickets);
       setTickets(typedTickets);
     } catch (error: any) {
       console.error('Error fetching tickets:', error);
@@ -83,6 +88,7 @@ export const useTickets = () => {
 
   const createTicket = async (title: string, description: string, priority: string = 'medium') => {
     try {
+      console.log('Creating ticket:', { title, description, priority });
       const { data, error } = await supabase.rpc('create_support_ticket', {
         p_title: title,
         p_description: description,
@@ -138,6 +144,7 @@ export const useTickets = () => {
   };
 
   useEffect(() => {
+    console.log('useTickets useEffect triggered');
     fetchTickets();
   }, [profile?.tenant_id, supportUser]);
 
