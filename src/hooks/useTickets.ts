@@ -35,11 +35,27 @@ export const useTickets = () => {
   const fetchTickets = async () => {
     try {
       setLoading(true);
-      console.log('=== FETCHING TICKETS DEBUG ===');
-      console.log('Profile:', profile);
-      console.log('Support User:', supportUser);
-      console.log('Is Support Admin:', !!supportUser);
+      console.log('=== DETAILED TICKETS FETCH DEBUG ===');
+      console.log('Profile object:', JSON.stringify(profile, null, 2));
+      console.log('Support User object:', JSON.stringify(supportUser, null, 2));
+      console.log('Profile tenant_id:', profile?.tenant_id);
+      console.log('Is Support Admin?:', !!supportUser);
       
+      // First, let's see what's in the support_tickets table
+      console.log('--- CHECKING ALL TICKETS IN DATABASE ---');
+      const { data: allTicketsCheck, error: allTicketsError } = await supabase
+        .from('support_tickets')
+        .select('id, tenant_id, title, status, created_at')
+        .order('created_at', { ascending: false });
+      
+      if (allTicketsError) {
+        console.error('Error checking all tickets:', allTicketsError);
+      } else {
+        console.log('ALL TICKETS IN DATABASE:', allTicketsCheck);
+        console.log('Total tickets in database:', allTicketsCheck?.length || 0);
+      }
+
+      // Now build the actual query
       let query = supabase
         .from('support_tickets')
         .select(`
@@ -50,21 +66,39 @@ export const useTickets = () => {
 
       // If this is NOT a support admin, filter by tenant
       if (!supportUser && profile?.tenant_id) {
+        console.log('=== APPLYING TENANT FILTER ===');
         console.log('Filtering by tenant_id:', profile.tenant_id);
         query = query.eq('tenant_id', profile.tenant_id);
       } else {
-        console.log('Support admin - showing all tickets');
+        console.log('=== NO TENANT FILTER (SUPPORT ADMIN OR NO PROFILE) ===');
+        if (supportUser) {
+          console.log('Support admin - showing all tickets');
+        } else {
+          console.log('No profile or tenant_id - this might be the issue!');
+        }
       }
 
       const { data, error } = await query;
       
       if (error) {
-        console.error('Error fetching tickets:', error);
+        console.error('Error fetching tickets with query:', error);
         throw error;
       }
       
-      console.log('Raw ticket data from DB:', data);
-      console.log('Number of tickets found:', data?.length || 0);
+      console.log('=== QUERY RESULTS ===');
+      console.log('Raw ticket data from filtered query:', data);
+      console.log('Number of tickets from filtered query:', data?.length || 0);
+      
+      // Let's also check what tenants exist
+      const { data: tenantsData, error: tenantsError } = await supabase
+        .from('tenants')
+        .select('id, name, company_name');
+      
+      if (tenantsError) {
+        console.error('Error fetching tenants:', tenantsError);
+      } else {
+        console.log('AVAILABLE TENANTS:', tenantsData);
+      }
       
       const typedTickets = (data || []).map(ticket => ({
         ...ticket,
@@ -72,7 +106,8 @@ export const useTickets = () => {
         status: ticket.status as SupportTicket['status'],
       }));
       
-      console.log('Processed tickets:', typedTickets);
+      console.log('=== FINAL PROCESSED TICKETS ===');
+      console.log('Processed tickets for display:', typedTickets);
       setTickets(typedTickets);
     } catch (error: any) {
       console.error('Error fetching tickets:', error);
@@ -144,7 +179,9 @@ export const useTickets = () => {
   };
 
   useEffect(() => {
-    console.log('useTickets useEffect triggered');
+    console.log('=== useTickets useEffect triggered ===');
+    console.log('Dependencies - profile?.tenant_id:', profile?.tenant_id);
+    console.log('Dependencies - supportUser:', supportUser);
     fetchTickets();
   }, [profile?.tenant_id, supportUser]);
 
