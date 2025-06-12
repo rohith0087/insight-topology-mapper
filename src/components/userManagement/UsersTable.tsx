@@ -2,21 +2,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { 
   Table,
   TableBody,
@@ -25,8 +13,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Trash2 } from 'lucide-react';
 import { Profile, UserRole, getRoleBadgeColor, formatRole } from './userManagementUtils';
+import RoleChangeDialog from './RoleChangeDialog';
+import UserDeleteDialog from './UserDeleteDialog';
+import UserActions from './UserActions';
 
 interface UsersTableProps {
   users: Profile[];
@@ -175,35 +165,12 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onUsersUpdate }) => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex space-x-2">
-                      {canModifyUser(user) && (
-                        <>
-                          <Select
-                            value={user.role || 'viewer'}
-                            onValueChange={(value: UserRole) => handleRoleChange(user, value)}
-                          >
-                            <SelectTrigger className="w-32 h-8 text-xs bg-slate-700 border-slate-600 text-white">
-                              <SelectValue className="text-white" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-600">
-                              <SelectItem value="viewer" className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white">Viewer</SelectItem>
-                              <SelectItem value="analyst" className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white">Analyst</SelectItem>
-                              <SelectItem value="network_admin" className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white">Network Admin</SelectItem>
-                              <SelectItem value="tenant_admin" className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white">Tenant Admin</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleDeleteClick(user)}
-                            disabled={!user.is_active}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                    <UserActions
+                      user={user}
+                      canModify={canModifyUser(user)}
+                      onRoleChange={handleRoleChange}
+                      onDeleteClick={handleDeleteClick}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
@@ -212,62 +179,20 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onUsersUpdate }) => {
         </CardContent>
       </Card>
 
-      {/* Role Change Confirmation Dialog */}
-      <AlertDialog open={roleChangeDialogOpen} onOpenChange={setRoleChangeDialogOpen}>
-        <AlertDialogContent className="bg-slate-800 border-slate-700">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Confirm Role Change</AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-300">
-              Are you sure you want to change the role of <strong>{selectedUser?.first_name} {selectedUser?.last_name}</strong> ({selectedUser?.email}) to <strong>{newRole ? formatRole(newRole) : ''}</strong>?
-              <br /><br />
-              This action will immediately update their permissions and access level.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-slate-600 text-white hover:bg-slate-700">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmRoleChange}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Change Role
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <RoleChangeDialog
+        open={roleChangeDialogOpen}
+        onOpenChange={setRoleChangeDialogOpen}
+        selectedUser={selectedUser}
+        newRole={newRole}
+        onConfirm={confirmRoleChange}
+      />
 
-      {/* User Deletion Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-slate-800 border-slate-700">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Confirm User Deletion</AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-300">
-              Are you sure you want to deactivate <strong>{selectedUser?.first_name} {selectedUser?.last_name}</strong> ({selectedUser?.email})?
-              <br /><br />
-              This action will:
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>Immediately revoke their access to the system</li>
-                <li>Prevent them from logging in</li>
-                <li>Remove them from all active sessions</li>
-              </ul>
-              <br />
-              <strong className="text-red-400">This action cannot be easily undone.</strong>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-slate-600 text-white hover:bg-slate-700">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Deactivate User
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <UserDeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        selectedUser={selectedUser}
+        onConfirm={confirmDelete}
+      />
     </>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -618,18 +617,35 @@ const LumenNetLanding: React.FC = () => {
       </footer>
       
       {/* Additional CSS for subtle animations if needed */}
-      <style jsx global>{`
-        .animate-pulse-slow {
-          animation: pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      <style>{`
+        .gradient-text {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          color: transparent;
         }
-        .animate-pulse-slower {
-            animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        
+        .hero-gradient {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
         }
-        @keyframes pulse {
-          50% {
-            opacity: .2;
-            transform: scale(1.1);
-          }
+        
+        .feature-card {
+          backdrop-filter: blur(10px);
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glow-effect {
+          box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .hover-lift {
+          transition: transform 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+          transform: translateY(-5px);
         }
       `}</style>
 
