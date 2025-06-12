@@ -56,9 +56,6 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onUsersUpdate }) => {
       });
 
       onUsersUpdate();
-      setRoleChangeDialogOpen(false);
-      setSelectedUser(null);
-      setNewRole(null);
     } catch (error) {
       console.error('Error updating user role:', error);
       toast({
@@ -84,8 +81,6 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onUsersUpdate }) => {
       });
 
       onUsersUpdate();
-      setDeleteDialogOpen(false);
-      setSelectedUser(null);
     } catch (error) {
       console.error('Error deactivating user:', error);
       toast({
@@ -97,6 +92,10 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onUsersUpdate }) => {
   };
 
   const handleRoleChange = (user: Profile, role: UserRole) => {
+    if (role === user.role) {
+      // No change needed
+      return;
+    }
     setSelectedUser(user);
     setNewRole(role);
     setRoleChangeDialogOpen(true);
@@ -105,6 +104,23 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onUsersUpdate }) => {
   const handleDeleteClick = (user: Profile) => {
     setSelectedUser(user);
     setDeleteDialogOpen(true);
+  };
+
+  const confirmRoleChange = async () => {
+    if (selectedUser && newRole) {
+      await updateUserRole(selectedUser.id, newRole);
+      setRoleChangeDialogOpen(false);
+      setSelectedUser(null);
+      setNewRole(null);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (selectedUser) {
+      await deactivateUser(selectedUser.id);
+      setDeleteDialogOpen(false);
+      setSelectedUser(null);
+    }
   };
 
   const canModifyUser = (user: Profile) => {
@@ -166,14 +182,14 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onUsersUpdate }) => {
                             value={user.role || 'viewer'}
                             onValueChange={(value: UserRole) => handleRoleChange(user, value)}
                           >
-                            <SelectTrigger className="w-32 h-8 text-xs bg-slate-700 border-slate-600">
-                              <SelectValue />
+                            <SelectTrigger className="w-32 h-8 text-xs bg-slate-700 border-slate-600 text-white">
+                              <SelectValue className="text-white" />
                             </SelectTrigger>
-                            <SelectContent className="bg-slate-900 border-slate-600">
-                              <SelectItem value="viewer" className="text-white hover:bg-slate-700">Viewer</SelectItem>
-                              <SelectItem value="analyst" className="text-white hover:bg-slate-700">Analyst</SelectItem>
-                              <SelectItem value="network_admin" className="text-white hover:bg-slate-700">Network Admin</SelectItem>
-                              <SelectItem value="tenant_admin" className="text-white hover:bg-slate-700">Tenant Admin</SelectItem>
+                            <SelectContent className="bg-slate-800 border-slate-600">
+                              <SelectItem value="viewer" className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white">Viewer</SelectItem>
+                              <SelectItem value="analyst" className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white">Analyst</SelectItem>
+                              <SelectItem value="network_admin" className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white">Network Admin</SelectItem>
+                              <SelectItem value="tenant_admin" className="text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white">Tenant Admin</SelectItem>
                             </SelectContent>
                           </Select>
                           
@@ -212,7 +228,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onUsersUpdate }) => {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 
-              onClick={() => selectedUser && newRole && updateUserRole(selectedUser.id, newRole)}
+              onClick={confirmRoleChange}
               className="bg-blue-600 hover:bg-blue-700"
             >
               Change Role
@@ -244,7 +260,7 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, onUsersUpdate }) => {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 
-              onClick={() => selectedUser && deactivateUser(selectedUser.id)}
+              onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700"
             >
               Deactivate User
