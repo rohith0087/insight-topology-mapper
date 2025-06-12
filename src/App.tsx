@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
@@ -22,7 +21,7 @@ function App() {
     <Router>
       <AuthProvider>
         <SupportAuthProvider>
-          <QueryClientProvider client={queryClient}>
+          <QueryClient client={queryClient}>
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/documentation" element={<DocumentationPage />} />
@@ -41,7 +40,7 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
-          </QueryClientProvider>
+          </QueryClient>
         </SupportAuthProvider>
       </AuthProvider>
     </Router>
