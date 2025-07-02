@@ -36,7 +36,8 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
         name: editingSource.name,
         type: editingSource.type,
         config: editingSource.config,
-        enabled: editingSource.enabled
+        enabled: editingSource.enabled,
+        credentialId: editingSource.credential_id
       });
       setOpen(true);
     }
@@ -99,7 +100,8 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
             name: formData.name,
             type: formData.type,
             config: formData.config,
-            enabled: formData.enabled
+            enabled: formData.enabled,
+            credential_id: formData.credentialId
           })
           .eq('id', editingSource.id);
 
@@ -116,7 +118,8 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
             name: formData.name,
             type: formData.type,
             config: formData.config,
-            enabled: formData.enabled
+            enabled: formData.enabled,
+            credential_id: formData.credentialId
           }]);
 
         if (error) throw error;
@@ -187,9 +190,9 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
           />
 
           <TestConnectionComponent 
-            testResult={testResult}
-            testing={testing}
-            onTest={testConnection}
+            sourceType={formData.type}
+            config={formData.config}
+            credentialId={formData.credentialId}
           />
 
           <DataSourceActionButtons

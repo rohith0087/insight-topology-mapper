@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { DataSourceFormFields } from './DataSourceFormFields';
+import DataSourceFormFields from './DataSourceFormFields';
 import { SecureCredentialInput } from './SecureCredentialInput';
-import { TestConnectionComponent } from './TestConnectionComponent';
+import TestConnectionComponent from './TestConnectionComponent';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';

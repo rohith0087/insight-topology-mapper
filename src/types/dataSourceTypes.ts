@@ -4,6 +4,7 @@ export interface DataSourceConfig {
   type: string;
   config: any;
   enabled: boolean;
+  credentialId?: string;
 }
 
 export interface DataSourceConfigDialogProps {
