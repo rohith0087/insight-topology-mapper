@@ -9,6 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      credential_audit_log: {
+        Row: {
+          action: string
+          credential_id: string
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          performed_at: string
+          performed_by: string | null
+          tenant_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          credential_id: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          performed_at?: string
+          performed_by?: string | null
+          tenant_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          credential_id?: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          performed_at?: string
+          performed_by?: string | null
+          tenant_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credential_audit_log_credential_id_fkey"
+            columns: ["credential_id"]
+            isOneToOne: false
+            referencedRelation: "encrypted_credentials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_conflicts: {
         Row: {
           conflict_type: string
@@ -219,6 +263,7 @@ export type Database = {
         Row: {
           config: Json
           created_at: string | null
+          credential_id: string | null
           enabled: boolean | null
           id: string
           last_sync: string | null
@@ -232,6 +277,7 @@ export type Database = {
         Insert: {
           config?: Json
           created_at?: string | null
+          credential_id?: string | null
           enabled?: boolean | null
           id?: string
           last_sync?: string | null
@@ -245,6 +291,7 @@ export type Database = {
         Update: {
           config?: Json
           created_at?: string | null
+          credential_id?: string | null
           enabled?: boolean | null
           id?: string
           last_sync?: string | null
@@ -257,6 +304,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "data_sources_credential_id_fkey"
+            columns: ["credential_id"]
+            isOneToOne: false
+            referencedRelation: "encrypted_credentials"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "data_sources_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -264,6 +318,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      encrypted_credentials: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          credential_name: string
+          credential_type: string
+          encrypted_data: Json
+          id: string
+          is_active: boolean
+          last_used: string | null
+          tenant_id: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          credential_name: string
+          credential_type: string
+          encrypted_data: Json
+          id?: string
+          is_active?: boolean
+          last_used?: string | null
+          tenant_id: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          credential_name?: string
+          credential_type?: string
+          encrypted_data?: Json
+          id?: string
+          is_active?: boolean
+          last_used?: string | null
+          tenant_id?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
       }
       etl_jobs: {
         Row: {
@@ -1010,6 +1106,10 @@ export type Database = {
       is_valid_company_email: {
         Args: { email: string }
         Returns: boolean
+      }
+      log_credential_access: {
+        Args: { p_credential_id: string; p_action: string; p_metadata?: Json }
+        Returns: undefined
       }
       update_onboarding_progress: {
         Args: { p_step: number; p_step_data?: Json }

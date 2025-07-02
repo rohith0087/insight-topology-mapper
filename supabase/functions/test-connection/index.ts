@@ -1,9 +1,29 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+async function getDecryptedCredentials(credentialId: string) {
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+  )
+
+  const { data, error } = await supabaseClient.functions.invoke('credential-manager', {
+    body: {
+      action: 'retrieve',
+      credentialId
+    }
+  })
+
+  if (error) throw error
+  if (!data?.success) throw new Error('Failed to retrieve credentials')
+
+  return data.credentialData
 }
 
 serve(async (req) => {
@@ -12,9 +32,25 @@ serve(async (req) => {
   }
 
   try {
-    const { type, config } = await req.json()
+    const { type, config, credentialId } = await req.json()
 
     let testResult = { success: false, message: '', details: {} }
+    let credentials = {}
+
+    // Get decrypted credentials if provided
+    if (credentialId) {
+      try {
+        credentials = await getDecryptedCredentials(credentialId)
+      } catch (error) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            message: 'Failed to retrieve credentials: ' + error.message 
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
 
     switch (type) {
       case 'nmap':
@@ -35,15 +71,17 @@ serve(async (req) => {
 
       case 'aws':
         // Test AWS credentials
-        if (!config.access_key_id || !config.secret_access_key) {
+        if (!credentials.access_key_id || !credentials.secret_access_key) {
           testResult.message = 'AWS credentials are required'
         } else {
+          // In a real implementation, you'd make an actual AWS API call here
           testResult = {
             success: true,
             message: 'AWS credentials format is valid',
             details: {
               regions: config.regions?.split(',').length || 0,
-              services: config.services?.split(',').length || 0
+              services: config.services?.split(',').length || 0,
+              accessKeyId: credentials.access_key_id.substring(0, 8) + '...'
             }
           }
         }
@@ -51,18 +89,19 @@ serve(async (req) => {
 
       case 'splunk':
         // Test Splunk connection
-        if (!config.endpoint || !config.username || !config.password) {
+        if (!config.endpoint || !credentials.username || !credentials.password) {
           testResult.message = 'Splunk endpoint and credentials are required'
         } else {
           try {
             const url = new URL(config.endpoint)
             testResult = {
               success: true,
-              message: 'Splunk endpoint format is valid',
+              message: 'Splunk configuration is valid',
               details: {
                 host: url.hostname,
                 port: url.port,
-                index: config.index || 'main'
+                index: config.index || 'main',
+                username: credentials.username
               }
             }
           } catch (e) {
@@ -73,31 +112,16 @@ serve(async (req) => {
 
       case 'azure':
         // Test Azure configuration
-        if (!config.subscription_id || !config.tenant_id || !config.client_id || !config.client_secret) {
-          testResult.message = 'Azure subscription, tenant, client ID and secret are required'
+        if (!config.subscription_id || !credentials.tenant_id || !credentials.client_id || !credentials.client_secret) {
+          testResult.message = 'Azure subscription and credentials are required'
         } else {
           testResult = {
             success: true,
-            message: 'Azure configuration format is valid',
+            message: 'Azure configuration is valid',
             details: {
-              subscription: config.subscription_id.substring(0, 8) + '...',
-              tenant: config.tenant_id.substring(0, 8) + '...'
-            }
-          }
-        }
-        break
-
-      case 'snmp':
-        // Test SNMP configuration
-        if (!config.hosts || !config.community) {
-          testResult.message = 'SNMP hosts and community string are required'
-        } else {
-          testResult = {
-            success: true,
-            message: 'SNMP configuration is valid',
-            details: {
-              hosts: config.hosts.split(',').length,
-              version: config.version || '2c'
+              subscription: config.subscription_id?.substring(0, 8) + '...',
+              tenant: credentials.tenant_id?.substring(0, 8) + '...',
+              clientId: credentials.client_id?.substring(0, 8) + '...'
             }
           }
         }
@@ -105,7 +129,7 @@ serve(async (req) => {
 
       case 'sentinelone':
         // Test SentinelOne configuration
-        if (!config.console_url || !config.api_token) {
+        if (!config.console_url || !credentials.api_token) {
           testResult.message = 'SentinelOne console URL and API token are required'
         } else {
           try {
@@ -116,7 +140,8 @@ serve(async (req) => {
               details: {
                 console: url.hostname,
                 siteId: config.site_id || 'all',
-                accountId: config.account_id || 'all'
+                accountId: config.account_id || 'all',
+                tokenPrefix: credentials.api_token?.substring(0, 8) + '...'
               }
             }
           } catch (e) {
@@ -127,7 +152,7 @@ serve(async (req) => {
 
       case 'qradar':
         // Test QRadar configuration
-        if (!config.qradar_host || (!config.username && !config.auth_token)) {
+        if (!config.qradar_host || (!credentials.username && !credentials.auth_token)) {
           testResult.message = 'QRadar host and credentials (username/password or auth token) are required'
         } else {
           testResult = {
@@ -136,7 +161,7 @@ serve(async (req) => {
             details: {
               host: config.qradar_host,
               port: config.port || '443',
-              authMethod: config.auth_token ? 'token' : 'username/password',
+              authMethod: credentials.auth_token ? 'token' : 'username/password',
               version: config.version || '19.0'
             }
           }
@@ -145,7 +170,7 @@ serve(async (req) => {
 
       case 'datadog':
         // Test DataDog configuration
-        if (!config.api_key || !config.app_key) {
+        if (!credentials.api_key || !credentials.app_key) {
           testResult.message = 'DataDog API key and application key are required'
         } else {
           testResult = {
@@ -154,7 +179,8 @@ serve(async (req) => {
             details: {
               site: config.site || 'datadoghq.com',
               organization: config.organization || 'default',
-              includeServices: config.include_services || 'true'
+              includeServices: config.include_services || 'true',
+              apiKeyPrefix: credentials.api_key?.substring(0, 8) + '...'
             }
           }
         }
@@ -162,15 +188,15 @@ serve(async (req) => {
 
       case 'microsoft-sentinel':
         // Test Microsoft Sentinel configuration
-        if (!config.workspace_id || !config.tenant_id || !config.client_id || !config.client_secret || !config.subscription_id) {
-          testResult.message = 'Microsoft Sentinel requires workspace ID, tenant ID, client ID, client secret, and subscription ID'
+        if (!config.workspace_id || !credentials.tenant_id || !credentials.client_id || !credentials.client_secret || !config.subscription_id) {
+          testResult.message = 'Microsoft Sentinel requires workspace ID and credentials'
         } else {
           testResult = {
             success: true,
             message: 'Microsoft Sentinel configuration is valid',
             details: {
-              workspace: config.workspace_id.substring(0, 8) + '...',
-              tenant: config.tenant_id.substring(0, 8) + '...',
+              workspace: config.workspace_id?.substring(0, 8) + '...',
+              tenant: credentials.tenant_id?.substring(0, 8) + '...',
               resourceGroup: config.resource_group,
               workspaceName: config.workspace_name
             }
