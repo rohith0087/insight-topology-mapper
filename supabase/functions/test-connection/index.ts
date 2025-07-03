@@ -115,13 +115,85 @@ serve(async (req) => {
         if (!config.target_ranges) {
           testResult.message = 'Target ranges are required for nmap'
         } else {
-          testResult = {
-            success: true,
-            message: 'Nmap configuration is valid',
-            details: {
-              targets: config.target_ranges.split(',').length,
-              scanType: config.scan_type || 'tcp_syn'
+          try {
+            // Validate IP ranges
+            const ranges = config.target_ranges.split(',').map((r: string) => r.trim());
+            const validRanges: string[] = [];
+            const invalidRanges: string[] = [];
+            
+            for (const range of ranges) {
+              // Basic validation for common formats
+              if (range.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2}$/) || // CIDR
+                  range.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) || // Range
+                  range.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) { // Single IP
+                
+                // Check if it's a private IP range
+                const firstIP = range.split(/[\/\-]/)[0];
+                const parts = firstIP.split('.').map(Number);
+                const [a, b] = parts;
+                
+                const isPrivate = (a === 10) || 
+                                 (a === 172 && b >= 16 && b <= 31) || 
+                                 (a === 192 && b === 168) || 
+                                 (a === 127);
+                
+                if (isPrivate) {
+                  validRanges.push(range);
+                } else {
+                  invalidRanges.push(range);
+                }
+              } else {
+                invalidRanges.push(range);
+              }
             }
+            
+            if (invalidRanges.length > 0) {
+              testResult = {
+                success: false,
+                message: `Invalid or public IP ranges detected: ${invalidRanges.join(', ')}. Only private IP ranges are allowed.`,
+                details: {
+                  validRanges: validRanges.length,
+                  invalidRanges: invalidRanges
+                }
+              };
+            } else {
+              // Validate port configuration
+              const ports = config.ports || '';
+              let portCount = 20; // default ports
+              
+              if (ports.trim()) {
+                const portRanges = ports.split(',');
+                portCount = 0;
+                
+                for (const portRange of portRanges) {
+                  if (portRange.includes('-')) {
+                    const [start, end] = portRange.split('-').map(p => parseInt(p.trim()));
+                    if (start && end && start <= end && start > 0 && end <= 65535) {
+                      portCount += (end - start + 1);
+                    }
+                  } else {
+                    const port = parseInt(portRange.trim());
+                    if (port > 0 && port <= 65535) {
+                      portCount += 1;
+                    }
+                  }
+                }
+              }
+              
+              testResult = {
+                success: true,
+                message: 'NMAP configuration is valid',
+                details: {
+                  validTargetRanges: validRanges.length,
+                  scanType: config.scan_type || 'tcp_syn',
+                  estimatedPorts: portCount,
+                  targetRanges: validRanges,
+                  safetyNote: 'Only private IP ranges will be scanned'
+                }
+              };
+            }
+          } catch (e) {
+            testResult.message = 'Invalid NMAP configuration format';
           }
         }
         break
