@@ -90,6 +90,7 @@ serve(async (req) => {
 
         // Call the appropriate ETL function using Supabase client
         const { data: result, error: functionError } = await supabaseClient.functions.invoke(functionName, {
+          body: {},
           headers: {
             'data-source-id': source.id
           }
