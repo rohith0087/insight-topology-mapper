@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from './ui/card';
 import { useToast } from './ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useRunIndividualETL } from '../hooks/useDataSources';
 import DataSourceCardHeader from './dataSource/DataSourceCardHeader';
 import DataSourceCardTestResults from './dataSource/DataSourceCardTestResults';
 import DataSourceCardStats from './dataSource/DataSourceCardStats';
@@ -19,6 +20,7 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ source, onEdit, onDelet
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<any>(null);
   const [updating, setUpdating] = useState(false);
+  const runIndividualETL = useRunIndividualETL();
   const { toast } = useToast();
 
   const testConnection = async () => {
@@ -86,6 +88,23 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ source, onEdit, onDelet
     }
   };
 
+  const handleScan = async () => {
+    try {
+      await runIndividualETL.mutateAsync(source.id);
+      toast({
+        title: "Scan Started",
+        description: `${source.name} scan has been initiated`,
+      });
+      onRefresh();
+    } catch (error) {
+      toast({
+        title: "Scan Failed",
+        description: error.message || "Failed to start scan",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card className="bg-slate-900 border-slate-600 hover:border-slate-500 transition-colors">
       <DataSourceCardHeader source={source} />
@@ -97,7 +116,9 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ source, onEdit, onDelet
           source={source}
           testing={testing}
           updating={updating}
+          scanning={runIndividualETL.isPending}
           onTestConnection={testConnection}
+          onScan={handleScan}
           onToggleEnabled={toggleEnabled}
           onEdit={onEdit}
           onDelete={onDelete}

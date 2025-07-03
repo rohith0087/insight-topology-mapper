@@ -18,13 +18,31 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     )
 
-    // Get all enabled data sources
-    const { data: dataSources, error: sourcesError } = await supabaseClient
-      .from('data_sources')
-      .select('*')
-      .eq('enabled', true)
-
-    if (sourcesError) throw sourcesError
+    // Check if this is for a specific data source
+    const specificDataSourceId = req.headers.get('data-source-id');
+    
+    let dataSources;
+    if (specificDataSourceId) {
+      // Get specific data source
+      const { data: singleSource, error: sourceError } = await supabaseClient
+        .from('data_sources')
+        .select('*')
+        .eq('id', specificDataSourceId)
+        .eq('enabled', true)
+        .single();
+      
+      if (sourceError) throw sourceError;
+      dataSources = singleSource ? [singleSource] : [];
+    } else {
+      // Get all enabled data sources
+      const { data: allSources, error: sourcesError } = await supabaseClient
+        .from('data_sources')
+        .select('*')
+        .eq('enabled', true);
+      
+      if (sourcesError) throw sourcesError;
+      dataSources = allSources || [];
+    }
 
     const results = []
 

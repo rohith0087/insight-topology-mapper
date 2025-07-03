@@ -57,3 +57,27 @@ export const useRunETL = () => {
     },
   });
 };
+
+export const useRunIndividualETL = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (dataSourceId: string) => {
+      const response = await supabase.functions.invoke('etl-orchestrator', {
+        method: 'POST',
+        headers: {
+          'data-source-id': dataSourceId
+        }
+      });
+
+      if (response.error) throw response.error;
+      return response.data;
+    },
+    onSuccess: () => {
+      // Invalidate and refetch relevant queries
+      queryClient.invalidateQueries({ queryKey: ['data-sources'] });
+      queryClient.invalidateQueries({ queryKey: ['etl-jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['network-topology'] });
+    },
+  });
+};
