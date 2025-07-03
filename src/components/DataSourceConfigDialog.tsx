@@ -112,6 +112,17 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
           description: "Successfully updated data source!",
         });
       } else {
+        // Get current user's tenant_id
+        const { data: userProfile } = await supabase
+          .from('profiles')
+          .select('tenant_id')
+          .eq('id', (await supabase.auth.getUser()).data.user?.id)
+          .single();
+
+        if (!userProfile?.tenant_id) {
+          throw new Error('User must be associated with a tenant');
+        }
+
         const { error } = await supabase
           .from('data_sources')
           .insert([{
@@ -119,7 +130,8 @@ const DataSourceConfigDialog: React.FC<DataSourceConfigDialogProps> = ({
             type: formData.type,
             config: formData.config,
             enabled: formData.enabled,
-            credential_id: formData.credentialId
+            credential_id: formData.credentialId,
+            tenant_id: userProfile.tenant_id
           }]);
 
         if (error) throw error;
