@@ -281,7 +281,15 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     )
 
-    const dataSourceId = req.headers.get('data-source-id');
+    // Get data source ID from request body
+    let dataSourceId;
+    try {
+      const body = await req.json();
+      dataSourceId = body?.dataSourceId;
+    } catch (e) {
+      throw new Error('Request body must contain dataSourceId');
+    }
+    
     if (!dataSourceId) {
       throw new Error('Data source ID is required');
     }
@@ -503,7 +511,7 @@ serve(async (req) => {
         last_sync: new Date().toISOString(),
         sync_status: 'success'
       })
-      .eq('id', req.headers.get('data-source-id'))
+      .eq('id', dataSourceId)
 
     return new Response(
       JSON.stringify({ 
