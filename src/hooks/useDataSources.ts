@@ -64,10 +64,7 @@ export const useRunIndividualETL = () => {
   return useMutation({
     mutationFn: async (dataSourceId: string) => {
       const response = await supabase.functions.invoke('etl-orchestrator', {
-        method: 'POST',
-        headers: {
-          'data-source-id': dataSourceId
-        }
+        body: { dataSourceId }
       });
 
       if (response.error) throw response.error;

@@ -19,7 +19,15 @@ serve(async (req) => {
     )
 
     // Check if this is for a specific data source
-    const specificDataSourceId = req.headers.get('data-source-id');
+    let specificDataSourceId = null;
+    
+    try {
+      const body = await req.json();
+      specificDataSourceId = body?.dataSourceId;
+    } catch (e) {
+      // No body or invalid JSON, continue with all sources
+      console.log('No specific data source ID provided, processing all sources');
+    }
     
     let dataSources;
     if (specificDataSourceId) {
@@ -90,10 +98,7 @@ serve(async (req) => {
 
         // Call the appropriate ETL function using Supabase client
         const { data: result, error: functionError } = await supabaseClient.functions.invoke(functionName, {
-          body: {},
-          headers: {
-            'data-source-id': source.id
-          }
+          body: { dataSourceId: source.id }
         })
 
         if (functionError) {
