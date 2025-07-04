@@ -52,13 +52,9 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
   const { data: networkData, isLoading, error } = useNetworkData();
   const [currentView, setCurrentView] = useState<TopologyView>('network');
   
-  // Use static data if no data is available from the database
+  // Use dynamic data from database
   const actualData = useMemo(() => {
-    if (networkData && (networkData.nodes.length > 0 || networkData.edges.length > 0)) {
-      return { ...networkData, isStatic: false };
-    }
-    const mockData = generateMockTopologyData();
-    return { ...mockData, isStatic: true };
+    return networkData || { nodes: [], edges: [], isStatic: false };
   }, [networkData]);
   
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>(actualData.nodes || []);
@@ -174,14 +170,16 @@ const NetworkTopology: React.FC<NetworkTopologyProps> = ({
 
   return (
     <div className="w-full h-full bg-slate-900 relative">
-      {actualData.isStatic && (
-        <div className="absolute top-4 left-4 z-10 max-w-md">
-          <Alert className="border-cyan-500/50 bg-cyan-950/50 text-cyan-100">
-            <Info className="h-4 w-4 text-cyan-400" />
-            <AlertDescription className="text-sm">
-              <strong>Static Demo Data:</strong> No live data sources connected. Showing sample network topology for demonstration purposes.
-            </AlertDescription>
-          </Alert>
+      {actualData.nodes.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="text-center max-w-md mx-auto p-8">
+            <Alert className="border-cyan-500/50 bg-cyan-950/50 text-cyan-100">
+              <Info className="h-4 w-4 text-cyan-400" />
+              <AlertDescription className="text-sm">
+                <strong>No Network Data Found:</strong> Run a network scan from your data sources to discover and visualize network topology. The scanner is ready but hasn't found any devices yet.
+              </AlertDescription>
+            </Alert>
+          </div>
         </div>
       )}
 
