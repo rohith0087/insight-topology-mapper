@@ -324,6 +324,30 @@ serve(async (req) => {
         }
         break
 
+      case 'api':
+        // Test Custom API configuration
+        if (!config.endpoint) {
+          testResult.message = 'API endpoint is required'
+        } else {
+          try {
+            const url = new URL(config.endpoint)
+            testResult = {
+              success: true,
+              message: 'Custom API configuration is valid',
+              details: {
+                endpoint: config.endpoint,
+                method: config.method || 'GET',
+                authType: config.auth_type || 'none',
+                nodeMapping: config.node_mapping ? 'configured' : 'not configured',
+                connectionMapping: config.connection_mapping ? 'configured' : 'not configured'
+              }
+            }
+          } catch (e) {
+            testResult.message = 'Invalid API endpoint URL format'
+          }
+        }
+        break
+
       default:
         testResult.message = `Unsupported source type: ${type}`
     }
