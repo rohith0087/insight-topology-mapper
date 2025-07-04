@@ -313,6 +313,7 @@ serve(async (req) => {
       .from('etl_jobs')
       .insert({
         data_source_id: dataSourceId,
+        tenant_id: dataSource.tenant_id,
         job_type: 'nmap_scan',
         status: 'running',
         started_at: new Date().toISOString()
@@ -464,6 +465,7 @@ serve(async (req) => {
             node_type: 'device',
             label: device.hostname || device.ip,
             status: status,
+            tenant_id: dataSource.tenant_id,
             metadata: {
               ip: device.ip,
               hostname: device.hostname,
