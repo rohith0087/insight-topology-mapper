@@ -94,7 +94,7 @@ serve(async (req) => {
             continue
         }
 
-        console.log(`Invoking ${functionName} for data source: ${source.name}`)
+        console.log(`Invoking ${functionName} for data source: ${source.name} (ID: ${source.id})`)
 
         // Call the appropriate ETL function using Supabase client
         const { data: result, error: functionError } = await supabaseClient.functions.invoke(functionName, {
