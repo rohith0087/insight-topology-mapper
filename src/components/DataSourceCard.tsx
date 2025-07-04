@@ -90,13 +90,24 @@ const DataSourceCard: React.FC<DataSourceCardProps> = ({ source, onEdit, onDelet
 
   const handleScan = async () => {
     try {
-      await runIndividualETL.mutateAsync(source.id);
-      toast({
-        title: "Scan Started",
-        description: `${source.name} scan has been initiated`,
-      });
+      const result = await runIndividualETL.mutateAsync(source.id);
+      console.log('Scan result:', result);
+      
+      if (result?.success) {
+        toast({
+          title: "Scan Started",
+          description: `${source.name} scan has been initiated`,
+        });
+      } else {
+        toast({
+          title: "Scan Warning",
+          description: result?.message || "Scan may not have started properly",
+          variant: "destructive",
+        });
+      }
       onRefresh();
     } catch (error) {
+      console.error('Scan error:', error);
       toast({
         title: "Scan Failed",
         description: error.message || "Failed to start scan",
